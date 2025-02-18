@@ -158,7 +158,11 @@ class Users(models.Model):
     role = models.TextField()
     created_at = models.DateTimeField(blank=True, null=True)
     approved = models.BooleanField(blank=True, null=True)
+    
+    def __str__(self):
+        return f"{self.name} - {self.email}"
 
     class Meta:
         managed = False
         db_table = 'users'
+        verbose_name_plural = "Users"  # Add this line
