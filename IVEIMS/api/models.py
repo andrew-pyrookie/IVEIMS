@@ -1,131 +1,48 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.utils.timezone import now
 
+# Custom User Manager
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError("The Email field must be set")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
-class AssetTransfers(models.Model):
-    equipment = models.ForeignKey('Equipment', models.DO_NOTHING)
-    from_lab = models.CharField(max_length=100)
-    to_lab = models.CharField(max_length=100)
-    transfer_date = models.DateTimeField(blank=True, null=True)
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self.create_user(email, password, **extra_fields)
 
-    class Meta:
-        managed = False
-        db_table = 'asset_transfers'
-
-
-class AuthGroup(models.Model):
-    name = models.CharField(unique=True, max_length=150)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_group'
-
-
-class AuthGroupPermissions(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
-    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_group_permissions'
-        unique_together = (('group', 'permission'),)
-
-
-class AuthPermission(models.Model):
+# Custom User Model
+class Users(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255)
-    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)
-    codename = models.CharField(max_length=100)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_permission'
-        unique_together = (('content_type', 'codename'),)
-
-
-class AuthUser(models.Model):
-    password = models.CharField(max_length=128)
+    email = models.EmailField(unique=True, max_length=255)
+    role = models.TextField()
+    created_at = models.DateTimeField(default=now)
+    approved = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     last_login = models.DateTimeField(blank=True, null=True)
-    is_superuser = models.BooleanField()
-    username = models.CharField(unique=True, max_length=150)
-    first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
-    email = models.CharField(max_length=254)
-    is_staff = models.BooleanField()
-    is_active = models.BooleanField()
-    date_joined = models.DateTimeField()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["name", "role"]
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return f"{self.name} - {self.email}"
 
     class Meta:
-        managed = False
-        db_table = 'auth_user'
+        db_table = "users"
+        verbose_name_plural = "Users"
 
-
-class AuthUserGroups(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
-    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_user_groups'
-        unique_together = (('user', 'group'),)
-
-
-class AuthUserUserPermissions(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
-    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_user_user_permissions'
-        unique_together = (('user', 'permission'),)
-
-
-class DjangoAdminLog(models.Model):
-    action_time = models.DateTimeField()
-    object_id = models.TextField(blank=True, null=True)
-    object_repr = models.CharField(max_length=200)
-    action_flag = models.SmallIntegerField()
-    change_message = models.TextField()
-    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
-    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'django_admin_log'
-
-
-class DjangoContentType(models.Model):
-    app_label = models.CharField(max_length=100)
-    model = models.CharField(max_length=100)
-
-    class Meta:
-        managed = False
-        db_table = 'django_content_type'
-        unique_together = (('app_label', 'model'),)
-
-
-class DjangoMigrations(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    app = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    applied = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'django_migrations'
-
-
-class DjangoSession(models.Model):
-    session_key = models.CharField(primary_key=True, max_length=40)
-    session_data = models.TextField()
-    expire_date = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'django_session'
-
-
+# Equipment Model
 class Equipment(models.Model):
     name = models.CharField(max_length=255)
     lab = models.CharField(max_length=100)
@@ -137,32 +54,23 @@ class Equipment(models.Model):
     current_lab = models.CharField(max_length=100)
 
     class Meta:
-        managed = False
         db_table = 'equipment'
 
+# Asset Transfers Model
+class AssetTransfers(models.Model):
+    equipment = models.ForeignKey(Equipment, models.CASCADE, null=True, blank=True)
+    from_lab = models.CharField(max_length=100)
+    to_lab = models.CharField(max_length=100)
+    transfer_date = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        db_table = 'asset_transfers'
+
+# Maintenance Reminders Model
 class MaintenanceReminders(models.Model):
-    equipment = models.ForeignKey(Equipment, models.DO_NOTHING)
+    equipment = models.ForeignKey(Equipment, models.CASCADE, null=True, blank=True)
     reminder_date = models.DateTimeField(blank=True, null=True)
     status = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'maintenance_reminders'
-
-
-class Users(models.Model):
-    name = models.CharField(max_length=255)
-    email = models.CharField(unique=True, max_length=255)
-    password = models.CharField(max_length=255)
-    role = models.TextField()
-    created_at = models.DateTimeField(blank=True, null=True)
-    approved = models.BooleanField(blank=True, null=True)
-    
-    def __str__(self):
-        return f"{self.name} - {self.email}"
-
-    class Meta:
-        managed = False
-        db_table = 'users'
-        verbose_name_plural = "Users"  # Add this line
