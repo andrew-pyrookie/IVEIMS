@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import AssetTransfers, Equipment, AuthUser, Users
+from .models import AssetTransfers, Equipment, Users
 from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSerializer
 
 # AssetTransfers Views
@@ -29,7 +29,7 @@ class EquipmentDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 # User Authentication Views
 class UserListView(generics.ListAPIView):
-    queryset = AuthUser.objects.all()
+    queryset = Users.objects.all()
     serializer_class = UsersSerializer
     permission_classes = [permissions.IsAdminUser]
 
