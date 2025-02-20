@@ -1,10 +1,11 @@
 from django.urls import path
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.decorators import api_view
 from .views import (
     AssetTransfersListCreateView, AssetTransfersDetailView,
     EquipmentListCreateView, EquipmentDetailView,
-    UserListView, UserDetailView, TransferEquipmentView
+    UserListView, UserDetailView, TransferEquipmentView, RegisterView, LoginView, LogoutView
 )
 
 @api_view(['GET'])
@@ -18,6 +19,11 @@ def api_root(request):
 
 urlpatterns = [
     path('', api_root, name='api-root'),  # This line adds the root API endpoint
+    
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('asset-transfers/', AssetTransfersListCreateView.as_view(), name='asset-transfers-list'),
     path('asset-transfers/<int:pk>/', AssetTransfersDetailView.as_view(), name='asset-transfers-detail'),
     path('equipment/', EquipmentListCreateView.as_view(), name='equipment-list'),
