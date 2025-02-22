@@ -3,14 +3,14 @@ from rest_framework import generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework import status
-from .models import AssetTransfers, Equipment, Users
-from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSerializer
+from rest_framework import status, viewsets
+from .models import AssetTransfers, Equipment, Users, Project, Booking
+from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSerializer, ProjectSerializer, BookingSerializer
 
 Users = get_user_model()
 
-# User Registration View
 class RegisterView(generics.CreateAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -27,7 +27,6 @@ class RegisterView(generics.CreateAPIView):
             "access": str(refresh.access_token),
         }, status=status.HTTP_201_CREATED)
 
-# User Login View (JWT Tokens)
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -74,6 +73,11 @@ class EquipmentListCreateView(generics.ListCreateAPIView):
     queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        equipment = serializer.save()
+        equipment.generate_qr_code()
+        equipment.save()
 
 class EquipmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Equipment.objects.all()
@@ -113,3 +117,72 @@ class TransferEquipmentView(APIView):
             transfer_date=data.get('transfer_date')
         )
         return Response({"message": "Equipment transferred successfully", "transfer_id": transfer.id})
+    
+class OfflineSyncView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Sync offline data when reconnected."""
+        unsynced_transfers = AssetTransfers.objects.filter(is_synced=False)
+
+        for transfer in unsynced_transfers:
+            transfer.is_synced = True
+            transfer.save()
+
+        unsynced_equipment = Equipment.objects.filter(is_synced=False)
+        for equipment in unsynced_equipment:
+            equipment.is_synced = True
+            equipment.save()
+
+        return Response({"message": "Offline data synced successfully."}, status=status.HTTP_200_OK)
+    
+class ProjectListCreateView(generics.ListCreateAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Booking.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        start_time = serializer.validated_data['start_time']
+        end_time = serializer.validated_data['end_time']
+        equipment = serializer.validated_data['equipment']
+
+        conflicting_booking = Booking.objects.filter(
+            equipment=equipment,
+            start_time__lt=end_time,
+            end_time__gt=start_time
+        ).exists()
+
+        if conflicting_booking:
+            return Response({"error": "This equipment is already booked for the selected time range."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        start_time = serializer.validated_data['start_time']
+        end_time = serializer.validated_data['end_time']
+        equipment = serializer.validated_data['equipment']
+        instance = self.get_object()
+
+        conflicting_booking = Booking.objects.filter(
+            equipment=equipment,
+            start_time__lt=end_time,
+            end_time__gt=start_time
+        ).exclude(id=instance.id).exists()
+
+        if conflicting_booking:
+            return Response({"error": "This equipment is already booked for the selected time range."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()

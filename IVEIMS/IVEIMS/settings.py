@@ -1,11 +1,16 @@
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 import environ
 env = environ.Env()
-environ.Env.read_env()
+environ.Env.read_env(env_file=BASE_DIR / ".env")
+
+# media folders
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=True)
