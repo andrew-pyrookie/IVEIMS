@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AssetTransfers, Equipment, MaintenanceReminders, Users
+from .models import AssetTransfers, Equipment, MaintenanceReminders, Users, Project, Booking
 from django.contrib.auth import get_user_model
 
 Users = get_user_model()
@@ -14,6 +14,10 @@ class EquipmentSerializer(serializers.ModelSerializer):
         model = Equipment
         fields = '__all__'
 
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = '__all__'
 class MaintenanceRemindersSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaintenanceReminders
@@ -36,3 +40,13 @@ class UsersSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+    
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['id', 'user', 'equipment', 'start_time', 'end_time']
+
+    def validate(self, data):
+        if data['end_time'] <= data['start_time']:
+            raise serializers.ValidationError("End time must be after start time.")
+        return data

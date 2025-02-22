@@ -69,3 +69,4 @@ Have feedback or want to collaborate? Reach out to us!
 📩 Email: [musiliofficialandrew@gmail.com]
 
 🔥 Let's build something amazing together! 🚀
+ Use Swagger/OpenAPI (drf-yasg) for API documentation

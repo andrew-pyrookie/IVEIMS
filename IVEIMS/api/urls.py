@@ -5,7 +5,8 @@ from rest_framework.decorators import api_view
 from .views import (
     AssetTransfersListCreateView, AssetTransfersDetailView,
     EquipmentListCreateView, EquipmentDetailView,
-    UserListView, UserDetailView, TransferEquipmentView, RegisterView, LoginView, LogoutView
+    UserListView, UserDetailView, TransferEquipmentView, RegisterView, LoginView, LogoutView,
+    ProjectListCreateView, ProjectDetailView, OfflineSyncView
 )
 
 @api_view(['GET'])
@@ -31,4 +32,7 @@ urlpatterns = [
     path('users/', UserListView.as_view(), name='users-list'),
     path('users/<int:pk>/', UserDetailView.as_view(), name='users-detail'),
     path('transfer-equipment/', TransferEquipmentView.as_view(), name='transfer-equipment'),
+    path('projects/', ProjectListCreateView.as_view(), name='project-list'),
+    path('projects/<int:pk>/', ProjectDetailView.as_view(), name='project-detail'),
+    path("sync-offline-data/", OfflineSyncView.as_view(), name="sync_offline_data"),
 ]
