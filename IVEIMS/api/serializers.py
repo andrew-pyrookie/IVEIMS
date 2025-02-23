@@ -44,7 +44,7 @@ class UsersSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['id', 'user', 'equipment', 'start_time', 'end_time']
+        fields = ['id','equipment', 'start_time', 'end_time']
 
     def validate(self, data):
         if data['end_time'] <= data['start_time']:
