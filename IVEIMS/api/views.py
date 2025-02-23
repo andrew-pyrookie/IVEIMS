@@ -155,6 +155,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         return Booking.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        print(f"Authenticated User: {self.request.user}")  # Debugging
         start_time = serializer.validated_data['start_time']
         end_time = serializer.validated_data['end_time']
         equipment = serializer.validated_data['equipment']
