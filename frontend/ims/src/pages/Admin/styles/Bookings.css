@@ -1,0 +1,153 @@
+/* 🌍 General Layout */
+.bookings-container {
+    display: flex;
+    margin-left: 300px;
+  }
+  
+  .bookings-main {
+    flex: 1;
+    padding: 20px;
+    background: #f9f9f9;
+  }
+  
+  /* 🏗️ Top Navbar */
+  .top-navbar {
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .top-navbar h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  
+  /* 📌 Booking Tabs */
+  .booking-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .booking-tabs button {
+    background: #ddd;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  
+  .booking-tabs button.active {
+    background: #007bff;
+    color: white;
+  }
+  
+  .booking-tabs button:hover {
+    background: #bbb;
+  }
+  
+  /* 📋 Booking Table */
+  .booking-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  table th,
+  table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  table th {
+    background: #f5f5f5;
+  }
+  
+  /* ✅ Booking Status */
+  .status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  
+  .status.pending {
+    background: #ffcc00;
+    color: black;
+  }
+  
+  .status.approved {
+    background: #28a745;
+    color: white;
+  }
+  
+  .status.rejected {
+    background: #dc3545;
+    color: white;
+  }
+  
+  /* 🎯 Action Buttons */
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .actions button {
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  
+  .approve {
+    background: #28a745;
+    color: white;
+  }
+  
+  .approve:hover {
+    background: #218838;
+  }
+  
+  .reject {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .reject:hover {
+    background: #c82333;
+  }
+  
+  .view-only {
+    color: #555;
+    font-weight: bold;
+  }
+  
+  /* 📱 Responsive Design */
+  @media screen and (max-width: 768px) {
+    .bookings-container {
+      flex-direction: column;
+    }
+  
+    .top-navbar {
+      text-align: center;
+    }
+  
+    .booking-tabs {
+      justify-content: center;
+    }
+  
+    table {
+      font-size: 14px;
+    }
+  }
+  
