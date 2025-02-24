@@ -8,6 +8,9 @@ import environ
 env = environ.Env()
 environ.Env.read_env(env_file=BASE_DIR / ".env")
 
+FERNET_KEY = env("FERNET_KEY")
+
+
 # media folders
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
