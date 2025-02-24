@@ -7,24 +7,8 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
-from datetime import datetime
-from cryptography.fernet import Fernet
 from django.conf import settings
-import base64
 
-ENCRYPTION_KEY = b'your-secret-key-here'  # Store securely in env variables
-
-def encrypt_data(data):
-    cipher = Fernet(settings.FERNET_KEY)  # Use settings.FERNET_KEY instead of ENCRYPTION_KEY
-    encrypted_data = cipher.encrypt(data.encode())
-    return encrypted_data.decode()
-
-def decrypt_data(encrypted_data):
-    cipher = Fernet(settings.FERNET_KEY)  # Same here
-    decrypted_data = cipher.decrypt(encrypted_data.encode())
-    return decrypted_data.decode()
-
-# Custom User Manager
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -40,10 +24,10 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         return self.create_user(email, password, **extra_fields)
 
-# Custom User Model
+# Updated User Model
 class Users(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True, max_length=255)
+    email = models.EmailField(unique=True, max_length=255)  # Enforce uniqueness here
     role = models.TextField()
     created_at = models.DateTimeField(default=now)
     approved = models.BooleanField(default=False)
@@ -52,17 +36,10 @@ class Users(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     last_login = models.DateTimeField(blank=True, null=True)
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = "email"  # Changed from email_hash
     REQUIRED_FIELDS = ["name", "role"]
 
     objects = CustomUserManager()
-    
-    def save(self, *args, **kwargs):
-        self.email = encrypt_data(self.email)
-        super().save(*args, **kwargs)
-
-    def get_decrypted_email(self):
-        return decrypt_data(self.email)
 
     def __str__(self):
         return f"{self.name} - {self.email}"
@@ -70,7 +47,6 @@ class Users(AbstractBaseUser, PermissionsMixin):
     class Meta:
         db_table = "users"
         verbose_name_plural = "Users"
-
 # Equipment Model
 class Equipment(models.Model):
     name = models.CharField(max_length=255)
