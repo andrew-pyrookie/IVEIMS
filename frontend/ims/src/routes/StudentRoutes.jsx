@@ -9,8 +9,10 @@ const StudentRoutes = () => {
   return (
       <Routes>
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="dashboard/:userId" element={<Dashboard />} />
         <Route path="documents" element={<Documents />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="profile/:userId" element={<Profile />} />
         <Route path="bookings" element={<Bookings />} />
         <Route path="projects" element={<Projects />} />
         {/* <Route path="*" element={<NotFound />} /> */}

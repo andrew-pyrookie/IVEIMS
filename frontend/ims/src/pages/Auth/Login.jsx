@@ -17,14 +17,25 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5173/api/auth/login", formData);
-      localStorage.setItem("token", res.data.token);
+      const res = await axios.post("http://localhost:8000/api/login/", formData);
+      localStorage.setItem("token", res.data.access); // Store access token
       setError("");
-      navigate("/dashboard");
+  
+      if (res.data.user.role === "student") {
+        navigate(`/student/dashboard/${res.data.user.id}`);
+      } else if (res.data.user.role === "Lab Technician") {
+        navigate("/lab-technician-dashboard");
+      } else if (res.data.user.role === "Lab Manager") {
+        navigate("/lab-manager-dashboard");
+      } else {
+        navigate("/"); // Default redirection
+      }
+  
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid credentials");
+      setError(err.response?.data?.error || "Invalid credentials");
     }
   };
+  
 
   return (
     <div className="login-container">
