@@ -1,0 +1,116 @@
+/* Remove default button and input styles */
+button, input {
+    all: unset;
+  }
+  
+  /* General Styles */
+  .login-container {
+    display: flex;
+    justify-content: center;  /* Centers horizontally */
+    align-items: center;      /* Centers vertically */
+    height: 100vh;            /* Full viewport height */
+    width: 100vw;             /* Full viewport width */
+    background-color: #f4f4f4;
+  }
+  
+  
+  .login-form {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 350px;
+  }
+  
+  .login-form h2 {
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .login-form input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #ffffff;
+    text-align: start;
+  }
+  
+  .login-form button {
+    background-color: #3d4a60;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+  }
+  .login-form button:focus, input:focus {
+    outline: none;
+    box-shadow: none;
+  }
+  
+  .login-form button:hover {
+    background-color: #2a364d;
+  }
+  
+  .login-form p {
+    margin-top: 10px;
+    font-size: 0.9em;
+  }
+  
+  .login-form a {
+    color: #3d4a60;
+    text-decoration: none;
+  }
+  
+  .login-form a:hover {
+    text-decoration: underline;
+  }
+  
+  .error-msg {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+  }
+
+.input-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-left: 10px;
+    margin: 8px 0;
+    background: #ffffff;
+  }
+  
+
+  .input-container input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding-left: 10px;
+  }
+  
+  /* Style for icons inside inputs */
+  .input-icon {
+    color: #3d4a60;
+    font-size: 1.2em;
+  }
+  
+  /* Style for password toggle icon */
+  .password-toggle {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    color: #454545;
+    font-size: 1.2em;
+  }
+  
+  
+  
