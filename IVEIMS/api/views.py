@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from .models import AssetTransfers, Equipment, Users, Project, Booking
-from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSerializer, ProjectSerializer, BookingSerializer
+from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSerializer, ProjectSerializer, BookingSerializer, ProfileSerializer
 
 Users = get_user_model()
 
@@ -35,18 +35,32 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         password = request.data.get("password")
-        
-        # Directly use normalized email for lookup
+
+
+        # Normalize email
         normalized_email = Users.objects.normalize_email(email)
+ 
+
+        # Find user
         user = Users.objects.filter(email=normalized_email).first()
-        
-        if user and user.check_password(password):
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            }, status=status.HTTP_200_OK)
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        if not user:
+
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Check password
+        if not user.check_password(password):
+
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+
+
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": {"id": user.id, "role": user.role},
+        }, status=status.HTTP_200_OK)
 
 # Logout view remains unchanged
 class LogoutView(APIView):
@@ -61,6 +75,13 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user  # Returns the authenticated user's data
 # AssetTransfers Views
 class AssetTransfersListCreateView(generics.ListCreateAPIView):
     queryset = AssetTransfers.objects.all()
