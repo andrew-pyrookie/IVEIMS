@@ -1,0 +1,381 @@
+/* 🌎 General Page Styling */
+body {
+  background: white;
+  color: black;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* 🏗️ General Container Layout */
+.inventory-container {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: #000;
+  font-family: Arial, sans-serif;
+  width: 100%;
+  margin-left: 300px;
+  overflow-x: hidden; /* Prevent horizontal overflow */
+}
+
+.main-contentInventory {
+  flex: 1;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 🎯 View Mode Toggle Buttons */
+.view-toggle {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 80px;
+}
+
+.view-toggle button {
+  background-color: #ddd;
+  border: none;
+ padding: 4px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 3px;
+  max-width: 80px;
+}
+
+.view-toggle button.active {
+  background-color: #3d4a60;
+  color: white;
+}
+
+.view-toggle button:hover {
+  background-color: #0154ac;
+  color: white;
+}
+.view-toggle button:focus{
+  outline: none;
+}
+
+/* ➕ Add Equipment Button */
+.add-button {
+  background-color: #3d4a60;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.3s ease;
+  margin-bottom: 20px;
+  outline: none;
+}
+
+.add-button:hover {
+  background-color: #0056b3;
+  outline: none;
+}
+.add-button:focus {
+  outline: none;
+}
+.add-item-card-button{
+  width: 20px;
+}
+
+/* ➕ Add/Edit Item Card */
+.add-item-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
+  width: 100%;
+  max-width: 270px;
+}
+
+.add-item-card h3 {
+  margin-top: 0;
+}
+
+.add-item-card input,
+.add-item-card select {
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.add-item-card button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.add-item-card button:hover {
+  background-color: #0056b3;
+}
+.add-item-card-button{
+  max-width: 110px;
+}
+
+.add-item-card-button:focus{
+  outline: none;
+}
+
+
+.add-item-card-dropdown {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  background-color: white;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  appearance: none; /* Removes default dropdown arrow */
+  -webkit-appearance: none; /* Safari */
+  -moz-appearance: none; /* Firefox */
+  cursor: pointer;
+}
+
+/* Optional: Custom dropdown arrow */
+.add-item-card-dropdown {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 15px;
+  padding-right: 30px;
+}
+
+/* Hover & Focus styles */
+.add-item-card-dropdown:hover {
+  border-color: #888;
+}
+
+.add-item-card-dropdown:focus {
+  outline: none;
+  border-color: #555;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.react-datepicker__navigation {
+  max-width: 8px;
+  background-color: white;
+  max-height: 8px;
+  top: 10px; /* Adjust position */
+}
+.react-datepicker__navigation:focus {
+  outline: none;
+}
+
+/* 📋 Inventory Table */
+.inventory-table-container {
+  width: 100%;
+  overflow-x: auto; /* Enable horizontal scrolling */
+}
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* Minimum width to ensure table doesn't break */
+}
+
+.inventory-table th,
+.inventory-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.inventory-table th {
+  background: #f5f5f5;
+}
+
+
+/* ===== Inventory Card ===== */
+.inventory-card-container{
+  display: flex;
+  flex-direction: row;
+}
+.inventory-card {
+  background: linear-gradient(to bottom, #f9f9f9, #ffffff);
+  width: 280px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  position: relative;
+  transition: transform 0.3s ease-in-out;
+  
+}
+
+.inventory-card:hover {
+  transform: translateY(-5px);
+}
+
+/* ===== Card Actions (Edit & Delete Icons) ===== */
+.card-actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.edit-icon,
+.delete-icon {
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  color: #3d4a60;
+}
+
+.edit-icon:hover {
+  color: #007bff;
+  transform: scale(1.2);
+}
+
+.delete-icon:hover {
+  color: #dc3545;
+  transform: scale(1.2);
+}
+
+/* ===== Inventory Card Content ===== */
+.inventory-card h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.inventory-card p {
+  font-size: 14px;
+  color: #555;
+  margin: 5px 0;
+}
+
+.inventory-card strong {
+  color: #000;
+}
+
+/* ===== QR Code Styling ===== */
+.qr-code {
+  margin-top: 15px;
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  display: inline-block;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Wrapper for Horizontal Scroll */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Inventory Table */
+.inventory-table {
+  width: 100%;
+  min-width: 800px; /* Minimum width to ensure table doesn't break */
+  border-collapse: collapse;
+}
+
+.inventory-table th,
+.inventory-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.inventory-table th {
+  background: #f5f5f5;
+  font-weight: bold;
+}
+
+
+/* 📱 Responsive Design */
+@media screen and (max-width: 768px) {
+  .table-wrapper {
+    border: none;
+    box-shadow: none;
+  }
+
+  .inventory-table {
+    min-width: 100%; /* Allow table to shrink on smaller devices */
+  }
+  .inventory-container {
+    margin-left: 0;
+  }
+
+  .inventory-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .add-item-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .view-toggle {
+    flex-direction: column;
+  }
+
+  .view-toggle button {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .main-content {
+    padding: 10px;
+  }
+  .inventory-container{
+    max-width: 370px;
+  }
+  .add-item-card {
+    max-height: 700px;
+    max-width: 300px;
+    border:2px #0056b3;
+    display: flex;
+    flex-direction: column;
+  } 
+  .view-toggle {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 80px;
+}
+
+  .add-item-card-button{
+    max-width: 110px;
+  }
+
+  .inventory-table {
+    min-width: 100%; /* Allow table to shrink on smaller devices */
+  }
+
+  .inventory-card {
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,86 @@
+  .main-content {
+    margin-left: 250px;
+    flex: 1;
+    padding: 30px;
+    background-color: #ffffff;
+  }
+  
+  .top-navbar {
+    background-color: #3d4a60;
+    color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .doc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  .card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+  
+  .upload-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #3d4a60;
+    background: #f9f9f9;
+    cursor: pointer;
+    text-align: center;
+    font-size: 1em;
+    color: #3d4a60;
+  }
+  
+  .upload-input:hover {
+    background: #eceff1;
+  }
+  
+  .file-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .file-item {
+    background: #f4f4f4;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+  }
+  
+  .download-btn {
+    background-color: #3d4a60;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .download-btn:hover {
+    background-color: #2a364d;
+  }
+  
+  .footer {
+    background-color: #1d2636;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  
