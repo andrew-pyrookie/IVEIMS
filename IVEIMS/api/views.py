@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
+import hashlib
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
@@ -10,6 +11,7 @@ from .models import AssetTransfers, Equipment, Users, Project, Booking
 from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSerializer, ProjectSerializer, BookingSerializer
 
 Users = get_user_model()
+
 
 class RegisterView(generics.CreateAPIView):
     queryset = Users.objects.all()
@@ -33,18 +35,20 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         password = request.data.get("password")
-
-        user = Users.objects.filter(email=email).first()
+        
+        # Directly use normalized email for lookup
+        normalized_email = Users.objects.normalize_email(email)
+        user = Users.objects.filter(email=normalized_email).first()
+        
         if user and user.check_password(password):
             refresh = RefreshToken.for_user(user)
             return Response({
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
             }, status=status.HTTP_200_OK)
-
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
-# Logout View (Blacklist Refresh Token)
+# Logout view remains unchanged
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
