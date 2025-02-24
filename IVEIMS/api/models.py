@@ -15,12 +15,14 @@ import base64
 ENCRYPTION_KEY = b'your-secret-key-here'  # Store securely in env variables
 
 def encrypt_data(data):
-    cipher = Fernet(ENCRYPTION_KEY)
-    return cipher.encrypt(data.encode()).decode()
+    cipher = Fernet(settings.FERNET_KEY)  # Use settings.FERNET_KEY instead of ENCRYPTION_KEY
+    encrypted_data = cipher.encrypt(data.encode())
+    return encrypted_data.decode()
 
 def decrypt_data(encrypted_data):
-    cipher = Fernet(ENCRYPTION_KEY)
-    return cipher.decrypt(encrypted_data.encode()).decode()
+    cipher = Fernet(settings.FERNET_KEY)  # Same here
+    decrypted_data = cipher.decrypt(encrypted_data.encode())
+    return decrypted_data.decode()
 
 # Custom User Manager
 class CustomUserManager(BaseUserManager):
