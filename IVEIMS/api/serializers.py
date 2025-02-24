@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import AssetTransfers, Equipment, MaintenanceReminders, Users, Project, Booking
 from django.contrib.auth import get_user_model
 
+
 Users = get_user_model()
 
 class AssetTransfersSerializer(serializers.ModelSerializer):
@@ -29,12 +30,20 @@ class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = ['id', 'name', 'email', 'role', 'password', 'is_active', 'is_staff']
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {
+            'password': {'write_only': True},
+            # Email is now visible in responses
+        }
 
     def create(self, validated_data):
+        # Simply normalize email without encryption
+        email = validated_data['email']
+        normalized_email = Users.objects.normalize_email(email)
+        validated_data['email'] = normalized_email
+        
         user = Users.objects.create(
             name=validated_data['name'],
-            email=validated_data['email'],
+            email=normalized_email,
             role=validated_data['role']
         )
         user.set_password(validated_data['password'])
