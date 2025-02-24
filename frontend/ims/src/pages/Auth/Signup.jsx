@@ -20,7 +20,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const roles = ["Student", "Lab Technician", "Lab Manager"];
+  const roles = ["student", "Lab Technician", "admin"];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -44,7 +44,18 @@ const Signup = () => {
       const res = await axios.post("http://localhost:8000/api/register/", userData);
       setSuccess(res.data.message);
       setError("");
-      setTimeout(() => navigate("/login"), 2000);
+
+      localStorage.setItem("userId", res.data.user.id); // Store the user ID
+
+      if (res.data.user.role === "student") {
+        navigate(`/student/dashboard/${res.data.user.id}`);
+      } else if (res.data.user.role === "admin") {
+        navigate(`/admin/dashboard/${res.data.user.id}`);
+      } else if (res.data.user.role === "Lab Manager") {
+        navigate("/lab-manager-dashboard");
+      } else {
+        navigate("/"); // Default redirection
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
     }

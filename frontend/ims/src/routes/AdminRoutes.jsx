@@ -10,6 +10,7 @@ const AdminRoutes = () => {
   return (
       <Routes>
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="dashboard/:userId" element={<Dashboard />} />
         <Route path="users" element={<UsersManagement />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="bookings" element={<Bookings />} />
