@@ -10,7 +10,7 @@ from .views import (
     UserListView, UserDetailView, TransferEquipmentView, 
     RegisterView, LoginView, LogoutView,
     ProjectListCreateView, ProjectDetailView, 
-    OfflineSyncView, BookingViewSet
+    OfflineSyncView, BookingViewSet, ProfileView
 )
 
 # Initialize DefaultRouter for ViewSets
@@ -64,6 +64,8 @@ urlpatterns = [
 
     # Offline Sync
     path('sync-offline-data/', OfflineSyncView.as_view(), name='sync-offline-data'),
+    
+    path('profile/', ProfileView.as_view(), name='profile'),
 
     # Include Router URLs (Bookings)
     path('', include(router.urls)),

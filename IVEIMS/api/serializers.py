@@ -50,6 +50,21 @@ class UsersSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
+class ProfileSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = Users
+        fields = ['id', 'email', 'name', 'role', 'password']
+        read_only_fields = ['email', 'role']  # Prevent email/role from being updated
+
+    def update(self, instance, validated_data):
+        # Handle password update securely
+        password = validated_data.pop('password', None)
+        if password:
+            instance.set_password(password)
+        return super().update(instance, validated_data)
+    
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
