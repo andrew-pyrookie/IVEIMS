@@ -29,26 +29,32 @@ class UsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Users
-        fields = ['id', 'name', 'email', 'role', 'password', 'is_active', 'is_staff']
-        extra_kwargs = {
-            'password': {'write_only': True},
-            # Email is now visible in responses
-        }
+        fields = ['id', 'name', 'email', 'role', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def validate_role(self, value):
+        if value not in Users.RoleChoices.values:
+            raise serializers.ValidationError("Invalid role selected.")
+        return value
 
     def create(self, validated_data):
-        # Simply normalize email without encryption
-        email = validated_data['email']
-        normalized_email = Users.objects.normalize_email(email)
-        validated_data['email'] = normalized_email
-        
+        validated_data['email'] = Users.objects.normalize_email(validated_data['email'])
+        validated_data.pop('is_superuser', None)
+        validated_data.pop('is_staff', None)
+
         user = Users.objects.create(
             name=validated_data['name'],
-            email=normalized_email,
+            email=validated_data['email'],
             role=validated_data['role']
         )
         user.set_password(validated_data['password'])
+
+        if user.role == Users.RoleChoices.ADMIN:
+            user.is_staff = True
+
         user.save()
         return user
+
     
 class ProfileSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False, allow_blank=True)
