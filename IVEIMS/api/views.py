@@ -6,9 +6,10 @@ from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+
 from rest_framework import status, viewsets
 from .models import AssetTransfers, Equipment, Users, Project, Booking
-from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSerializer, ProjectSerializer, BookingSerializer
+from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSerializer, ProjectSerializer, BookingSerializer, ProfileSerializer
 
 Users = get_user_model()
 
@@ -63,7 +64,6 @@ class LoginView(APIView):
             "user": {"id": user.id, "role": user.role},
         }, status=status.HTTP_200_OK)
 
-
 # Logout view remains unchanged
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -77,6 +77,13 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user  # Returns the authenticated user's data
 # AssetTransfers Views
 class AssetTransfersListCreateView(generics.ListCreateAPIView):
     queryset = AssetTransfers.objects.all()
@@ -114,6 +121,7 @@ class UserDetailView(generics.RetrieveAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     permission_classes = [permissions.IsAuthenticated]
+
 
 # Custom API for transferring equipment
 class TransferEquipmentView(APIView):

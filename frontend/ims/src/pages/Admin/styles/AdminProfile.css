@@ -1,0 +1,110 @@
+
+
+.profile-container {
+  display: flex;
+  margin-left: 250px;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+}
+
+/* Profile Card Styles */
+.profile-card {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.profile-info {
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+.profile-info h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.user-email {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+/* Input Styles */
+.profile-info input {
+  width: 100%;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-info input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+  outline: none;
+}
+
+/* Button Styles */
+.edit-btn, .save-btn {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 1rem;
+}
+
+.edit-btn:hover, .save-btn:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.edit-btn:active, .save-btn:active {
+  transform: translateY(0);
+}
+
+/* Error Message Styles */
+.error-msg {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-container {
+    display: flex;
+    min-height: 100vh;
+    margin-left: 0px;
+  }
+  
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+  }
+
+  .profile-card {
+    padding: 1rem;
+  }
+
+  .profile-info {
+    padding: 1.5rem;
+  }
+}

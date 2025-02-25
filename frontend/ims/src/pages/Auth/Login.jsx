@@ -19,12 +19,13 @@ const Login = () => {
     try {
       const res = await axios.post("http://localhost:8000/api/login/", formData);
       localStorage.setItem("token", res.data.access); // Store access token
+      // console.log("Token:", token); 
       setError("");
   
       if (res.data.user.role === "student") {
         navigate(`/student/dashboard/${res.data.user.id}`);
-      } else if (res.data.user.role === "Lab Technician") {
-        navigate("/lab-technician-dashboard");
+      } else if (res.data.user.role === "admin") {
+        navigate(`/admin/dashboard/${res.data.user.id}`);
       } else if (res.data.user.role === "Lab Manager") {
         navigate("/lab-manager-dashboard");
       } else {

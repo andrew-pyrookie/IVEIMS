@@ -25,8 +25,7 @@
   padding: 30px;
   width: calc(100% - 250px); /* Ensures content takes the remaining space */
   background-color: #ffffff; /* White background for the content */
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Light shadow for modern look */
+  border-radius: 8px; /* Light shadow for modern look */
   overflow: auto;
 }
 
@@ -73,9 +72,12 @@
   }
 
   .dashboard-content {
+    padding-top: 70px;
+    height: 100vh; /* Full height for content */
     flex-direction: column;
    display: flex;
-    max-width:300px; /* Full width for content */
+    max-width:310px; /* Full width for content */
+    overflow: auto;
   }
 
   .stats {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Sidebar.css"; // Import styles
-import { FaChartBar, FaProjectDiagram, FaCalendarAlt, FaUser } from "react-icons/fa"; // Import icons
+import { FaChartBar, FaProjectDiagram, FaCalendarAlt, FaUser, FaTimes  } from "react-icons/fa"; // Import icons
 import { MdWork } from "react-icons/md";
 import { FaBars } from "react-icons/fa"; // Import Hamburger icon
 
@@ -15,7 +15,9 @@ const Sidebar = () => {
   return (
     <>
       {/* Hamburger icon visible on small screens */}
-      <FaBars className="hamburger-icon" onClick={toggleSidebar} />
+     <div className="hamburger-icon" onClick={toggleSidebar}>
+           {isOpen ? <FaTimes /> : <FaBars />}
+      </div>
       
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>

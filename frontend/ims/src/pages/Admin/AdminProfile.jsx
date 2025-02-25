@@ -1,30 +1,35 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "/src/components/Student/Sidebar.jsx";
-
+import Sidebar from "/src/components/Admin/Sidebar.jsx";
 import axios from "axios";
-import { FaUserCircle } from "react-icons/fa";
-import '/src/pages/Student/styles/Profile.css';
+import "/src/pages/Admin/styles/AdminProfile.css";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     name: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Fetch user profile data on component mount
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await axios.get("http://localhost:8000/api/profile/", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming you use token-based authentication
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        setProfile({ ...profile, name: response.data.name });
+
+        setProfile({
+          name: response.data.name,
+          email: response.data.email,
+          password: "",
+          confirmPassword: "",
+        });
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -36,18 +41,15 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  // Handle input changes
   const handleProfileChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  // Toggle edit mode
   const toggleEdit = () => {
     setIsEditing(!isEditing);
     setError("");
   };
 
-  // Handle save changes
   const handleSave = async () => {
     if (profile.password !== profile.confirmPassword) {
       setError("Passwords do not match!");
@@ -57,51 +59,36 @@ const Profile = () => {
     try {
       const updatedData = {
         name: profile.name,
-        password: profile.password, // Only send password if it's being updated
+        password: profile.password,
       };
 
-      const response = await axios.put(
-        "http://localhost:8000/api/profile/",
-        updatedData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      await axios.put("http://localhost:8000/api/profile/", updatedData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-      console.log("Profile updated successfully:", response.data);
       setIsEditing(false);
       setError("");
-      setProfile({ ...profile, password: "", confirmPassword: "" }); // Clear password fields after saving
+      setProfile({ ...profile, password: "", confirmPassword: "" });
     } catch (error) {
       console.error("Error updating profile:", error);
       setError("Failed to update profile.");
     }
   };
 
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
-
   return (
     <div className="profile-container">
-      <div className="main-content">
-        {/* Top Navbar */}
-        <div className="top-navbar">
-          <span className="navbar-title">⚙️ Profile Settings</span>
-        </div>
+      <Sidebar />
+      <div className="profile-card">
+        <div className="profile-info">
+          <h2 className="user-name">  Name: {profile.name}</h2>
+          <p className="user-email">Email: {profile.email}</p>
 
-        {/* Profile Card */}
-        <div className="profile-card">
-          <FaUserCircle className="user-icon" />
           {!isEditing ? (
-            <>
-              <h2>{profile.name}</h2>
-              <button className="edit-btn" onClick={toggleEdit}>
-                Edit
-              </button>
-            </>
+            <button className="edit-btn" onClick={toggleEdit}>
+              Edit Profile
+            </button>
           ) : (
             <>
               <input

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "/src/components/Admin/Sidebar.jsx"; // Import Sidebar
+import Topbar from "/src/components/Admin/Topbar.jsx";
 import "/src/pages/Admin/styles/Dashboard.css"; // Import styles
 
 const Dashboard = () => {
@@ -88,6 +89,8 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <Sidebar />
+      <Topbar />
+      {/* Dashboard Content */}
       <div className="dashboard-content">
         <h1>📊 Dashboard Overview</h1>
         <div className="stats">

@@ -135,7 +135,9 @@
   /* 📱 Responsive Design */
   @media screen and (max-width: 768px) {
     .bookings-container {
-      flex-direction: column;
+      padding-top: 70px;
+      display: flex;
+      margin-left: 0px;
     }
   
     .top-navbar {
