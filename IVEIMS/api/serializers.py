@@ -29,7 +29,7 @@ class UsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Users
-        fields = ['id', 'name', 'email', 'role', 'password', 'is_active', 'is_staff']
+        fields = ['id', 'name', 'email', 'role', 'password']
         extra_kwargs = {
             'password': {'write_only': True},
             # Email is now visible in responses

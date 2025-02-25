@@ -31,8 +31,6 @@ class Users(AbstractBaseUser, PermissionsMixin):
     role = models.TextField()
     created_at = models.DateTimeField(default=now)
     approved = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     last_login = models.DateTimeField(blank=True, null=True)
 
