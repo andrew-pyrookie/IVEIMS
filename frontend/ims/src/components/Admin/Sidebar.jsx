@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Sidebar.css"; // Import styles
-import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars } from "react-icons/fa"; // Import icons
+import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars,FaUser,FaTimes  } from "react-icons/fa"; // Import icons
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // Sidebar is hidden by default on small screens
