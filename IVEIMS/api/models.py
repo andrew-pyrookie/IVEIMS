@@ -20,21 +20,30 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         return self.create_user(email, password, **extra_fields)
 
 # Updated User Model
+from django.db import models
+
 class Users(AbstractBaseUser, PermissionsMixin):
+    class RoleChoices(models.TextChoices):  # Define the available roles
+        ADMIN = "admin", "Admin"
+        STUDENT = "student", "Student"
+        LAB_MANAGER = "lab manager", "Lab Manager"
+        TECHNICIAN = 'Technician', "Technician"
+
     name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True, max_length=255)  # Enforce uniqueness here
-    role = models.TextField()
+    email = models.EmailField(unique=True, max_length=255)
+    role = models.CharField(max_length=20, choices=RoleChoices.choices, default=RoleChoices.STUDENT)
     created_at = models.DateTimeField(default=now)
     approved = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     last_login = models.DateTimeField(blank=True, null=True)
 
-    USERNAME_FIELD = "email"  # Changed from email_hash
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "role"]
 
     objects = CustomUserManager()
@@ -45,6 +54,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
     class Meta:
         db_table = "users"
         verbose_name_plural = "Users"
+
 # Equipment Model
 class Equipment(models.Model):
     name = models.CharField(max_length=255)
