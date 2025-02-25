@@ -12,7 +12,6 @@ from .serializers import AssetTransfersSerializer, EquipmentSerializer, UsersSer
 
 Users = get_user_model()
 
-
 class RegisterView(generics.CreateAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -22,6 +21,7 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
         refresh = RefreshToken.for_user(user)
         return Response({
             "user": UsersSerializer(user).data,
@@ -36,25 +36,16 @@ class LoginView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
-
         # Normalize email
         normalized_email = Users.objects.normalize_email(email)
- 
 
         # Find user
         user = Users.objects.filter(email=normalized_email).first()
-        if not user:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-        # Check password
-        if not user.check_password(password):
-
+        if not user or not user.check_password(password):
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Generate tokens
         refresh = RefreshToken.for_user(user)
-
 
         return Response({
             "refresh": str(refresh),
@@ -62,7 +53,6 @@ class LoginView(APIView):
             "user": {"id": user.id, "role": user.role},
         }, status=status.HTTP_200_OK)
 
-# Logout view remains unchanged
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
