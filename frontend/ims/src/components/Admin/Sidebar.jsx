@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Sidebar.css"; // Import styles
-import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars } from "react-icons/fa"; // Import icons
+import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars,FaUser, FaTimes } from "react-icons/fa"; // Import icons
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // Sidebar is hidden by default on small screens
@@ -13,7 +13,9 @@ const Sidebar = () => {
   return (
     <>
       {/* Hamburger icon visible on small screens */}
-      <FaBars className="hamburger-icon" onClick={toggleSidebar} />
+      <div className="hamburger-icon" onClick={toggleSidebar}>
+        {isOpen ? <FaTimes /> : <FaBars />}
+      </div>
       
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
@@ -55,6 +57,12 @@ const Sidebar = () => {
             <Link to="/admin/backup">
               <FaDatabase className="icon" />
               <span className="text">Backup</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/profile">
+              <FaUser className="icon" />
+              <span className="text">Profile</span>
             </Link>
           </li>
         </ul>
