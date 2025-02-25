@@ -37,7 +37,6 @@ class LoginView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
-<<<<<<< HEAD
         print(f"Received login attempt: {email}")  # Debugging log
 
         # Normalize email
@@ -53,22 +52,11 @@ class LoginView(APIView):
         # Check password
         if not user.check_password(password):
             print("Incorrect password")  # Debugging log
-=======
-        # Normalize email
-        normalized_email = Users.objects.normalize_email(email)
-
-        # Find user
-        user = Users.objects.filter(email=normalized_email).first()
-        if not user or not user.check_password(password):
->>>>>>> origin/main
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Generate tokens
         refresh = RefreshToken.for_user(user)
-<<<<<<< HEAD
         print("Login successful!")  # Debugging log
-=======
->>>>>>> origin/main
 
         return Response({
             "refresh": str(refresh),
