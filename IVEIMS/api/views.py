@@ -63,6 +63,10 @@ class LoginView(APIView):
             "access": str(refresh.access_token),
             "user": {"id": user.id, "role": user.role},
         }, status=status.HTTP_200_OK)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 10f5b65bd8b6f6d631a4b36d5f4e222376581ead
 
 # Logout view remains unchanged
 class LogoutView(APIView):

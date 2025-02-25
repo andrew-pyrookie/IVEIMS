@@ -10,9 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@mantine/core": "^7.17.0",
     "axios": "^1.7.9",
     "mantine-datatable": "^7.15.1",
+=======
+>>>>>>> 10f5b65bd8b6f6d631a4b36d5f4e222376581ead
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-datepicker": "^8.0.0",
