@@ -44,8 +44,8 @@ class LoginView(APIView):
         # Find user
         user = Users.objects.filter(email=normalized_email).first()
         if not user:
-
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
 
         # Check password
         if not user.check_password(password):
