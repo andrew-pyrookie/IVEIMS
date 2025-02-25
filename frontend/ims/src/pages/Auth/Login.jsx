@@ -19,7 +19,6 @@ const Login = () => {
     try {
       const res = await axios.post("http://localhost:8000/api/login/", formData);
       localStorage.setItem("token", res.data.access); // Store access token
-      // console.log("Token:", token); 
       setError("");
   
       if (res.data.user.role === "student") {

@@ -29,12 +29,11 @@
 .hamburger-icon {
   font-size: 30px;
   cursor: pointer;
-  position: fixed; /* Change to fixed so it stays in the same position */
-  top: 20px; /* Keep it at the top */
-  left: 20px; /* Keep it on the left */
-  z-index: 20; /* Ensure it stays on top of other elements */
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 20;
   display: none; /* Hide hamburger icon on large screens */
-  background-color: white;
 }
 
 .sidebar h1 {
@@ -115,7 +114,6 @@
 
   .hamburger-icon {
     display: block; /* Show hamburger icon on small screens */
-    background-color: white;
   }
 
   .sidebar.open {
