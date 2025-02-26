@@ -17,8 +17,10 @@ const StudentRoutes = () => {
         <Route path="profile/:userId" element={<Profile />} />
 
         <Route path="bookings" element={<Bookings />} />
+        <Route path="bookings/:userId" element={<Bookings />} />
 
         <Route path="projects" element={<Projects />} />
+        <Route path="projects/:userId" element={<Projects />} />
         
         {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
