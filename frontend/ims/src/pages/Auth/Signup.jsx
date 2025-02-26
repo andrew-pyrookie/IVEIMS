@@ -42,6 +42,7 @@ const Signup = () => {
 
     try {
       const res = await axios.post("http://localhost:8000/api/register/", userData);
+      localStorage.setItem("token", res.data.access); 
       setSuccess(res.data.message);
       setError("");
 

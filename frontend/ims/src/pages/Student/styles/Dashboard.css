@@ -1,45 +1,103 @@
-  
-  .dashboard-container {
-    display: flex;
-    height: 100%;
-  }
-  
+/* Dashboard.css */
+
+/* General Styles */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+  flex-direction: row;
+  width: 100vw;
+  padding-top: 100px;
+}
+
+.Dash-main-content {
+  flex-grow: 1;
+  padding: 20px;
+  margin-left: 250px; /* Adjust based on the width of your sidebar */
+}
+
+/* Top Navbar */
+.top-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Grid Container */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* Card Styles */
+.card {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Specific Card Styles */
+.active-projects {
+  border-left: 4px solid #4caf50;
+}
+
+.upcoming-bookings {
+  border-left: 4px solid #2196f3;
+}
+
+.notifications {
+  border-left: 4px solid #ff9800;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .main-content {
-    margin-left: 250px;
-    flex: 1;
-    padding: 30px;
-    background-color: #ffffff;
+    margin-left: 0;
+    padding: 10px;
   }
-  
-  .top-navbar {
-    background-color: #3d4a60;
-    color: white;
-    padding: 20px;
-    margin-bottom: 20px;
-    font-size: 1.5em;
-    font-weight: bold;
-    text-align: center;
-  }
-  
+
   .grid-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: 1fr;
   }
-  
-  .card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  .top-navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  padding: 10px;
   }
-  
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+
+  .navbar-title {
+    font-size: 1.25rem;
   }
-  
-  h3 {
-    color: #1d2636;
-  }
+}

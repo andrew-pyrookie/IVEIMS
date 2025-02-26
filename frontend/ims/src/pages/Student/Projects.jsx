@@ -1,11 +1,14 @@
 // Project.jsx
 import React from 'react';
 import '/src/pages/Student/styles/Projects.css';
-import Sidebar from "/src/components/Student/Sidebar.jsx";
+import Sidebar from "/src/components/Student/StudentSidebar.jsx";
+import Topbar from "/src/components/Student/StudentTopbar.jsx";
+
 const Project = () => {
   return (
     <div className="project-container">
       <Sidebar />
+      <Topbar />
       <div className="main-content">
         <div className="top-navbar">
           <span className="navbar-title">📂 Project Management</span>
