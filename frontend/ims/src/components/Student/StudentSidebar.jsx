@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom"; // Use NavLink instead of Link
 import "./Sidebar.css"; // Import styles
-import { FaChartBar, FaProjectDiagram, FaCalendarAlt, FaUser, FaTimes  } from "react-icons/fa"; // Import icons
+import { FaChartBar, FaProjectDiagram, FaCalendarAlt, FaUser, FaTimes } from "react-icons/fa"; // Import icons
 import { MdWork } from "react-icons/md";
 import { FaBars } from "react-icons/fa"; // Import Hamburger icon
 
@@ -19,7 +19,6 @@ const Sidebar = () => {
         {isOpen ? <FaTimes /> : <FaBars />}
       </div>
       
-      
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="sidebar-header">
@@ -27,34 +26,50 @@ const Sidebar = () => {
         </div>
         <ul>
           <li>
-            <Link to="/student/dashboard">
+            <NavLink
+              to="/student/dashboard"
+              activeClassName="active" // Apply active class
+              exact // Ensure exact match for the root path
+            >
               <FaChartBar className="icon" />
               <span className="text">Dashboard</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/student/projects">
+            <NavLink
+              to="/student/projects"
+              activeClassName="active" // Apply active class
+            >
               <FaProjectDiagram className="icon" />
               <span className="text">Projects</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/student/documents">
+            <NavLink
+              to="/student/documents"
+              activeClassName="active" // Apply active class
+            >
               <MdWork className="icon" />
               <span className="text">Documents</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/student/bookings">
+            <NavLink
+              to="/student/bookings"
+              activeClassName="active" // Apply active class
+            >
               <FaCalendarAlt className="icon" />
               <span className="text">Bookings</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/student/profile">
+            <NavLink
+              to="/student/profile"
+              activeClassName="active" // Apply active class
+            >
               <FaUser className="icon" />
               <span className="text">Profile</span>
-            </Link>
+            </NavLink>
           </li>
         </ul>
       </div>

@@ -102,6 +102,17 @@
   transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out;
 }
 
+/* Active link styling */
+.sidebar ul li a.active {
+  background: #e5e4e4;
+  border-radius: 3px;
+  color: #3d4a60;
+}
+
+.sidebar ul li a.active::after {
+  opacity: 1; /* Show the left border */
+}
+
 /* Media Query for smaller screens */
 @media (max-width: 768px) {
   .sidebar-header h1 {

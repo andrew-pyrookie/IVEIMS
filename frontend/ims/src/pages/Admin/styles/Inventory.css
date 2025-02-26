@@ -45,6 +45,12 @@ body {
 .add-equipment-button:hover {
   background-color: #dcdddd;
 }
+.actions-container-filter-container{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
 
 /* Filter Styles */
 .filter-container {

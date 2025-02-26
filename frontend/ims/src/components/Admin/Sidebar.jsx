@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom"; // Use NavLink instead of Link
 import "./Sidebar.css"; // Import styles
-import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars,FaUser,FaTimes  } from "react-icons/fa"; // Import icons
+import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars, FaUser, FaTimes } from "react-icons/fa"; // Import icons
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // Sidebar is hidden by default on small screens
@@ -24,46 +24,68 @@ const Sidebar = () => {
         </div>
         <ul>
           <li>
-            <Link to="/admin/dashboard">
+            <NavLink
+              to="/admin/dashboard"
+              activeClassName="active" // Apply active class
+              exact // Ensure exact match for the root path
+            >
               <FaChartBar className="icon" />
               <span className="text">Dashboard</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/admin/users">
+            <NavLink
+              to="/admin/users"
+              activeClassName="active" // Apply active class
+            >
               <FaUsers className="icon" />
               <span className="text">Users Mgmt</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/admin/inventory">
+            <NavLink
+              to="/admin/inventory"
+              activeClassName="active" // Apply active class
+            >
               <FaBox className="icon" />
               <span className="text">Inventory</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/admin/bookings">
+            <NavLink
+              to="/admin/bookings"
+              activeClassName="active" // Apply active class
+            >
               <FaCalendarAlt className="icon" />
               <span className="text">Bookings</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/admin/reports">
+            <NavLink
+              to="/admin/reports"
+              activeClassName="active" // Apply active class
+            >
               <FaFileAlt className="icon" />
               <span className="text">Reports</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/admin/backup">
+            <NavLink
+              to="/admin/backup"
+              activeClassName="active" // Apply active class
+            >
               <FaDatabase className="icon" />
               <span className="text">Backup</span>
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/admin/profile">
+            <NavLink
+              to="/admin/profile"
+              activeClassName="active" // Apply active class
+            >
               <FaUser className="icon" />
               <span className="text">Profile</span>
-            </Link>
+            </NavLink>
           </li>
         </ul>
       </div>
@@ -72,4 +94,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-

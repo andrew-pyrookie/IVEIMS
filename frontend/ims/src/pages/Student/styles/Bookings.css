@@ -95,9 +95,8 @@
 /* Search Container */
 .search-container {
   margin: 20px 0;
-
   display: flex;
-  justify-content: flex-start; /* Align search input to the right */
+  justify-content: space-between; /* Align search input to the right */
 }
 
 /* Search Input */
@@ -130,17 +129,7 @@
   fill: #999;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .search-container {
-    justify-content: center; /* Center the search input on smaller screens */
-  }
 
-  .search-input {
-    width: 100%; /* Full width on smaller screens */
-    max-width: 400px; /* Limit maximum width */
-  }
-}
 
 /* Table Styles */
 .table-container {
@@ -312,6 +301,14 @@
 
 .close-button:hover {
   color: var(--danger);
+}
+
+.form-group input[type="datetime-local"] {
+  /* Add your custom styles here */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
 }
 
 /* Booking Form Styles */

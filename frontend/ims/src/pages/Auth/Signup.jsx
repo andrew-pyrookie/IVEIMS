@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaEye, FaEyeSlash, FaChevronDown, FaCheck, FaEnvelope } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaChevronDown, FaCheck, FaEnvelope, FaUser, FaLock } from "react-icons/fa";
 import "./Signup.css"; // Import CSS file
 
 const Signup = () => {
@@ -43,6 +43,7 @@ const Signup = () => {
     try {
       const res = await axios.post("http://localhost:8000/api/register/", userData);
       localStorage.setItem("token", res.data.access); 
+      localStorage.setItem("user_id", res.data.user.id);
       setSuccess(res.data.message);
       setError("");
 
@@ -69,7 +70,7 @@ const Signup = () => {
 
         {/* Name Input */}
         <div className="input-container">
-          <FaEnvelope className="input-icon" />
+          <FaUser className="input-icon" />
           <input
             type="text"
             name="name"
@@ -95,7 +96,7 @@ const Signup = () => {
 
         {/* Password Input */}
         <div className="input-container">
-          <FaEnvelope className="input-icon" />
+          <FaLock className="input-icon" />
           <input
             type={showPassword ? "text" : "password"}
             name="password"
@@ -111,7 +112,7 @@ const Signup = () => {
 
         {/* Confirm Password Input */}
         <div className="input-container">
-          <FaEnvelope className="input-icon" />
+          <FaLock className="input-icon" />
           <input
             type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"

@@ -148,7 +148,13 @@ const Booking = () => {
         }
       });
 
-      setBookedEquipment(response.data);
+      // Ensure the response includes equipment_id or equipment.id
+      const bookedEquipmentWithIds = response.data.map(booking => ({
+        ...booking,
+        equipment_id: booking.equipment.id // Access equipment ID
+      }));
+
+      setBookedEquipment(bookedEquipmentWithIds);
       setShowBookedEquipmentModal(true);
     } catch (err) {
       setBookedEquipmentError('Failed to fetch booked equipment. Please try again later.');
@@ -358,6 +364,7 @@ const Booking = () => {
                   <table className="equipment-table">
                     <thead>
                       <tr>
+                        <th>Equipment ID</th> {/* New column for equipment ID */}
                         <th>Equipment Name</th>
                         <th>Start Time</th>
                         <th>End Time</th>
@@ -368,6 +375,7 @@ const Booking = () => {
                     <tbody>
                       {bookedEquipment.map((booking) => (
                         <tr key={booking.id}>
+                          <td>{booking.equipment_id}</td> {/* Display equipment ID */}
                           <td>{booking.equipment.name}</td>
                           <td>{formatDate(booking.start_time)}</td>
                           <td>{formatDate(booking.end_time)}</td>
