@@ -29,10 +29,10 @@
 .hamburger-icon {
   font-size: 30px;
   cursor: pointer;
-  position: fixed; /* Change to fixed so it stays in the same position */
-  top: 20px; /* Keep it at the top */
-  left: 20px; /* Keep it on the left */
-  z-index: 20; /* Ensure it stays on top of other elements */
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 20;
   display: none; /* Hide hamburger icon on large screens */
 }
 
@@ -123,6 +123,11 @@
 
   .sidebar.closed {
     display: none; /* Hide sidebar when it's collapsed */
+  }
+  .sidebar ul li a:hover {
+    background: #e5e4e4;
+    border-radius: 3px;
+    color: #3d4a60;
   }
 }
 

@@ -1,16 +1,16 @@
 // Dashboard.jsx
 import React from 'react';
-import Sidebar from "/src/components/Student/Sidebar.jsx";
+import StudentSidebar from "/src/components/Student/StudentSidebar.jsx";
 import '/src/pages/Student/styles/Dashboard.css';
+import Topbar from "/src/components/Student/StudentTopbar.jsx"; 
 
 const Dashboard = () => {
   return (
     <div className="dashboard-container">
-      <Sidebar />
-      <div className="main-content">
-        <div className="top-navbar">
-          <span className="navbar-title">📊 Student Overview</span>
-        </div>
+      <StudentSidebar />
+      <Topbar />
+
+      <div className="Dash-main-content">
         
         <div className="grid-container">
           <div className="card active-projects">

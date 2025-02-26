@@ -15,7 +15,10 @@ const Sidebar = () => {
   return (
     <>
       {/* Hamburger icon visible on small screens */}
-      <FaBars className="hamburger-icon" onClick={toggleSidebar} />
+      <div className="hamburger-icon" onClick={toggleSidebar}>
+        {isOpen ? <FaTimes /> : <FaBars />}
+      </div>
+      
       
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>

@@ -1,6 +1,7 @@
 // Documents.jsx
 import React, { useState } from 'react';
-import Sidebar from "/src/components/Student/Sidebar.jsx";
+import Sidebar from "/src/components/Student/StudentSidebar.jsx";
+import Topbar from "/src/components/Student/StudentTopbar.jsx";
 import '/src/pages/Student/styles/Documents.css';
 
 const Documents = () => {
@@ -14,6 +15,7 @@ const Documents = () => {
   return (
     <div className="documents-container">
       <Sidebar />
+      <Topbar />
       <div className="main-content">
         <div className="top-navbar">
           <span className="navbar-title">📜 Documentation</span>

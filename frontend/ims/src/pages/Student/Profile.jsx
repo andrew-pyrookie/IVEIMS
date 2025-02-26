@@ -1,30 +1,38 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "/src/components/Student/Sidebar.jsx";
-
+import Sidebar from "/src/components/Student/StudentSidebar.jsx";
+import Topbar from "/src/components/Student/StudentTopbar.jsx";
 import axios from "axios";
-import { FaUserCircle } from "react-icons/fa";
-import '/src/pages/Student/styles/Profile.css';
+import "/src/pages/Admin/styles/AdminProfile.css";
+
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     name: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Fetch user profile data on component mount
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await axios.get("http://localhost:8000/api/profile/", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming you use token-based authentication
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        setProfile({ ...profile, name: response.data.name });
+
+        setProfile({
+          name: response.data.name,
+          email: response.data.email,
+          password: "",
+          confirmPassword: "",
+        });
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -36,18 +44,16 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  // Handle input changes
   const handleProfileChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  // Toggle edit mode
   const toggleEdit = () => {
     setIsEditing(!isEditing);
     setError("");
+    setSuccess("");
   };
 
-  // Handle save changes
   const handleSave = async () => {
     if (profile.password !== profile.confirmPassword) {
       setError("Passwords do not match!");
@@ -57,23 +63,24 @@ const Profile = () => {
     try {
       const updatedData = {
         name: profile.name,
-        password: profile.password, // Only send password if it's being updated
+        password: profile.password,
       };
 
-      const response = await axios.put(
-        "http://localhost:8000/api/profile/",
-        updatedData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      await axios.put("http://localhost:8000/api/profile/", updatedData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-      console.log("Profile updated successfully:", response.data);
       setIsEditing(false);
       setError("");
-      setProfile({ ...profile, password: "", confirmPassword: "" }); // Clear password fields after saving
+      setSuccess("Profile updated successfully!");
+      setProfile({ ...profile, password: "", confirmPassword: "" });
+
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
     } catch (error) {
       console.error("Error updating profile:", error);
       setError("Failed to update profile.");
@@ -81,56 +88,74 @@ const Profile = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading profile...</p>
+      </div>
+    );
   }
 
   return (
     <div className="profile-container">
-      <div className="main-content">
-        {/* Top Navbar */}
-        <div className="top-navbar">
-          <span className="navbar-title">⚙️ Profile Settings</span>
-        </div>
+      <Sidebar />
+      <Topbar />  
+      <div className="profile-card">
+        <div className="profile-info">
+          <h2 className="user-name">Name: {profile.name}</h2>
+          <p className="user-email">Email: {profile.email}</p>
 
-        {/* Profile Card */}
-        <div className="profile-card">
-          <FaUserCircle className="user-icon" />
           {!isEditing ? (
-            <>
-              <h2>{profile.name}</h2>
-              <button className="edit-btn" onClick={toggleEdit}>
-                Edit
-              </button>
-            </>
+            <button className="edit-btn" onClick={toggleEdit}>
+              Edit Profile
+            </button>
           ) : (
             <>
-              <input
-                type="text"
-                name="name"
-                value={profile.name}
-                onChange={handleProfileChange}
-                placeholder="Full Name"
-              />
-              <input
-                type="password"
-                name="password"
-                value={profile.password}
-                onChange={handleProfileChange}
-                placeholder="New Password"
-              />
-              <input
-                type="password"
-                name="confirmPassword"
-                value={profile.confirmPassword}
-                onChange={handleProfileChange}
-                placeholder="Confirm New Password"
-              />
+              <div className="form-group">
+                <label htmlFor="name">Full Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={profile.name}
+                  onChange={handleProfileChange}
+                  placeholder="Full Name"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="password">New Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={profile.password}
+                  onChange={handleProfileChange}
+                  placeholder="New Password"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm New Password</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={profile.confirmPassword}
+                  onChange={handleProfileChange}
+                  placeholder="Confirm New Password"
+                />
+              </div>
 
               {error && <p className="error-msg">{error}</p>}
+              {success && <p className="success-msg">{success}</p>}
 
-              <button className="save-btn" onClick={handleSave}>
-                Save
-              </button>
+              <div className="form-actions">
+                <button className="cancel-btn" onClick={toggleEdit}>
+                  Cancel
+                </button>
+                <button className="save-btn" onClick={handleSave}>
+                  Save
+                </button>
+              </div>
             </>
           )}
         </div>
