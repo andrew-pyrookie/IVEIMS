@@ -79,6 +79,24 @@
   transform: translateY(0);
 }
 
+.save-btn {
+  background-color: #48bb78;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #38a169;
+}
+
+.cancel-btn {
+  background-color: #e53e3e;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #c53030;
+}
+
 /* Error Message Styles */
 .error-msg {
   color: #e74c3c;
