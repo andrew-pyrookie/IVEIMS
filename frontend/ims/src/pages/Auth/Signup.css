@@ -82,13 +82,19 @@ button, input {
     background: white;
     border: 1px solid #ccc;
     border-radius: 5px;
-    padding: 10px;
+    padding-left: 5px;
+    padding-bottom: 10px;
+    padding-top: 10px;
     text-align: left;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
 }
+
+.dropdown-button:focus {
+    outline: none;
+}   
 
 .dropdown-menu {
     position: absolute;
@@ -106,10 +112,12 @@ button, input {
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
+    color: #333;
 }
 
 .dropdown-item:hover {
-    background: #f0f0f0;
+    background:#333;
+    color: white;
 }
 
 .selected {
