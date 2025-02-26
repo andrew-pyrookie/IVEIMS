@@ -18,7 +18,8 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post("http://localhost:8000/api/login/", formData);
-      localStorage.setItem("token", res.data.access); // Store access token
+      localStorage.setItem("token", res.data.access);
+      localStorage.setItem("user_id", res.data.user_id);
       setError("");
   
       if (res.data.user.role === "student") {
@@ -77,5 +78,8 @@ const Login = () => {
     </div>
   );
 };
+
+
+
 
 export default Login;
