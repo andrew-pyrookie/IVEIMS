@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Admin/Dashboard";
 import UsersManagement from "../pages/Admin/UsersManagement";
-import Inventory from "../pages/admin/Inventory";
+import Inventory from "../pages/Admin/Inventory";
 import Bookings from "../pages/Admin/Bookings";
 import Reports from "../pages/Admin/Reports";
 import Backup from "../pages/Admin/Backup";
@@ -17,6 +17,7 @@ const AdminRoutes = () => {
         <Route path="users/userId" element={<UsersManagement />} />
 
         <Route path="inventory" element={<Inventory />} />
+        <Route path="inventory/:userId" element={<Inventory />} />
 
         <Route path="bookings" element={<Bookings />} />
         <Route path="bookings/:userId" element={<Bookings />} />
@@ -25,6 +26,9 @@ const AdminRoutes = () => {
         <Route path="backup" element={<Backup />} />
         <Route path="profile" element={<Profile />} />
         <Route path="profile/:userId" element={<Profile />} />
+
+        <Route path="usermanagement" element={<UsersManagement />} />
+        <Route path="usermanagement/:userId" element={<UsersManagement />} />
         {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
   );

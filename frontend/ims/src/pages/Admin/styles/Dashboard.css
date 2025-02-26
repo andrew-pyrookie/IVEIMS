@@ -1,132 +1,90 @@
-/* Container for the dashboard, using flex for layout */
+/* General Styles */
 .dashboard-container {
   display: flex;
-  flex-wrap: wrap;
-  min-height: 100vh; /* Ensure the container takes up at least full viewport height */
-  background-color: #f4f6f9; /* Light background color */
+  min-height: 100vh;
+  background-color: #f9fafb;
+  font-family: 'Arial', sans-serif;
+  padding-top: 70px;
 }
 
-/* Sidebar styles */
-.sidebar {
-  width: 250px; /* Fixed width for the sidebar */
-  background-color: #2c3e50; /* Sidebar background color */
-  color: white;
-  padding: 20px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 10;
-}
-
-/* Main content area */
 .dashboard-content {
-  margin-left: 250px; /* Space for the sidebar */
-  padding: 30px;
-  width: calc(100% - 250px); /* Ensures content takes the remaining space */
-  background-color: #ffffff; /* White background for the content */
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Light shadow for modern look */
-  overflow: auto;
-}
-
-/* Header for the dashboard */
-.dashboard-content h1 {
-  font-size: 2.5rem;
-  color: #333;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-/* Statistics container with flexbox */
-.stats {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap; /* Ensures items wrap on smaller screens */
-  justify-content: space-between; /* Distributes space between items */
-}
-
-/* Individual stat box */
-.stat-box {
-  background-color: #ecf0f1;
-  padding: 20px;
-  border-radius: 10px;
   flex: 1;
+  padding: 20px;
+  margin-left: 250px; /* Adjust based on Sidebar width */
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2d3748;
+  margin-bottom: 20px;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+/* Stat Box */
+.stat-box {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  width: 180px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   text-align: center;
-  font-size: 1.2rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for modern effect */
-  transition: transform 0.3s ease-in-out; /* Add smooth animation for hover effect */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Hover effect for stat boxes */
 .stat-box:hover {
-  transform: scale(1.05); /* Slight zoom effect on hover */
-  background-color: #dfe6e9; /* Light change on hover */
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Mobile responsiveness */
+.stat-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2d3748;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .dashboard-container {
-    flex-direction: column; /* Stack sidebar and content vertically on mobile */
-  }
-
   .dashboard-content {
-    padding-top: 70px;
-    height: 100vh; /* Full height for content */
-    flex-direction: column;
-   display: flex;
-    max-width:310px; /* Full width for content */
-    overflow: auto;
+    margin-left: 0; /* Remove margin for smaller screens */
+    padding: 10px;
   }
 
-  .stats {
-    flex-direction: column; /* Stack stat boxes vertically */
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 10px;
   }
 
   .stat-box {
-    font-size: 1rem; /* Adjust font size for smaller screens */
-  }
-}
-
-/* Tablet responsiveness */
-@media (max-width: 1024px) {
-  .dashboard-container {
-    flex-direction: column;
+    padding: 15px;
   }
 
-  .dashboard-content {
-    margin-left: 0;
-    width: 100%;
+  .stat-icon {
+    font-size: 24px;
   }
 
-  .stats {
-    flex-direction: column;
-    gap: 15px;
-  }
-}
-
-/* Laptop and larger screens */
-@media (min-width: 1025px) {
-  .dashboard-container {
-    flex-direction: row;
+  .stat-label {
+    font-size: 12px;
   }
 
-  .dashboard-content {
-    margin-left: 250px; /* Revert to the default margin for laptops and larger screens */
-    width: calc(100% - 250px);
-  }
-
-  .stats {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .stat-box {
-    font-size: 1.2rem;
+  .stat-value {
+    font-size: 20px;
   }
 }

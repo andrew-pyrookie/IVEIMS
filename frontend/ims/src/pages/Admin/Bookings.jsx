@@ -1,127 +1,152 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Sidebar from "/src/components/Admin/Sidebar.jsx";
-import "/src/pages/Admin/styles/Bookings.css";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Sidebar from "/src/components/Admin/Sidebar.jsx"; // Import Sidebar
+import Topbar from "/src/components/Admin/Topbar.jsx";
+import "/src/pages/Admin/styles/Bookings.css"; // Import the CSS file
 
 const Bookings = () => {
-  const [activeTab, setActiveTab] = useState("equipment"); // Default tab
-  const [bookings, setBookings] = useState({
-    equipment: [],
-    lab: [],
-  }); // State to hold bookings data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filterLab, setFilterLab] = useState('');
+  const [filterEquipment, setFilterEquipment] = useState('');
+  const [viewMode, setViewMode] = useState('equipment'); // 'equipment' or 'lab'
 
-  // Fetch bookings data from the backend
+  // Fetch bookings from the backend
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        setLoading(true);
-        const response = await axios.get("http://localhost:8000/api/equipment/", {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:8000/api/bookings/', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming JWT token is stored in local storage
+            Authorization: `Bearer ${token}`,
           },
         });
-        // Assuming the API provides the 'equipment' and 'lab' data
-        setBookings({
-          equipment: response.data.equipment || [],
-          lab: response.data.lab || [],
-        }); // Set the bookings data, defaulting to empty arrays if data is missing
+        setBookings(response.data);
         setLoading(false);
       } catch (err) {
-        setError("Failed to fetch bookings. Please try again.");
+        setError('Failed to fetch bookings.');
         setLoading(false);
+        console.error('Error fetching bookings:', err);
       }
     };
 
     fetchBookings();
   }, []);
 
-  const handleAction = (id, type, action) => {
-    console.log(`Booking ID: ${id}, Type: ${type}, Action: ${action}`);
-    // Implement the action for approve or reject (e.g., call API to update the booking status)
-  };
+  // Filter bookings based on lab and equipment
+  const filteredBookings = bookings.filter((booking) => {
+    if (viewMode === 'equipment') {
+      return (
+        (filterEquipment === '' || booking.equipment.name === filterEquipment) &&
+        (filterLab === '' || booking.equipment.current_lab === filterLab)
+      );
+    } else if (viewMode === 'lab') {
+      return filterLab === '' || booking.equipment.current_lab === filterLab;
+    }
+    return true;
+  });
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
+  // Get unique labs and equipment for filters
+  const uniqueLabs = [...new Set(bookings.map((booking) => booking.equipment.current_lab))];
+  const uniqueEquipment = [...new Set(bookings.map((booking) => booking.equipment.name))];
+
+  if (loading) {
+    return <div className="loading-container">Loading bookings...</div>;
+  }
+
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
 
   return (
-    <div className="bookings-container1">
-      <div className="bookings-container">
-        <Sidebar />
-        <div className="bookings-main">
-  
-          {/* Booking Tabs */}
-          <div className="booking-tabs">
-            <button
-              className={activeTab === "equipment" ? "active" : ""}
-              onClick={() => setActiveTab("equipment")}
-            >
-              Equipment Reservations
-            </button>
-            <button
-              className={activeTab === "lab" ? "active" : ""}
-              onClick={() => setActiveTab("lab")}
-            >
-              Lab Space Bookings
-            </button>
-          </div>
+    <div className="bookings-container">
+      <Sidebar />
+      <Topbar />  
+      <h2 className="page-title">Bookings</h2>
 
-          {/* Booking List */}
-          <div className="booking-content">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Item</th>
-                  <th>User</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Safely access bookings[activeTab] using optional chaining */}
-                {(bookings[activeTab] || []).map((booking, index) => (
-                  <tr key={booking.id}>
-                    <td>{index + 1}</td>
-                    <td>{booking.item}</td>
-                    <td>{booking.user}</td>
-                    <td>
-                      <span className={`status ${booking.status.toLowerCase()}`}>
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="actions">
-                      {booking.status === "Pending" && (
-                        <>
-                          <button
-                            className="approve"
-                            onClick={() =>
-                              handleAction(booking.id, activeTab, "approve")
-                            }
-                          >
-                            ✅ Approve
-                          </button>
-                          <button
-                            className="reject"
-                            onClick={() =>
-                              handleAction(booking.id, activeTab, "reject")
-                            }
-                          >
-                            ❌ Reject
-                          </button>
-                        </>
-                      )}
-                      {booking.status !== "Pending" && (
-                        <span className="view-only">🔍 View</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Toggle Buttons */}
+      <div className="toggle-buttons">
+        <button
+          className={`toggle-button ${viewMode === 'equipment' ? 'active' : ''}`}
+          onClick={() => setViewMode('equipment')}
+        >
+          Equipment Bookings
+        </button>
+        <button
+          className={`toggle-button ${viewMode === 'lab' ? 'active' : ''}`}
+          onClick={() => setViewMode('lab')}
+        >
+          Lab Bookings
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="filter-container">
+        {viewMode === 'equipment' && (
+          <div className="filter-item">
+            <label htmlFor="equipment-filter" className="filter-label">
+              Filter by Equipment
+            </label>
+            <select
+              id="equipment-filter"
+              value={filterEquipment}
+              onChange={(e) => setFilterEquipment(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">All Equipment</option>
+              {uniqueEquipment.map((equipment) => (
+                <option key={equipment} value={equipment}>
+                  {equipment}
+                </option>
+              ))}
+            </select>
           </div>
+        )}
+        <div className="filter-item">
+          <label htmlFor="lab-filter" className="filter-label">
+            Filter by Lab
+          </label>
+          <select
+            id="lab-filter"
+            value={filterLab}
+            onChange={(e) => setFilterLab(e.target.value)}
+            className="filter-select"
+          >
+            <option value="">All Labs</option>
+            {uniqueLabs.map((lab) => (
+              <option key={lab} value={lab}>
+                {lab}
+              </option>
+            ))}
+          </select>
         </div>
+      </div>
+
+      {/* Bookings Table */}
+      <div className="table-container">
+        <table className="bookings-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              {viewMode === 'equipment' && <th>Equipment</th>}
+              {viewMode === 'lab' && <th>Lab</th>}
+              <th>Start Time</th>
+              <th>End Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredBookings.map((booking) => (
+              <tr key={booking.id}>
+                <td>{booking.user.name}</td>
+                {viewMode === 'equipment' && <td>{booking.equipment.name}</td>}
+                {viewMode === 'lab' && <td>{booking.equipment.current_lab}</td>}
+                <td>{new Date(booking.start_time).toLocaleString()}</td>
+                <td>{new Date(booking.end_time).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
