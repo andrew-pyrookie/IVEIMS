@@ -1,172 +1,592 @@
-import React, { useState } from "react";
-import { QRCodeCanvas } from "qrcode.react";
-import DatePicker from "react-datepicker";
-import "/src/pages/Admin/styles/Inventory.css";
+import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
+import { useTable, useSortBy, useFilters, usePagination } from 'react-table';
 import Sidebar from "/src/components/Admin/Sidebar.jsx";
-import "react-datepicker/dist/react-datepicker.css";
-import { FaPlus, FaEdit, FaTrash, FaTable, FaThLarge } from "react-icons/fa";
+import Topbar from "/src/components/Admin/Topbar.jsx";
+import "/src/pages/Admin/styles/Inventory.css"; // Import the CSS file
 
 const Inventory = () => {
-  const [items, setItems] = useState([]);
-  const [newItem, setNewItem] = useState({
-    name: "",
-    status: "Available",
-    lastMaintained: null,
-    nextMaintenance: null,
+  const [equipment, setEquipment] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterLab, setFilterLab] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newEquipment, setNewEquipment] = useState({
+    name: '',
+    status: 'available',
+    current_lab: '',
+    unique_code: '',
+    lab: '',
+    description: '',
+    next_maintenance: '',
+    last_maintenance: '' 
   });
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const [viewMode, setViewMode] = useState("table"); // "table" or "card"
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  
+  // Get token from localStorage or session storage
+  const getAuthToken = () => {
+    return localStorage.getItem('token');
+  };
 
-  // Handle Adding a New Item
-  const handleAddItem = () => {
-    if (newItem.name.trim() !== "") {
-      if (editingIndex !== null) {
-        const updatedItems = [...items];
-        updatedItems[editingIndex] = newItem;
-        setItems(updatedItems);
-        setEditingIndex(null);
-      } else {
-        setItems([...items, { ...newItem, id: Date.now() }]);
+  useEffect(() => {
+    const fetchEquipment = async () => {
+      try {
+        setLoading(true);
+        const token = getAuthToken();
+        
+        // Use your API endpoint for equipment
+        const response = await axios.get('http://localhost:8000/api/equipment/', {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : ''
+          }
+        });
+        setEquipment(Array.isArray(response.data) ? response.data : []);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch equipment data');
+        setLoading(false);
+        console.error('Error fetching equipment:', err);
       }
-      setNewItem({ name: "", status: "Available", lastMaintained: null, nextMaintenance: null });
-      setIsAdding(false);
+    };
+
+    fetchEquipment();
+  }, []);
+
+  const handleEquipmentClick = (item) => {
+    setSelectedEquipment(item);
+  };
+
+  const closeDetails = () => {
+    setSelectedEquipment(null);
+  };
+
+  const openAddModal = () => {
+    setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setNewEquipment({
+      name: '',
+      status: 'available',
+      current_lab: '',
+      unique_code: '',
+      lab: '',
+      description: '',
+      next_maintenance: ''
+    });
+    setSubmitError(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEquipment({
+      ...newEquipment,
+      [name]: value
+    });
+  };
+
+  const handleAddEquipment = async (e) => {
+    e.preventDefault();
+    setSubmitLoading(true);
+    setSubmitError(null);
+    
+    try {
+      const token = getAuthToken();
+      
+      const response = await axios.post('http://localhost:8000/api/equipment/', newEquipment, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      setEquipment([...equipment, response.data]);
+      setSubmitLoading(false);
+      closeAddModal();
+    } catch (err) {
+      setSubmitError('Failed to add equipment. Please try again.');
+      setSubmitLoading(false);
+      console.error('Error adding equipment:', err);
+    }
+  };
+  
+
+  // Function to download QR code
+  const handleDownloadQRCode = (qrCodeUrl, equipmentName) => {
+    // Create a link element
+    const link = document.createElement('a');
+    link.href = qrCodeUrl;
+    link.download = `${equipmentName}_QR_Code.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Get unique labs for filter dropdown
+  const uniqueLabs = useMemo(() => {
+    return Array.isArray(equipment) 
+      ? [...new Set(equipment.map(item => item.current_lab).filter(Boolean))]
+      : [];
+  }, [equipment]);
+
+  // Get status badge class
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'available':
+        return 'status-badge status-available';
+      case 'in use':
+        return 'status-badge status-in-use';
+      case 'maintenance':
+        return 'status-badge status-maintenance';
+      default:
+        return 'status-badge';
     }
   };
 
-  // Handle Editing an Item
-  const handleEditItem = (index) => {
-    setNewItem(items[index]);
-    setEditingIndex(index);
-    setIsAdding(true);
-  };
+  // React Table Configuration
+  const columns = useMemo(() => [
+    {
+      Header: 'Name',
+      accessor: 'name',
+    },
+    {
+      Header: 'Status',
+      accessor: 'status',
+      Cell: ({ value }) => (
+        <span className={getStatusBadgeClass(value)}>
+          {value}
+        </span>
+      )
+    },
+    {
+      Header: 'Current Lab',
+      accessor: 'current_lab',
+    },
+    {
+      Header: 'Unique Code',
+      accessor: 'unique_code',
+    },
+    {
+      Header: 'Next Maintenance',
+      accessor: 'next_maintenance',
+      Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : '-'
+    },
+    {
+      Header: 'QR Code',
+      accessor: 'qr_code',
+      Cell: ({ value, row }) => value ? (
+        <button 
+          onClick={() => handleDownloadQRCode(value, row.original.name)}
+          className="qr-download-button"
+        >
+          Download QR
+        </button>
+      ) : '-'
+    },
+    {
+      Header: 'Actions',
+      id: 'actions',
+      Cell: ({ row }) => (
+        <button 
+          onClick={() => handleEquipmentClick(row.original)}
+          className="view-details-button"
+        >
+          View Details
+        </button>
+      )
+    }
+  ], []);
 
-  // Handle Deleting an Item
-  const handleDeleteItem = (index) => {
-    setItems(items.filter((_, i) => i !== index));
-  };
+  // Apply filters to the data
+  const data = useMemo(() => {
+    if (!Array.isArray(equipment)) return [];
+    
+    return equipment.filter(item => {
+      return (
+        (filterStatus === '' || item.status === filterStatus) &&
+        (filterLab === '' || item.current_lab === filterLab)
+      );
+    });
+  }, [equipment, filterStatus, filterLab]);
+
+  // Initialize react-table
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    prepareRow,
+    page,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    pageCount,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    state: { pageIndex, pageSize }
+  } = useTable(
+    { 
+      columns,
+      data,
+      initialState: { pageIndex: 0, pageSize: 10 }
+    },
+    useFilters,
+    useSortBy,
+    usePagination
+  );
+
+  if (loading) {
+    return <div className="loading-container">Loading equipment data...</div>;
+  }
+
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
 
   return (
-    <div className="inventory-container">
-      <Sidebar />
-
-      {/* Main Content */}
-      <div className="main-contentInventory">
-        <h2>🛠️ Equipment Tracking</h2>
-
-        {/* View Toggle Buttons */}
-        <div className="view-toggle">
-          <button className={viewMode === "table" ? "active" : ""} onClick={() => setViewMode("table")}>
-            <FaTable /> Table
-          </button>
-          <button className={viewMode === "card" ? "active" : ""} onClick={() => setViewMode("card")}>
-            <FaThLarge /> Card
-          </button>
-        </div>
-
-        {/* Add Equipment Button */}
-        <button className="add-button" onClick={() => setIsAdding(!isAdding)}>
-          <FaPlus /> Add Equipment
+    <div className="equipment-container">
+        <Sidebar />
+        <Topbar />
+      <h1 className="page-title">Laboratory Equipment</h1>
+      
+      <div className="actions-container">
+        <button 
+          className="add-equipment-button" 
+          onClick={openAddModal}
+        >
+          Add Equipment
         </button>
+      </div>
+      
+      {/* Filters */}
+      <div className="filter-container">
+        <div className="filter-item">
+          <label htmlFor="status-filter" className="filter-label">
+            Filter by Status
+          </label>
+          <select
+            id="status-filter"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="filter-select"
+          >
+            <option value="">All Statuses</option>
+            <option value="available">Available</option>
+            <option value="in use">In Use</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+        
+        <div className="filter-item">
+          <label htmlFor="lab-filter" className="filter-label">
+            Filter by Lab
+          </label>
+          <select
+            id="lab-filter"
+            value={filterLab}
+            onChange={(e) => setFilterLab(e.target.value)}
+            className="filter-select"
+          >
+            <option value="">All Labs</option>
+            {uniqueLabs.map(lab => (
+              <option key={lab} value={lab}>{lab}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-        {/* Add/Edit Equipment Card */}
-        {isAdding && (
-          <div className="add-item-card">
-            <h3>{editingIndex !== null ? "Edit Equipment" : "Add Equipment"}</h3>
-
-            <input
-              type="text"
-              placeholder="Enter equipment name"
-              value={newItem.name}
-              onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-            />
-
-            <select className="add-item-card-dropdown" value={newItem.status} onChange={(e) => setNewItem({ ...newItem, status: e.target.value })}>
-              <option value="Available">Available</option>
-              <option value="In Use">In Use</option>
-            </select>
-
-            {/* Last Maintained Date */}
-            <DatePicker
-              selected={newItem.lastMaintained}
-              onChange={(date) => setNewItem({ ...newItem, lastMaintained: date })}
-              placeholderText="Last Maintained"
-            />
-
-            {/* Next Maintenance Date */}
-            <DatePicker
-              selected={newItem.nextMaintenance}
-              onChange={(date) => setNewItem({ ...newItem, nextMaintenance: date })}
-              placeholderText="Next Maintenance"
-            />
-
-            <button className="add-item-card-button" onClick={handleAddItem}>{editingIndex !== null ? "Update" : "Add"} Equipment</button>
-          </div>
-        )}
-
-        {/* Equipment Table View */}
-        {viewMode === "table" && (
-          <div className="table-wrapper">
-            <table className="inventory-table">
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Status</th>
-                  <th>Last Maintained</th>
-                  <th>Next Maintenance</th>
-                  <th>QR Code</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, index) => (
-                  <tr key={item.id}>
-                    <td>{item.name}</td>
-                    <td>{item.status}</td>
-                    <td>{item.lastMaintained ? item.lastMaintained.toDateString() : "N/A"}</td>
-                    <td>{item.nextMaintenance ? item.nextMaintenance.toDateString() : "N/A"}</td>
-                    <td>
-                      <QRCodeCanvas value={JSON.stringify(item)} size={50} />
-                    </td>
-                    <td>
-                      <FaEdit className="edit-icon" onClick={() => handleEditItem(index)} />
-                      <FaTrash className="delete-icon" onClick={() => handleDeleteItem(index)} />
-                    </td>
-                  </tr>
+      {/* React Table */}
+      <div className="table-container">
+        <table {...getTableProps()} className="equipment-table">
+          <thead>
+            {headerGroups.map(headerGroup => (
+              <tr {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map(column => (
+                  <th 
+                    {...column.getHeaderProps(column.getSortByToggleProps())}
+                    className={`table-header ${column.isSorted ? (column.isSortedDesc ? 'sort-desc' : 'sort-asc') : ''}`}
+                  >
+                    {column.render('Header')}
+                    <span>
+                      {column.isSorted
+                        ? column.isSortedDesc
+                          ? ' 🔽'
+                          : ' 🔼'
+                        : ''}
+                    </span>
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </tr>
+            ))}
+          </thead>
+          <tbody {...getTableBodyProps()}>
+            {page.map(row => {
+              prepareRow(row);
+              return (
+                <tr {...row.getRowProps()} className="table-row">
+                  {row.cells.map(cell => (
+                    <td {...cell.getCellProps()} className="table-cell">
+                      {cell.render('Cell')}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
-        {/* Equipment Card View */}
-        {viewMode === "card" && (
-          <div className="inventory-card-container">
-            {items.map((item, index) => (
-              <div key={item.id} className="inventory-card">
-                {/* Edit & Delete Icons on Top-Right */}
-                <div className="card-actions">
-                  <FaEdit className="edit-icon" onClick={() => handleEditItem(index)} />
-                  <FaTrash className="delete-icon" onClick={() => handleDeleteItem(index)} />
+      
+
+      {/* Equipment Details Modal */}
+      {selectedEquipment && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title">{selectedEquipment.name}</h2>
+              <button 
+                onClick={closeDetails}
+                className="close-button"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-details">
+              <div className="detail-grid">
+                <div className="detail-item">
+                  <p className="detail-label">Status</p>
+                  <p className={getStatusBadgeClass(selectedEquipment.status)}>
+                    {selectedEquipment.status}
+                  </p>
+                </div>
+                
+                <div className="detail-item">
+                  <p className="detail-label">Current Lab</p>
+                  <p className="detail-value">{selectedEquipment.current_lab}</p>
+                </div>
+                
+                <div className="detail-item">
+                  <p className="detail-label">Unique Code</p>
+                  <p className="detail-value">{selectedEquipment.unique_code}</p>
+                </div>
+                
+                <div className="detail-item">
+                  <p className="detail-label">Home Lab</p>
+                  <p className="detail-value">{selectedEquipment.lab}</p>
+                </div>
+                
+                {selectedEquipment.last_maintenance && (
+                  <div className="detail-item">
+                    <p className="detail-label">Last Maintenance</p>
+                    <p className="detail-value">{new Date(selectedEquipment.last_maintenance).toLocaleDateString()}</p>
+                  </div>
+                )}
+                
+                {selectedEquipment.next_maintenance && (
+                  <div className="detail-item">
+                    <p className="detail-label">Next Maintenance</p>
+                    <p className="detail-value">{new Date(selectedEquipment.next_maintenance).toLocaleDateString()}</p>
+                  </div>
+                )}
+                
+                {selectedEquipment.created_at && (
+                  <div className="detail-item">
+                    <p className="detail-label">Created At</p>
+                    <p className="detail-value">{new Date(selectedEquipment.created_at).toLocaleDateString()}</p>
+                  </div>
+                )}
+              </div>
+              
+              {selectedEquipment.description && (
+                <div className="description-container">
+                  <p className="detail-label">Description</p>
+                  <p className="detail-description">{selectedEquipment.description}</p>
+                </div>
+              )}
+              
+              {selectedEquipment.qr_code && (
+                <div className="qr-container">
+                  <p className="detail-label">QR Code</p>
+                  <div className="qr-image-container">
+                    <img 
+                      src={selectedEquipment.qr_code} 
+                      alt="Equipment QR Code" 
+                      className="qr-image"
+                    />
+                    <button 
+                      onClick={() => handleDownloadQRCode(selectedEquipment.qr_code, selectedEquipment.name)}
+                      className="qr-download-button"
+                    >
+                      Download QR Code
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              <div className="modal-actions">
+                <button 
+                  className="close-modal-button"
+                  onClick={closeDetails}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Equipment Modal */}
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title">Add New Equipment</h2>
+              <button 
+                onClick={closeAddModal}
+                className="close-button"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddEquipment} className="add-equipment-form">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="name" className="form-label">Equipment Name*</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={newEquipment.name}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="unique_code" className="form-label">Unique Code*</label>
+                  <input
+                    type="text"
+                    id="unique_code"
+                    name="unique_code"
+                    value={newEquipment.unique_code}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    required
+                  />
+                  <small className="helper-text">This will be used to generate the QR code automatically.</small>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="status" className="form-label">Status</label>
+                  <select
+                    id="status"
+                    name="status"
+                    value={newEquipment.status}
+                    onChange={handleInputChange}
+                    className="form-select"
+                  >
+                    <option value="available">Available</option>
+                    <option value="in use">In Use</option>
+                    <option value="maintenance">Maintenance</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="current_lab" className="form-label">Current Lab*</label>
+                  <input
+                    type="text"
+                    id="current_lab"
+                    name="current_lab"
+                    value={newEquipment.current_lab}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="lab" className="form-label">Home Lab</label>
+                  <input
+                    type="text"
+                    id="lab"
+                    name="lab"
+                    value={newEquipment.lab}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="next_maintenance" className="form-label">Next Maintenance Date</label>
+                  <input
+                    type="date"
+                    id="next_maintenance"
+                    name="next_maintenance"
+                    value={newEquipment.next_maintenance}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
                 </div>
 
-                {/* Card Content */}
-                <h3>{item.name}</h3>
-                <p>
-                  <strong>Status:</strong> {item.status}
-                </p>
-                <p>
-                  <strong>Last Maintained:</strong> {item.lastMaintained ? item.lastMaintained.toDateString() : "N/A"}
-                </p>
-                <p>
-                  <strong>Next Maintenance:</strong> {item.nextMaintenance ? item.nextMaintenance.toDateString() : "N/A"}
-                </p>
-                <QRCodeCanvas value={JSON.stringify(item)} size={70} />
+                <div className="form-group">
+                  <label htmlFor="last-maintenance" className="form-label">Last Maintenance</label>
+                    <input
+                      type="date"
+                      id="last-maintenance"
+                      name="last_maintenance"
+                      value={newEquipment.last_maintenance}
+                      onChange={handleInputChange}
+                      required
+                    /> 
+                </div>
+
               </div>
-            ))}
+              
+              <div className="form-group full-width">
+                <label htmlFor="description" className="form-label">Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={newEquipment.description}
+                  onChange={handleInputChange}
+                  className="form-textarea"
+                  rows="4"
+                />
+              </div>
+              
+              {submitError && (
+                <div className="error-message">{submitError}</div>
+              )}
+              
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  onClick={closeAddModal}
+                  className="cancel-button"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="submit-button"
+                  disabled={submitLoading}
+                >
+                  {submitLoading ? 'Adding...' : 'Add Equipment'}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

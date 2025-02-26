@@ -11,16 +11,26 @@ const Dashboard = () => {
   const [pendingLabBookings, setPendingLabBookings] = useState(0);
   const [notification, setNotification] = useState("");
 
+  // Get token from localStorage
+  const getAuthToken = () => {
+    return localStorage.getItem("token");
+  };
+
   // Fetch data for each stat from its API
   useEffect(() => {
     const fetchTotalUsers = async () => {
       try {
-        const response = await fetch("/api/total-users"); // Replace with your actual API endpoint
+        const token = getAuthToken();
+        const response = await fetch("http://localhost:8000/api/users/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch total users");
         }
         const data = await response.json();
-        setTotalUsers(data.totalUsers); // Assuming the response contains `totalUsers`
+        setTotalUsers(data.length); // Assuming the response is an array of users
       } catch (error) {
         console.error("Error fetching total users:", error);
       }
@@ -28,12 +38,17 @@ const Dashboard = () => {
 
     const fetchEquipmentAvailable = async () => {
       try {
-        const response = await fetch("/api/equipment-available"); // Replace with your actual API endpoint
+        const token = getAuthToken();
+        const response = await fetch("http://localhost:8000/api/equipment/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch equipment available");
         }
         const data = await response.json();
-        setEquipmentAvailable(data.equipmentAvailable); // Assuming the response contains `equipmentAvailable`
+        setEquipmentAvailable(data.length); // Assuming the response contains `equipmentAvailable`
       } catch (error) {
         console.error("Error fetching equipment available:", error);
       }
@@ -41,7 +56,12 @@ const Dashboard = () => {
 
     const fetchPendingEquipmentBookings = async () => {
       try {
-        const response = await fetch("/api/pending-equipment-bookings"); // Replace with your actual API endpoint
+        const token = getAuthToken();
+        const response = await fetch("http://localhost:8000/api/pending-equipment-bookings", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch pending equipment bookings");
         }
@@ -54,7 +74,12 @@ const Dashboard = () => {
 
     const fetchPendingLabBookings = async () => {
       try {
-        const response = await fetch("/api/pending-lab-bookings"); // Replace with your actual API endpoint
+        const token = getAuthToken();
+        const response = await fetch("http://localhost:8000/api/pending-lab-bookings", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch pending lab bookings");
         }
@@ -67,7 +92,12 @@ const Dashboard = () => {
 
     const fetchNotification = async () => {
       try {
-        const response = await fetch("/api/notification"); // Replace with your actual API endpoint
+        const token = getAuthToken();
+        const response = await fetch("http://localhost:8000/api/notification", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch notification");
         }
@@ -92,13 +122,33 @@ const Dashboard = () => {
       <Topbar />
       {/* Dashboard Content */}
       <div className="dashboard-content">
-        <h1>📊 Dashboard Overview</h1>
-        <div className="stats">
-          <div className="stat-box">👥 Total Users: {totalUsers}</div>
-          <div className="stat-box">📦 Equipment Available: {equipmentAvailable}</div>
-          <div className="stat-box">📅 Pending Equipment Bookings: {pendingEquipmentBookings}</div>
-          <div className="stat-box">📅 Pending Lab Bookings: {pendingLabBookings}</div>
-          <div className="stat-box">📑 Notification: {notification}</div>
+        <h1 className="dashboard-title">📊 Dashboard Overview</h1>
+        <div className="stats-grid">
+          <div className="stat-box">
+            <div className="stat-icon">👥</div>
+            <div className="stat-label">Total Users</div>
+            <div className="stat-value">{totalUsers}</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-icon">📦</div>
+            <div className="stat-label">Equipment Available</div>
+            <div className="stat-value">{equipmentAvailable}</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-icon">📅</div>
+            <div className="stat-label">Pending Equipment Bookings</div>
+            <div className="stat-value">{pendingEquipmentBookings}</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-icon">📅</div>
+            <div className="stat-label">Pending Lab Bookings</div>
+            <div className="stat-value">{pendingLabBookings}</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-icon">📑</div>
+            <div className="stat-label">Notification</div>
+            <div className="stat-value">{notification}</div>
+          </div>
         </div>
       </div>
     </div>
