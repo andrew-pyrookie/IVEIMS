@@ -12,6 +12,7 @@ const Profile = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,6 +49,7 @@ const Profile = () => {
   const toggleEdit = () => {
     setIsEditing(!isEditing);
     setError("");
+    setSuccess("");
   };
 
   const handleSave = async () => {
@@ -70,19 +72,34 @@ const Profile = () => {
 
       setIsEditing(false);
       setError("");
+      setSuccess("Profile updated successfully!");
       setProfile({ ...profile, password: "", confirmPassword: "" });
+
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
     } catch (error) {
       console.error("Error updating profile:", error);
       setError("Failed to update profile.");
     }
   };
 
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="profile-container">
       <Sidebar />
       <div className="profile-card">
         <div className="profile-info">
-          <h2 className="user-name">  Name: {profile.name}</h2>
+          <h2 className="user-name">Name: {profile.name}</h2>
           <p className="user-email">Email: {profile.email}</p>
 
           {!isEditing ? (
@@ -91,33 +108,51 @@ const Profile = () => {
             </button>
           ) : (
             <>
-              <input
-                type="text"
-                name="name"
-                value={profile.name}
-                onChange={handleProfileChange}
-                placeholder="Full Name"
-              />
-              <input
-                type="password"
-                name="password"
-                value={profile.password}
-                onChange={handleProfileChange}
-                placeholder="New Password"
-              />
-              <input
-                type="password"
-                name="confirmPassword"
-                value={profile.confirmPassword}
-                onChange={handleProfileChange}
-                placeholder="Confirm New Password"
-              />
+              <div className="form-group">
+                <label htmlFor="name">Full Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={profile.name}
+                  onChange={handleProfileChange}
+                  placeholder="Full Name"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="password">New Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={profile.password}
+                  onChange={handleProfileChange}
+                  placeholder="New Password"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm New Password</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={profile.confirmPassword}
+                  onChange={handleProfileChange}
+                  placeholder="Confirm New Password"
+                />
+              </div>
 
               {error && <p className="error-msg">{error}</p>}
+              {success && <p className="success-msg">{success}</p>}
 
-              <button className="save-btn" onClick={handleSave}>
-                Save
-              </button>
+              <div className="form-actions">
+                <button className="cancel-btn" onClick={toggleEdit}>
+                  Cancel
+                </button>
+                <button className="save-btn" onClick={handleSave}>
+                  Save
+                </button>
+              </div>
             </>
           )}
         </div>
