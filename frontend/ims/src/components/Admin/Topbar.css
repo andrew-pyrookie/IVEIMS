@@ -1,0 +1,125 @@
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: white;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1000;
+  margin-left: 0px;
+}
+.topbar-right-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-right:40px;
+}
+
+
+.topbar-icon {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.topbar-notification-container {
+  position: relative;
+}
+
+.topbar-notification-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background-color: red;
+  border-radius: 50%;
+}
+
+.topbar-user-section {
+  position: relative;
+  cursor: pointer;
+}
+
+.topbar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+.topbar-user-info:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.topbar-profile-pic {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dropdown-icon {
+  font-size: 12px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
+  z-index: 100;
+  color: #333;
+}
+
+.dropdown-item {
+  padding: 12px 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  color: rgb(237, 234, 234);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  color: #333;
+}
+
+.dropdown-item:hover {
+  background-color: #555;
+  color: white;
+}
+
+.dropdown-item .dropdown-icon-left {
+  margin-right: 12px;
+  color: #7c7c7c;
+}
+.Myprofile{
+  color: black;
+}
+.logout {
+  color: red;
+  font-weight: bold;
+}
+@media (max-width: 768px) {
+  .topbar-right-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-right:40px;
+  }
+  .topbar{
+  background-color: white;
+  padding-top: 10px;
+  }
+  
+
+}

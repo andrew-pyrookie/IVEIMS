@@ -1,0 +1,80 @@
+.backup-container {
+    display: flex;
+    margin-left: 300px;
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 20px;
+    background: #f4f4f4;
+    min-height: 100vh;
+  }
+  
+  h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  /* Grid Layout */
+  .backup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  /* Backup Cards */
+  .backup-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.3s;
+  }
+  
+  .backup-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Icons */
+  .backup-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+  
+  .auto-backup { color: #007bff; } /* Blue */
+  .recovery { color: #28a745; } /* Green */
+  .encryption { color: #dc3545; } /* Red */
+  .logs { color: #ff9800; } /* Orange */
+  
+  /* Buttons */
+  .backup-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+  
+  .backup-btn:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Specific Button Colors */
+  .auto-backup + .backup-btn { background: #007bff; color: white; }
+  .recovery + .backup-btn { background: #28a745; color: white; }
+  .encryption + .backup-btn { background: #dc3545; color: white; }
+  .logs + .backup-btn { background: #ff9800; color: white; }
+  

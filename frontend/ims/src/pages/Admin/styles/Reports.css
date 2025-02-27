@@ -1,0 +1,128 @@
+/* 🌍 General Layout */
+.reports-container {
+    display: flex;
+    margin-left: 300px;
+  }
+  
+  .reports-main {
+    flex: 1;
+    padding: 20px;
+    background: #f9f9f9;
+  }
+  
+  /* 🏗️ Top Navbar */
+  .top-navbar {
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .top-navbar h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  
+  /* 📌 Reports Tabs */
+  .reports-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .reports-tabs button {
+    background: #ddd;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  
+  .reports-tabs button.active {
+    background: #007bff;
+    color: white;
+  }
+  
+  .reports-tabs button:hover {
+    background: #bbb;
+  }
+  
+  /* 📋 Reports Table */
+  .reports-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  table th,
+  table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  table th {
+    background: #f5f5f5;
+  }
+  
+  /* 🎯 Export Buttons */
+  .export-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .export-btn {
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+  }
+  
+  .csv {
+    background: #28a745;
+    color: white;
+  }
+  
+  .csv:hover {
+    background: #218838;
+  }
+  
+  .pdf {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .pdf:hover {
+    background: #c82333;
+  }
+  
+  /* 📱 Responsive Design */
+  @media screen and (max-width: 768px) {
+    .reports-container {
+      flex-direction: column;
+    }
+  
+    .top-navbar {
+      text-align: center;
+    }
+  
+    .reports-tabs {
+      justify-content: center;
+    }
+  
+    table {
+      font-size: 14px;
+    }
+  }
+  
