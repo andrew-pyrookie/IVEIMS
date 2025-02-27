@@ -151,7 +151,6 @@ const UsersManagement = () => {
           className="search-bar"
         />
         <button className="add-user-button" onClick={() => setShowAddModal(true)}>
-          <FaUser className="icon" />
           Add User
         </button>
       </div>

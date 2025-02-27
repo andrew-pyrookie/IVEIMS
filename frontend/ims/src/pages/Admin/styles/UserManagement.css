@@ -101,10 +101,14 @@
   background-color: #3182ce;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 10px;
+  border-radius: 3px;
   cursor: pointer;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  justify-content: center;
   transition: background-color 0.3s ease;
 }
 
@@ -223,10 +227,7 @@
   font-size: 14px;
   text-align: center;
 }
-.add-user-button{
-  height: 30px;
-  width: 150px;
-}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
