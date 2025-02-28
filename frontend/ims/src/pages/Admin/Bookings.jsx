@@ -124,14 +124,6 @@ const AdminBookings = () => {
             </svg>
           </div>
           
-          <div className="admin-filters">
-            <select className="admin-filter-dropdown">
-              <option value="all">All Bookings</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="completed">Completed</option>
-              <option value="active">Currently Active</option>
-            </select>
-          </div>
         </div>
         
         <div className="admin-table-container">

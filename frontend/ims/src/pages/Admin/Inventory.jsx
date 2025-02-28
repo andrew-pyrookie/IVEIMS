@@ -25,6 +25,10 @@
 //   });
 //   const [submitLoading, setSubmitLoading] = useState(false);
 //   const [submitError, setSubmitError] = useState(null);
+//   const [showStatusModal, setShowStatusModal] = useState(false);
+//   const [equipmentToUpdate, setEquipmentToUpdate] = useState(null);
+//   const [showDeleteModal, setShowDeleteModal] = useState(false);
+//   const [equipmentToDelete, setEquipmentToDelete] = useState(null);
   
 //   // Get token from localStorage or session storage
 //   const getAuthToken = () => {
@@ -114,6 +118,69 @@
 //     }
 //   };
   
+//   const handleChangeStatus = (equipment) => {
+//     setEquipmentToUpdate(equipment);
+//     setShowStatusModal(true);
+//   };
+
+//   const handleStatusChangeConfirm = async (newStatus) => {
+//     if (newStatus && ['available', 'in use', 'maintenance'].includes(newStatus)) {
+//       try {
+//         const token = getAuthToken();
+//         const response = await axios.patch(
+//           `http://localhost:8000/api/equipment/${equipmentToUpdate.id}/`,
+//           { status: newStatus },
+//           {
+//             headers: {
+//               Authorization: token ? `Bearer ${token}` : '',
+//               'Content-Type': 'application/json'
+//             }
+//           }
+//         );
+        
+//         // Update the equipment list with the new status
+//         setEquipment(prevEquipment => 
+//           prevEquipment.map(item => 
+//             item.id === equipmentToUpdate.id ? { ...item, status: newStatus } : item
+//           )
+//         );
+//         setShowStatusModal(false);
+//       } catch (err) {
+//         console.error('Error changing status:', err);
+//         setSubmitError('Failed to change status. Please try again.');
+//       }
+//     } else {
+//       setSubmitError('Invalid status. Please select one of: available, in use, maintenance.');
+//     }
+//   };
+
+//   const handleDeleteEquipment = (equipment) => {
+//     setEquipmentToDelete(equipment);
+//     setShowDeleteModal(true);
+//   };
+
+//   const handleDeleteConfirm = async () => {
+//     try {
+//       const token = getAuthToken();
+//       await axios.delete(
+//         `http://localhost:8000/api/equipment/${equipmentToDelete.id}/`,
+//         {
+//           headers: {
+//             Authorization: token ? `Bearer ${token}` : ''
+//           }
+//         }
+//       );
+      
+//       // Remove the deleted equipment from the list
+//       setEquipment(prevEquipment => 
+//         prevEquipment.filter(item => item.id !== equipmentToDelete.id)
+//       );
+//       setShowDeleteModal(false);
+//     } catch (err) {
+//       console.error('Error deleting equipment:', err);
+//       setSubmitError('Failed to delete equipment. Please try again.');
+//     }
+//   };
 
 //   // Function to download QR code
 //   const handleDownloadQRCode = (qrCodeUrl, equipmentName) => {
@@ -191,12 +258,26 @@
 //       Header: 'Actions',
 //       id: 'actions',
 //       Cell: ({ row }) => (
-//         <button 
-//           onClick={() => handleEquipmentClick(row.original)}
-//           className="view-details-button"
-//         >
-//           View Details
-//         </button>
+//         <div className="actions-container">
+//           <button 
+//             onClick={() => handleEquipmentClick(row.original)}
+//             className="view-details-button"
+//           >
+//             View Details
+//           </button>
+//           <button 
+//             onClick={() => handleChangeStatus(row.original)}
+//             className="change-status-button"
+//           >
+//             Change Status
+//           </button>
+//           <button 
+//             onClick={() => handleDeleteEquipment(row.original)}
+//             className="delete-button"
+//           >
+//             Delete
+//           </button>
+//         </div>
 //       )
 //     }
 //   ], []);
@@ -253,7 +334,7 @@
 //         <Sidebar />
 //         <Topbar />
 //       <h1 className="page-title">Laboratory Equipment</h1>
-      
+//       <div className="actions-container-filter-container">
 //       <div className="actions-container">
 //         <button 
 //           className="add-equipment-button" 
@@ -299,6 +380,7 @@
 //           </select>
 //         </div>
 //       </div>
+//       </div>
 
 //       {/* React Table */}
 //       <div className="table-container">
@@ -340,8 +422,6 @@
 //           </tbody>
 //         </table>
 //       </div>
-
-      
 
 //       {/* Equipment Details Modal */}
 //       {selectedEquipment && (
@@ -587,12 +667,85 @@
 //           </div>
 //         </div>
 //       )}
+
+//       {/* Change Status Modal */}
+//       {showStatusModal && (
+//         <div className="modal-overlay">
+//           <div className="modal-content">
+//             <div className="modal-header">
+//               <h2 className="modal-title">Change Status</h2>
+//               <button 
+//                 onClick={() => setShowStatusModal(false)}
+//                 className="close-button"
+//               >
+//                 ✕
+//               </button>
+//             </div>
+//             <div className="modal-body">
+//               <p>Select a new status for <strong>{equipmentToUpdate?.name}</strong>:</p>
+//               <div className="status-options">
+//                 <button 
+//                   className="status-option available"
+//                   onClick={() => handleStatusChangeConfirm('available')}
+//                 >
+//                   Available
+//                 </button>
+//                 <button 
+//                   className="status-option in-use"
+//                   onClick={() => handleStatusChangeConfirm('in use')}
+//                 >
+//                   In Use
+//                 </button>
+//                 <button 
+//                   className="status-option maintenance"
+//                   onClick={() => handleStatusChangeConfirm('maintenance')}
+//                 >
+//                   Maintenance
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Delete Confirmation Modal */}
+//       {showDeleteModal && (
+//         <div className="modal-overlay">
+//           <div className="modal-content">
+//             <div className="modal-header">
+//               <h2 className="modal-title">Delete Equipment</h2>
+//               <button 
+//                 onClick={() => setShowDeleteModal(false)}
+//                 className="close-button"
+//               >
+//                 ✕
+//               </button>
+//             </div>
+//             <div className="modal-body">
+//               <p>Are you sure you want to delete <strong>{equipmentToDelete?.name}</strong>?</p>
+//               <div className="confirmation-buttons">
+//                 <button 
+//                   className="confirm-button"
+//                   onClick={handleDeleteConfirm}
+//                 >
+//                   Yes, Delete
+//                 </button>
+//                 <button 
+//                   className="cancel-button"
+//                   onClick={() => setShowDeleteModal(false)}
+//                 >
+//                   Cancel
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
 //     </div>
 //   );
 // };
 
 // export default Inventory;
-
 
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -622,10 +775,16 @@ const Inventory = () => {
   });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [equipmentToUpdate, setEquipmentToUpdate] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [equipmentToDelete, setEquipmentToDelete] = useState(null);
+  const [updateData, setUpdateData] = useState({
+    status: '',
+    to_lab: '',
+    transfer_date: new Date().toISOString().split('T')[0]
+  });
+  const [activeTab, setActiveTab] = useState('status'); // 'status' or 'transfer'
   
   // Get token from localStorage or session storage
   const getAuthToken = () => {
@@ -633,28 +792,28 @@ const Inventory = () => {
   };
 
   useEffect(() => {
-    const fetchEquipment = async () => {
-      try {
-        setLoading(true);
-        const token = getAuthToken();
-        
-        // Use your API endpoint for equipment
-        const response = await axios.get('http://localhost:8000/api/equipment/', {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : ''
-          }
-        });
-        setEquipment(Array.isArray(response.data) ? response.data : []);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch equipment data');
-        setLoading(false);
-        console.error('Error fetching equipment:', err);
-      }
-    };
-
     fetchEquipment();
   }, []);
+
+  const fetchEquipment = async () => {
+    try {
+      setLoading(true);
+      const token = getAuthToken();
+      
+      // Use your API endpoint for equipment
+      const response = await axios.get('http://localhost:8000/api/equipment/', {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : ''
+        }
+      });
+      setEquipment(Array.isArray(response.data) ? response.data : []);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch equipment data');
+      setLoading(false);
+      console.error('Error fetching equipment:', err);
+    }
+  };
 
   const handleEquipmentClick = (item) => {
     setSelectedEquipment(item);
@@ -690,6 +849,14 @@ const Inventory = () => {
     });
   };
 
+  const handleUpdateInputChange = (e) => {
+    const { name, value } = e.target;
+    setUpdateData({
+      ...updateData,
+      [name]: value
+    });
+  };
+
   const handleAddEquipment = async (e) => {
     e.preventDefault();
     setSubmitLoading(true);
@@ -715,18 +882,31 @@ const Inventory = () => {
     }
   };
   
-  const handleChangeStatus = (equipment) => {
+  const handleUpdateEquipment = (equipment) => {
     setEquipmentToUpdate(equipment);
-    setShowStatusModal(true);
+    setUpdateData({
+      status: equipment.status,
+      to_lab: '',
+      transfer_date: new Date().toISOString().split('T')[0]
+    });
+    setActiveTab('status');
+    setShowUpdateModal(true);
   };
 
-  const handleStatusChangeConfirm = async (newStatus) => {
-    if (newStatus && ['available', 'in use', 'maintenance'].includes(newStatus)) {
-      try {
-        const token = getAuthToken();
-        const response = await axios.patch(
+  const handleUpdateConfirm = async (e) => {
+    e.preventDefault();
+    setSubmitLoading(true);
+    setSubmitError(null);
+    
+    try {
+      const token = getAuthToken();
+      
+      // Handle status update
+      if (activeTab === 'status' && updateData.status && 
+          ['available', 'in use', 'maintenance'].includes(updateData.status)) {
+        await axios.patch(
           `http://localhost:8000/api/equipment/${equipmentToUpdate.id}/`,
-          { status: newStatus },
+          { status: updateData.status },
           {
             headers: {
               Authorization: token ? `Bearer ${token}` : '',
@@ -734,20 +914,50 @@ const Inventory = () => {
             }
           }
         );
+      } 
+      // Handle transfer
+      else if (activeTab === 'transfer' && updateData.to_lab) {
+        // Create a transfer record
+        const transferPayload = {
+          equipment: equipmentToUpdate.id,
+          from_lab: equipmentToUpdate.current_lab,
+          to_lab: updateData.to_lab,
+          transfer_date: new Date(updateData.transfer_date).toISOString(),
+          is_synced: false
+        };
         
-        // Update the equipment list with the new status
-        setEquipment(prevEquipment => 
-          prevEquipment.map(item => 
-            item.id === equipmentToUpdate.id ? { ...item, status: newStatus } : item
-          )
+        // Create the transfer record
+        await axios.post('http://localhost:8000/api/asset-transfers/', transferPayload, {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        // Update the equipment's current lab
+        await axios.patch(
+          `http://localhost:8000/api/equipment/${equipmentToUpdate.id}/`,
+          { current_lab: updateData.to_lab },
+          {
+            headers: {
+              Authorization: token ? `Bearer ${token}` : '',
+              'Content-Type': 'application/json'
+            }
+          }
         );
-        setShowStatusModal(false);
-      } catch (err) {
-        console.error('Error changing status:', err);
-        setSubmitError('Failed to change status. Please try again.');
+      } else {
+        throw new Error('Invalid update data');
       }
-    } else {
-      setSubmitError('Invalid status. Please select one of: available, in use, maintenance.');
+      
+      // Refresh equipment data
+      await fetchEquipment();
+      
+      setSubmitLoading(false);
+      setShowUpdateModal(false);
+    } catch (err) {
+      setSubmitError(`Failed to update equipment. ${err.message}`);
+      setSubmitLoading(false);
+      console.error('Error updating equipment:', err);
     }
   };
 
@@ -860,13 +1070,13 @@ const Inventory = () => {
             onClick={() => handleEquipmentClick(row.original)}
             className="view-details-button"
           >
-            View Details
+            View
           </button>
           <button 
-            onClick={() => handleChangeStatus(row.original)}
-            className="change-status-button"
+            onClick={() => handleUpdateEquipment(row.original)}
+            className="update-button"
           >
-            Change Status
+            Update
           </button>
           <button 
             onClick={() => handleDeleteEquipment(row.original)}
@@ -1265,41 +1475,113 @@ const Inventory = () => {
         </div>
       )}
 
-      {/* Change Status Modal */}
-      {showStatusModal && (
+      {/* Update Equipment Modal (Combined Status & Transfer) */}
+      {showUpdateModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2 className="modal-title">Change Status</h2>
+              <h2 className="modal-title">Update Equipment</h2>
               <button 
-                onClick={() => setShowStatusModal(false)}
+                onClick={() => setShowUpdateModal(false)}
                 className="close-button"
               >
                 ✕
               </button>
             </div>
             <div className="modal-body">
-              <p>Select a new status for <strong>{equipmentToUpdate?.name}</strong>:</p>
-              <div className="status-options">
+              <div className="tabs">
                 <button 
-                  className="status-option available"
-                  onClick={() => handleStatusChangeConfirm('available')}
+                  className={`tab-button ${activeTab === 'status' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('status')}
                 >
-                  Available
+                  Update Status
                 </button>
                 <button 
-                  className="status-option in-use"
-                  onClick={() => handleStatusChangeConfirm('in use')}
+                  className={`tab-button ${activeTab === 'transfer' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('transfer')}
                 >
-                  In Use
-                </button>
-                <button 
-                  className="status-option maintenance"
-                  onClick={() => handleStatusChangeConfirm('maintenance')}
-                >
-                  Maintenance
+                  Transfer Equipment
                 </button>
               </div>
+              
+              <div className="equipment-info-summary">
+                <p><strong>Equipment:</strong> {equipmentToUpdate?.name}</p>
+                <p><strong>Current Status:</strong> <span className={getStatusBadgeClass(equipmentToUpdate?.status)}>{equipmentToUpdate?.status}</span></p>
+                <p><strong>Current Lab:</strong> {equipmentToUpdate?.current_lab}</p>
+              </div>
+              
+              <form onSubmit={handleUpdateConfirm} className="update-form">
+                {activeTab === 'status' && (
+                  <div className="status-update-form">
+                    <div className="form-group">
+                      <label htmlFor="status" className="form-label">New Status*</label>
+                      <select
+                        id="status"
+                        name="status"
+                        value={updateData.status}
+                        onChange={handleUpdateInputChange}
+                        className="form-select"
+                        required
+                      >
+                        <option value="available">Available</option>
+                        <option value="in use">In Use</option>
+                        <option value="maintenance">Maintenance</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+                
+                {activeTab === 'transfer' && (
+                  <div className="transfer-update-form">
+                    <div className="form-group">
+                      <label htmlFor="to_lab" className="form-label">Destination Lab*</label>
+                      <input
+                        type="text"
+                        id="to_lab"
+                        name="to_lab"
+                        value={updateData.to_lab}
+                        onChange={handleUpdateInputChange}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="transfer_date" className="form-label">Transfer Date*</label>
+                      <input
+                        type="date"
+                        id="transfer_date"
+                        name="transfer_date"
+                        value={updateData.transfer_date}
+                        onChange={handleUpdateInputChange}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {submitError && (
+                  <div className="error-message">{submitError}</div>
+                )}
+                
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowUpdateModal(false)}
+                    className="cancel-button"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="submit-button"
+                    disabled={submitLoading}
+                  >
+                    {submitLoading ? 'Processing...' : 'Update Equipment'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

@@ -1,99 +1,301 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from 'react';
+import { useTable } from 'react-table';
 import Sidebar from "/src/components/Admin/Sidebar.jsx";
+import Topbar from "/src/components/Admin/Topbar.jsx";
 import "/src/pages/Admin/styles/Reports.css"; // Import the CSS file
 
-const Reports = () => {
-  const [activeTab, setActiveTab] = useState("equipment"); // Default tab
+// Updated import for react-to-pdf
+import { usePDF } from 'react-to-pdf';
 
-  const reportsData = {
-    equipment: [
-      { id: 1, item: "Projector", user: "John Doe", date: "2025-02-18", action: "Checked Out" },
-      { id: 2, item: "Laptop", user: "Alice Smith", date: "2025-02-17", action: "Returned" },
+const ReportPage = () => {
+  const [transfers, setTransfers] = useState([]);
+  const [equipment, setEquipment] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [equipmentLoading, setEquipmentLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [fileName, setFileName] = useState('transfer_log_report');
+  const [pdfError, setPdfError] = useState(null);
+  
+  // Use the usePDF hook instead of direct toPDF function
+  const { toPDF, targetRef } = usePDF({
+    filename: `${fileName}.pdf`,
+    page: {
+      // You can adjust these settings as needed
+      margin: 20,
+      format: 'a4',
+      orientation: 'landscape',
+    },
+    overrides: {
+      // Optional: Add custom styling for PDF
+      pdf: {
+        compress: true
+      },
+      canvas: {
+        // Optional: Adjust quality
+        scale: 2
+      }
+    }
+  });
+
+  // Fetch transfer data from the API
+  useEffect(() => {
+    const fetchTransfers = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8000/api/asset-transfers/', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch transfer data');
+        }
+
+        const data = await response.json();
+        setTransfers(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchTransfers();
+  }, []);
+
+  // Fetch equipment data for all equipment IDs in transfers
+  useEffect(() => {
+    const fetchEquipmentDetails = async () => {
+      if (transfers.length === 0 || !Array.isArray(transfers)) {
+        setEquipmentLoading(false);
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const equipmentIds = [...new Set(transfers.map(transfer => transfer.equipment_id))];
+        const equipmentData = {};
+        
+        await Promise.all(equipmentIds.map(async (id) => {
+          if (!id) return; // Skip if ID is null or undefined
+          
+          const response = await fetch(`http://localhost:8000/api/equipment/${id}/`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            equipmentData[id] = data;
+          } else {
+            console.warn(`Could not fetch details for equipment ID ${id}`);
+            equipmentData[id] = { name: 'Unknown' };
+          }
+        }));
+        
+        setEquipment(equipmentData);
+        setEquipmentLoading(false);
+      } catch (err) {
+        console.error('Error fetching equipment details:', err);
+        setEquipmentLoading(false);
+      }
+    };
+
+    if (!loading && transfers.length > 0) {
+      fetchEquipmentDetails();
+    }
+  }, [transfers, loading]);
+
+  // Filter transfers based on search term
+  const filteredTransfers = transfers.filter((transfer) =>
+    transfer.from_lab.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    transfer.to_lab.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (equipment[transfer.equipment_id]?.name && 
+     equipment[transfer.equipment_id].name.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // Define columns for the table
+  const columns = React.useMemo(
+    () => [
+      {
+        Header: 'ID',
+        accessor: 'id',
+      },
+      {
+        Header: 'From Lab',
+        accessor: 'from_lab',
+      },
+      {
+        Header: 'To Lab',
+        accessor: 'to_lab',
+      },
+      {
+        Header: 'Transfer Date',
+        accessor: 'transfer_date',
+        Cell: ({ value }) => {
+          const date = new Date(value);
+          return date.toLocaleDateString();
+        }
+      },
+      {
+        Header: 'Equipment ID',
+        accessor: 'equipment_id',
+      },
+      {
+        Header: 'Equipment Name',
+        accessor: row => equipment[row.equipment_id]?.name || 'Loading...',
+        id: 'equipment_name',
+      },
+      {
+        Header: 'Synced',
+        accessor: 'is_synced',
+        Cell: ({ value }) => (value ? 'Yes' : 'No'),
+      },
     ],
-    booking: [
-      { id: 3, item: "Lab Room 101", user: "David Johnson", date: "2025-02-16", action: "Approved" },
-      { id: 4, item: "Lab Room 202", user: "Emily White", date: "2025-02-15", action: "Rejected" },
-    ],
-    activity: [
-      { id: 5, user: "Admin", date: "2025-02-14", action: "Updated Inventory" },
-      { id: 6, user: "Moderator", date: "2025-02-13", action: "Approved Booking" },
-    ],
+    [equipment]
+  );
+
+  // Use react-table to create the table
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+  } = useTable({ columns, data: filteredTransfers });
+
+  // Updated function to download the report as PDF
+  const downloadPDF = () => {
+    setPdfError(null);
+    
+    try {
+      toPDF()
+        .then(() => console.log('PDF generated successfully'))
+        .catch(err => {
+          console.error('PDF generation failed:', err);
+          setPdfError(err.message || 'Failed to generate PDF');
+        });
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      setPdfError(err.message || 'Failed to generate PDF');
+    }
   };
 
-  const handleExport = (format) => {
-    console.log(`Exporting reports as ${format}`);
-  };
+  if (loading) {
+    return <div className="loading-container">Loading transfer data...</div>;
+  }
+
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
 
   return (
-    <div className="reports-container">
+    <div className="report-container">
       <Sidebar />
       <Topbar />
-      <div className="reports-main">
-        {/* Top Navbar */}
-        <div className="top-navbar">
-          <h2>📑 System Reports</h2>
-        </div>
+      <h2 className="page-title">Transfer Log</h2>
 
-        {/* Reports Tabs */}
-        <div className="reports-tabs">
-          <button
-            className={activeTab === "equipment" ? "active" : ""}
-            onClick={() => setActiveTab("equipment")}
+      {/* Search Bar and Download Options */}
+      <div className="actions-container">
+        <input
+          type="text"
+          placeholder="Search by Lab or Equipment Name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-bar"
+        />
+        
+        <div className="export-options">
+          <input
+            type="text"
+            placeholder="File name"
+            value={fileName}
+            onChange={(e) => setFileName(e.target.value)}
+            className="filename-input"
+          />
+          <button 
+            className="download-button" 
+            onClick={downloadPDF}
+            disabled={equipmentLoading}
           >
-            Equipment Usage Logs
-          </button>
-          <button
-            className={activeTab === "booking" ? "active" : ""}
-            onClick={() => setActiveTab("booking")}
-          >
-            Booking History
-          </button>
-          <button
-            className={activeTab === "activity" ? "active" : ""}
-            onClick={() => setActiveTab("activity")}
-          >
-            User Activity Logs
-          </button>
-        </div>
-
-        {/* Export Buttons */}
-        <div className="export-buttons">
-          <button className="export-btn csv" onClick={() => handleExport("CSV")}>
-            📄 Export as CSV
-          </button>
-          <button className="export-btn pdf" onClick={() => handleExport("PDF")}>
-            🖨️ Export as PDF
+            {equipmentLoading ? 'Loading Equipment Data...' : 'Download Report (PDF)'}
           </button>
         </div>
+      </div>
 
-        {/* Reports Table */}
-        <div className="reports-content">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Item / User</th>
-                <th>User</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportsData[activeTab].map((report, index) => (
-                <tr key={report.id}>
-                  <td>{index + 1}</td>
-                  <td>{report.item || report.user}</td>
-                  <td>{report.user}</td>
-                  <td>{report.date}</td>
-                  <td>{report.action}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* PDF Error Message */}
+      {pdfError && (
+        <div className="error-message pdf-error">
+          <p>Error generating PDF: {pdfError}</p>
+          <p>Please ensure react-to-pdf is correctly installed:</p>
+          <code>npm install --save react-to-pdf</code>
+        </div>
+      )}
+
+      {/* Content to be exported as PDF - now using targetRef */}
+      <div className="pdf-content" ref={targetRef}>
+        
+
+        {/* Report Summary */}
+        <div className="report-summary">
+          <p>Generated on: {new Date().toLocaleDateString()}</p>
+          <p>Total transfers: <strong>{filteredTransfers.length}</strong></p>
+          {searchTerm && <p>Filtered by: <strong>{searchTerm}</strong></p>}
+        </div>
+
+        {/* Table */}
+        <div className="table-wrapper">
+          {equipmentLoading ? (
+            <div className="loading-inline">Loading equipment details...</div>
+          ) : (
+            <table {...getTableProps()} className="transfers-table">
+              <thead>
+                {headerGroups.map(headerGroup => (
+                  <tr key={headerGroup.id} {...headerGroup.getHeaderGroupProps()}>
+                    {headerGroup.headers.map(column => (
+                      <th key={column.id} {...column.getHeaderProps()}>
+                        {column.render('Header')}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody {...getTableBodyProps()}>
+                {rows.length > 0 ? (
+                  rows.map(row => {
+                    prepareRow(row);
+                    return (
+                      <tr key={row.id} {...row.getRowProps()}>
+                        {row.cells.map(cell => (
+                          <td key={cell.column.id + "-" + cell.row.id} {...cell.getCellProps()}>
+                            {cell.render('Cell')}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={columns.length} className="no-data">
+                      No transfer records found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+        
+        {/* Report Footer - This will appear in the PDF */}
+        <div className="report-footer">
+          <p>This is an official report from Asset Management System</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default Reports;
+export default ReportPage;
