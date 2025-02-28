@@ -33,28 +33,6 @@
   font-weight: 600;
 }
 
-/* Loading and Error States */
-.loading-spinner-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid var(--border);
-  border-top: 5px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .error-message {
   background-color: rgba(231, 76, 60, 0.1);
   border-left: 4px solid var(--danger);
@@ -468,4 +446,31 @@
     padding: 6px 10px;
     font-size: 12px;
   }
+}
+
+
+
+.form-group {
+  position: relative;
+  max-width:100%;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding-right: 40px; /* Space for the calendar icon */
+}
+
+.input-container svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #555;
 }

@@ -6,6 +6,9 @@ import Bookings from "../pages/Admin/Bookings";
 import Reports from "../pages/Admin/Reports";
 import Backup from "../pages/Admin/Backup";
 import Profile from "../pages/Admin/AdminProfile";
+import DesignStudioLab from "../pages/Admin/DesignStudioLab";
+import CezeriLab from "../pages/Admin/CezeriLab";
+import MedTechLab from "../pages/Admin/MedTechLab";
 
 const AdminRoutes = () => {
   return (
@@ -15,6 +18,17 @@ const AdminRoutes = () => {
 
         <Route path="users" element={<UsersManagement />} />
         <Route path="users/userId" element={<UsersManagement />} />
+
+
+        <Route path="designstudiolab" element={<DesignStudioLab />} />
+        <Route path="designstudiolab/:userId" element={<DesignStudioLab />} />
+
+
+        <Route path="cezerilab" element={<CezeriLab />} />
+        <Route path="cezerilab/:userId" element={<CezeriLab />} />
+
+        <Route path="medtechlab" element={<MedTechLab />} />
+        <Route path="medtechlab/:userId" element={<MedTechLab />} />
 
         <Route path="inventory" element={<Inventory />} />
         <Route path="inventory/:userId" element={<Inventory />} />

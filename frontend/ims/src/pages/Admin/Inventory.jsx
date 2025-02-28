@@ -752,6 +752,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useTable, useSortBy, useFilters, usePagination } from 'react-table';
 import Sidebar from "/src/components/Admin/Sidebar.jsx";
+import { FaCalendarAlt } from "react-icons/fa";
 import Topbar from "/src/components/Admin/Topbar.jsx";
 import "/src/pages/Admin/styles/Inventory.css"; // Import the CSS file
 
@@ -1422,6 +1423,17 @@ const Inventory = () => {
                     onChange={handleInputChange}
                     className="form-input"
                   />
+                  <FaCalendarAlt
+                  style={{
+                    position: "absolute",
+                    right: "-10px",
+                    top: "50%",
+                    transform: "translateY(0%)",
+                    cursor: "pointer",
+                    color: "#555",
+                  }}
+                  onClick={() => document.getElementById("next_maintenance").showPicker()} // Open date picker
+                />
                 </div>
 
                 <div className="form-group">
@@ -1434,6 +1446,17 @@ const Inventory = () => {
                       onChange={handleInputChange}
                       required
                     /> 
+                  <FaCalendarAlt
+                  style={{
+                    position: "absolute",
+                    right: "-10px",
+                    top: "50%",
+                    transform: "translateY(0%)",
+                    cursor: "pointer",
+                    color: "#555",
+                  }}
+                  onClick={() => document.getElementById("last-maintenance").showPicker()} // Open date picker
+                />
                 </div>
 
               </div>

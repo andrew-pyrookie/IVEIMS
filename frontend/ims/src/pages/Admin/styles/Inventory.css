@@ -511,6 +511,33 @@ body {
   margin-top: 20px;
 }
 
+
+.form-group {
+  position: relative;
+  max-width:100%;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding-right: 40px; /* Space for the calendar icon */
+}
+
+.input-container svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #555;
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .equipment-container {
@@ -544,3 +571,4 @@ body {
     overflow-x: auto;
   }
 }
+

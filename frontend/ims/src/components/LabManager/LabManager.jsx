@@ -27,26 +27,17 @@ const Sidebar = () => {
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="sidebar-header">
-          <h1>Admin Dashboard</h1>
+          <h1>labMan Dashboard</h1>
         </div>
         <ul>
           <li>
             <NavLink
-              to="/admin/dashboard"
+              to="/labmanager/dashboard"
               activeClassName="active" // Apply active class
               exact // Ensure exact match for the root path
             >
               <FaChartBar className="icon" />
               <span className="text">Dashboard</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/admin/users"
-              activeClassName="active" // Apply active class
-            >
-              <FaUsers className="icon" />
-              <span className="text">Users-Management</span>
             </NavLink>
           </li>
           <li className={inventoryOpen ? "submenu-open" : ""}>
@@ -60,7 +51,7 @@ const Sidebar = () => {
             <ul className={`submenu ${inventoryOpen ? "open" : ""}`}>
               <li>
                 <NavLink
-                  to="/admin/designstudiolab"
+                  to="/labmanager/designstudiolab"
                   activeClassName="active"
                 >
                   <FaTools className="submenu-icon" />
@@ -69,7 +60,7 @@ const Sidebar = () => {
               </li>
               <li>
                 <NavLink
-                  to="/admin/cezerilab"
+                  to="/lamanager/cezerilab"
                   activeClassName="active"
                 >
                   <FaFlask className="submenu-icon" />
@@ -78,7 +69,7 @@ const Sidebar = () => {
               </li>
               <li>
                 <NavLink
-                  to="/admin/medtechlab"
+                  to="/labmanager/medtechlab"
                   activeClassName="active"
                 >
                   <FaMedkit className="submenu-icon" />
@@ -89,7 +80,7 @@ const Sidebar = () => {
           </li>
           <li>
             <NavLink
-              to="/admin/bookings"
+              to="/labmanager/bookings"
               activeClassName="active" // Apply active class
             >
               <FaCalendarAlt className="icon" />
@@ -98,30 +89,30 @@ const Sidebar = () => {
           </li>
           <li>
             <NavLink
-              to="/admin/reports"
+              to="lLabmanager/SharedResourses"
               activeClassName="active" // Apply active class
             >
               <FaFileAlt className="icon" />
-              <span className="text">Reports</span>
+              <span className="text">Shared Equipment</span>
             </NavLink>
           </li>
           <li>
             <NavLink
-              to="/admin/backup"
+              to="/labmanager/Reports"
               activeClassName="active" // Apply active class
             >
               <FaDatabase className="icon" />
-              <span className="text">Backup</span>
+              <span className="text">Reports</span>
             </NavLink>
-          </li>
-          <li>
+            <li>
             <NavLink
-              to="/admin/profile"
+              to="/labmanager/Projects"
               activeClassName="active" // Apply active class
             >
-              <FaUser className="icon" />
-              <span className="text">Profile</span>
+              <FaDatabase className="icon" />
+              <span className="text">Projects</span>
             </NavLink>
+          </li>
           </li>
         </ul>
       </div>

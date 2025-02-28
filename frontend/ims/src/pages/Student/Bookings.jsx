@@ -3,6 +3,7 @@ import Sidebar from "/src/components/Student/StudentSidebar.jsx";
 import Topbar from "/src/components/Student/StudentTopbar.jsx";
 import "/src/pages/Student/styles/Bookings.css";
 import axios from 'axios';
+import { FaCalendarAlt } from "react-icons/fa";
 import { format } from 'date-fns';
 
 const Booking = () => {
@@ -320,6 +321,17 @@ const Booking = () => {
                     onChange={handleInputChange}
                     required
                   />
+                  <FaCalendarAlt
+                  style={{
+                    position: "absolute",
+                    right: "-10px",
+                    top: "50%",
+                    transform: "translateY(0%)",
+                    cursor: "pointer",
+                    color: "#555",
+                  }}
+                  onClick={() => document.getElementById("start_time").showPicker()} // Open date picker
+                />
                 </div>
 
                 <div className="form-group">
@@ -332,6 +344,17 @@ const Booking = () => {
                     onChange={handleInputChange}
                     required
                   />
+                  <FaCalendarAlt
+                  style={{
+                    position: "absolute",
+                    right: "-10px",
+                    top: "50%",
+                    transform: "translateY(0%)",
+                    cursor: "pointer",
+                    color: "#555",
+                  }}
+                  onClick={() => document.getElementById("end_time").showPicker()} // Open date picker
+                />
                 </div>
 
                 <button type="submit" className="submit-button">
