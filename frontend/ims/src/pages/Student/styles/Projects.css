@@ -121,6 +121,21 @@
 .delete-button:hover {
   background-color: #e53935; /* Darker red */
 }
+.edit-button{
+  background-color: #4299e1; /* Red */
+  color: white;
+  border: none;
+  padding: 6px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button:hover {
+  background-color: #3182ce; /* Darker red */
+}
 
 
 /* Popup Styles */
@@ -142,7 +157,7 @@
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 20px;
+  padding: 0px;
   width: 90%;
   max-width: 500px;
 }
@@ -150,7 +165,6 @@
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 20px;
   width: 90%;
   max-width: 500px;
 }
@@ -159,7 +173,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 .popup-header h2 {
@@ -183,13 +196,13 @@
 .project-details-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
 }
 
 .detail-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 10px;
 }
 
 .detail-label {
@@ -387,3 +400,35 @@
   background-color: #5a6268; /* Darker gray */
 }
 
+.modal-content{
+  padding: 20px;
+}
+
+
+
+
+
+.form-group {
+  position: relative;
+  max-width:100%;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding-right: 40px; /* Space for the calendar icon */
+}
+
+.input-container svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #555;
+}

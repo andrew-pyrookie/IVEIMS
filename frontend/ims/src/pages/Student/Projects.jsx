@@ -3,6 +3,7 @@ import '/src/pages/Student/styles/Projects.css';
 import Sidebar from "/src/components/Student/StudentSidebar.jsx";
 import Topbar from "/src/components/Student/StudentTopbar.jsx";
 import { useTable } from "react-table";
+import { FaCalendarAlt } from "react-icons/fa";
 import axios from "axios"; // Make sure to install axios: npm install axios
 
 const Project = () => {
@@ -274,25 +275,56 @@ const Project = () => {
                 <option value="completed">Completed</option>
               </select>
             </div>
+            
+            {/* Start Date with Calendar Icon */}
             <div className="form-group">
               <label>Start Date:</label>
-              <input
-                type="datetime-local"
-                value={projectStartDate}
-                onChange={(e) => setProjectStartDate(e.target.value)}
-                className="form-input"
-                required
-              />
+                <input
+                  type="datetime-local"
+                  id="startDate"
+                  name="startDate"
+                  value={projectStartDate}
+                  onChange={(e) => setProjectStartDate(e.target.value)}
+                  className="form-input"
+                  required
+                  style={{ paddingRight: "40px" }} // Space for the icon
+                />
+                <FaCalendarAlt
+                  style={{
+                    position: "absolute",
+                    right: "0px",
+                    top: "50%",
+                    transform: "translateY(-10%)",
+                    cursor: "pointer",
+                    color: "#555",
+                  }}
+                  onClick={() => document.getElementById("startDate").showPicker()} // Open date picker
+                />
             </div>
+        
+            {/* End Date */}
             <div className="form-group">
               <label>End Date (Optional):</label>
               <input
                 type="datetime-local"
                 value={projectEndDate}
+                min={new Date().toISOString().slice(0, 16)} // Minimum selectable date
                 onChange={(e) => setProjectEndDate(e.target.value)}
                 className="form-input"
               />
+              <FaCalendarAlt
+                  style={{
+                    position: "absolute",
+                    right: "0px",
+                    top: "50%",
+                    transform: "translateY(-10%)",
+                    cursor: "pointer",
+                    color: "#555",
+                  }}
+                  onClick={() => document.getElementById("startDate").showPicker()} // Open date picker
+                />
             </div>
+        
             <div className="popup-buttons">
               <button className="submit-button" onClick={addProject}>
                 Save Project
@@ -303,6 +335,7 @@ const Project = () => {
             </div>
           </div>
         </div>
+        
       )}
 
       {/* VIEW PROJECT - Table of Projects */}
@@ -455,3 +488,5 @@ const Project = () => {
 };
 
 export default Project;
+
+
