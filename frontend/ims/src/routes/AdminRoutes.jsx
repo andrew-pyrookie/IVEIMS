@@ -23,6 +23,10 @@ const AdminRoutes = () => {
         <Route path="bookings/:userId" element={<Bookings />} />
 
         <Route path="reports" element={<Reports />} />
+        <Route path="reports/:userId" element={<Reports />} />
+
+         <Route path="reports" element={<Reports />} />
+
         <Route path="backup" element={<Backup />} />
         <Route path="profile" element={<Profile />} />
         <Route path="profile/:userId" element={<Profile />} />

@@ -1,128 +1,230 @@
-/* 🌍 General Layout */
-.reports-container {
-    display: flex;
-    margin-left: 300px;
+/* 🌎 General Page Styling */
+body {
+  background: white;
+  color: black;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Main container styles */
+.report-container {
+  padding: 20px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  margin-top: 70px;
+  margin-left: 240px; /* Adjust based on your sidebar width */
+}
+
+.page-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+/* Actions container (search bar and download button) */
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 15px;
+}
+
+.search-bar {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex-grow: 1;
+  max-width: 400px;
+  font-size: 14px;
+}
+
+.download-button {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.download-button:hover {
+  background-color: #1976d2;
+}
+
+/* Table styles */
+.table-wrapper {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.transfers-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transfers-table th,
+.transfers-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.transfers-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.transfers-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Loading and error messages */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #6c757d;
+}
+
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .report-container {
+    margin-left: 0;
+    padding: 10px;
   }
-  
-  .reports-main {
-    flex: 1;
-    padding: 20px;
-    background: #f9f9f9;
+
+  .actions-container {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  
-  /* 🏗️ Top Navbar */
-  .top-navbar {
-    background: white;
-    padding: 15px 20px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin-bottom: 20px;
+
+  .search-bar {
+    max-width: 100%;
   }
-  
-  .top-navbar h2 {
-    margin: 0;
-    font-size: 20px;
-  }
-  
-  /* 📌 Reports Tabs */
-  .reports-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .reports-tabs button {
-    background: #ddd;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background 0.3s ease;
-  }
-  
-  .reports-tabs button.active {
-    background: #007bff;
-    color: white;
-  }
-  
-  .reports-tabs button:hover {
-    background: #bbb;
-  }
-  
-  /* 📋 Reports Table */
-  .reports-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  table {
+
+  .download-button {
     width: 100%;
-    border-collapse: collapse;
+    margin-top: 10px;
+  }
+}
+
+/* PDF Export Styling */
+.pdf-content {
+  padding: 20px;
+  background-color: white;
+}
+.report-summary{
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+}
+
+.report-header {
+  margin-bottom: 20px;
+  text-align: center;
+  display: none;
+}
+
+.report-header h2 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.report-header p {
+  color: #7f8c8d;
+}
+
+.report-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.8em;
+  color: #7f8c8d;
+  border-top: 1px solid #ecf0f1;
+  padding-top: 10px;
+}
+
+/* Table styling optimized for PDF export */
+.pdf-content .transfers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+.pdf-content .transfers-table th {
+  background-color: #3498db;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  font-weight: bold;
+  border: 1px solid #e0e0e0;
+}
+
+.pdf-content .transfers-table td {
+  padding: 8px 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.pdf-content .transfers-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Print-specific styles that will only apply when printing or generating PDF */
+@media print {
+  body * {
+    visibility: hidden;
   }
   
-  table th,
-  table td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
+  .pdf-content, .pdf-content * {
+    visibility: visible;
   }
   
-  table th {
-    background: #f5f5f5;
+  .pdf-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
   }
   
-  /* 🎯 Export Buttons */
-  .export-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
+  .transfers-table {
+    page-break-inside: auto;
   }
   
-  .export-btn {
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-weight: bold;
-    transition: background 0.3s ease;
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
   }
   
-  .csv {
-    background: #28a745;
-    color: white;
+  thead {
+    display: table-header-group;
   }
   
-  .csv:hover {
-    background: #218838;
+  tfoot {
+    display: table-footer-group;
   }
-  
-  .pdf {
-    background: #dc3545;
-    color: white;
-  }
-  
-  .pdf:hover {
-    background: #c82333;
-  }
-  
-  /* 📱 Responsive Design */
-  @media screen and (max-width: 768px) {
-    .reports-container {
-      flex-direction: column;
-    }
-  
-    .top-navbar {
-      text-align: center;
-    }
-  
-    .reports-tabs {
-      justify-content: center;
-    }
-  
-    table {
-      font-size: 14px;
-    }
-  }
-  
+}
+.export-options{
+  border: 1px solid #2196f3;
+  padding-left: 10px;
+}
