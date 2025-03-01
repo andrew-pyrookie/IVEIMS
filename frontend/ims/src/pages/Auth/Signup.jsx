@@ -20,7 +20,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const roles = ["student", "Lab Technician", "admin"];
+  const roles = ["student", "Technician", "admin", "lab manager"];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -53,8 +53,10 @@ const Signup = () => {
         navigate(`/student/dashboard/${res.data.user.id}`);
       } else if (res.data.user.role === "admin") {
         navigate(`/admin/dashboard/${res.data.user.id}`);
+      } else if (res.data.user.role === "Technician") {
+        navigate(`/Technician/dashboard/${res.data.user.id}`);
       } else if (res.data.user.role === "Lab Manager") {
-        navigate("/lab-manager-dashboard");
+        navigate(`/labmanager/dashboard/${res.data.user.id}`);
       } else {
         navigate("/"); // Default redirection
       }

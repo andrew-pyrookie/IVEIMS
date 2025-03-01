@@ -1,5 +1,6 @@
 const Booking = () => {
-    return ( <h1>Booking</h1> );
+    return ( <h1>inventory
+    </h1> );
 }
  
 export default Booking;

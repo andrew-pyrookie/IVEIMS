@@ -8,6 +8,7 @@ import CezeriLab from "../pages/LabManager/CezeriLab";
 import MedTechLab from "../pages/LabManager/MedTechLab";
 import Projects from "../pages/LabManager/Projects";
 import SharedResourses from "../pages/LabManager/SharedResourses";
+import NotFound from "../pages/NotFound/NotFound"; 
 
 const LabManagerRoutes = () => {
   return (
@@ -44,7 +45,7 @@ const LabManagerRoutes = () => {
 
         
 
-        {/* <Route path="*" element={<NotFound />} /> */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
   );
 };

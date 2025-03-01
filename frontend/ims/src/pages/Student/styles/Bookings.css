@@ -1,476 +1,87 @@
-/* EquipmentTable.css */
-
-/* General Styles */
-:root {
-  --primary: #3498db;
-  --primary-dark: #2980b9;
-  --secondary: #2ecc71;
-  --danger: #e74c3c;
-  --warning: #f39c12;
-  --light: #f5f5f5;
-  --dark: #333;
-  --text: #4a4a4a;
-  --border: #e1e1e1;
-  --shadow: rgba(0, 0, 0, 0.1);
-}
-
-.equipment-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text);
-  padding-top: 70px;
-  margin-left: 250px;
-}
-
-.page-title {
-  font-size: 28px;
-  color: var(--dark);
+/* Booking Form */
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   margin-bottom: 24px;
-  border-bottom: 2px solid var(--primary);
-  padding-bottom: 10px;
-  font-weight: 600;
 }
 
-.error-message {
-  background-color: rgba(231, 76, 60, 0.1);
-  border-left: 4px solid var(--danger);
-  color: var(--danger);
-  padding: 15px;
-  margin: 20px 0;
+.booking-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.booking-form label {
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.booking-form select,
+.booking-form input {
+  padding: 8px;
+  border: 1px solid #e2e8f0;
   border-radius: 4px;
-  display: flex;
-  align-items: center;
-}
-
-.error-icon {
-  width: 24px;
-  height: 24px;
-  fill: var(--danger);
-  margin-right: 10px;
-}
-
-.success-message {
-  background-color: rgba(46, 204, 113, 0.1);
-  border-left: 4px solid var(--secondary);
-  color: var(--secondary);
-  padding: 15px;
-  margin: 20px 0;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-}
-
-.success-icon {
-  width: 24px;
-  height: 24px;
-  fill: var(--secondary);
-  margin-right: 10px;
-}
-
-
-/* Search Container */
-.search-container {
-  margin: 20px 0;
-  display: flex;
-  justify-content: space-between; /* Align search input to the right */
-}
-
-/* Search Input */
-.search-input {
-  width: 300px; /* Adjust width as needed */
-  padding: 10px 15px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.search-input::placeholder {
-  color: #999;
-}
-
-.search-input:focus {
-  border-color: #007bff; /* Highlight color when focused */
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a subtle glow effect */
-}
-
-.search-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1.25rem;
-  height: 1.25rem;
-  fill: #999;
-}
-
-
-
-/* Table Styles */
-.table-container {
-  background-color: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px var(--shadow);
-}
-
-.equipment-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-}
-
-.equipment-table th,
-.equipment-table td {
-  padding: 14px 16px;
-  text-align: left;
-}
-
-.equipment-table th {
-  background-color: #f8f9fa;
-  color: var(--dark);
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-}
-
-.equipment-table tr {
-  border-bottom: 1px solid var(--border);
-  transition: background-color 0.2s;
-}
-
-.equipment-table tr:hover {
-  background-color: rgba(52, 152, 219, 0.05);
-}
-
-.equipment-table td {
   font-size: 14px;
 }
 
-.description-cell {
-  max-width: 250px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.no-data {
-  text-align: center;
-  color: #999;
-  padding: 40px 0;
-  font-style: italic;
-}
-
-/* Status Badge Styles */
+/* Status Badges */
 .status-badge {
   display: inline-block;
-  padding: 4px 10px;
-  border-radius: 20px;
+  padding: 4px 8px;
+  border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
   text-transform: capitalize;
 }
 
-.status-badge.available {
-  background-color: rgba(46, 204, 113, 0.15);
-  color: #27ae60;
+.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
-.status-badge.in.use {
-  background-color: rgba(243, 156, 18, 0.15);
-  color: #f39c12;
+.status-accepted {
+  background-color: #e3fcef;
+  color: #0f766e;
 }
 
-.status-badge.maintenance {
-  background-color: rgba(231, 76, 60, 0.15);
-  color: #e74c3c;
+.status-rejected {
+  background-color: #fee2e2;
+  color: #dc2626;
 }
 
-.status-text.available {
-  color: #27ae60;
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
 }
 
-.status-text.in.use {
-  color: #f39c12;
-}
-
-.status-text.maintenance {
-  color: #e74c3c;
-}
-
-/* Button Styles */
-.book-button {
-  background-color: var(--primary);
-  color: white;
+.action-button {
   border: none;
-  padding: 8px 16px;
   border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-.book-button:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-1px);
-}
-
-.book-button:active {
-  transform: translateY(0);
-}
-
-.book-button.disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
-  padding: 20px;
-}
-
-.modal-content {
-  background-color: white;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-header h3 {
-  font-size: 18px;
-  margin: 0;
-  color: var(--dark);
-}
-
-.close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
+  gap: 4px;
   cursor: pointer;
-  color: #777;
-  transition: color 0.2s;
-}
-
-.close-button:hover {
-  color: var(--danger);
-}
-
-.form-group input[type="datetime-local"] {
-  /* Add your custom styles here */
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-/* Booking Form Styles */
-.booking-form {
-  padding: 20px;
-}
-
-.equipment-info {
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-}
-
-.info-item {
-  display: flex;
-  margin-bottom: 8px;
-}
-
-.info-item:last-child {
-  margin-bottom: 0;
-}
-
-.info-item .label {
-  font-weight: 600;
-  min-width: 100px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: var(--dark);
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
   font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-  outline: none;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.submit-button {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
   transition: background-color 0.2s;
-  width: 100%;
-  font-size: 15px;
 }
 
-.submit-button:hover {
-  background-color: var(--primary-dark);
-}
-
-.booked-equipment-button {
-  margin-left: 10px;
-  padding: 8px 16px;
-  background-color: #4CAF50;
+.accept-button {
+  background-color: #34d399;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
-.booked-equipment-button:hover {
-  background-color: #45a049;
+.accept-button:hover {
+  background-color: #10b981;
 }
 
-.booked-equipment-list {
-  margin-top: 20px;
-}
-
-.booked-equipment-list table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.booked-equipment-list th, .booked-equipment-list td {
-  padding: 8px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.booked-equipment-list th {
-  background-color: #f2f2f2;
-}
-
-.unbook-button {
-  padding: 5px 10px;
-  background-color: #ff4d4d;
+.reject-button {
+  background-color: #f87171;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
-.unbook-button:hover {
-  background-color: #cc0000;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .equipment-table th,
-  .equipment-table td {
-    padding: 10px 12px;
-  }
-  
-  .equipment-table th:nth-child(5),
-  .equipment-table td:nth-child(5) {
-    display: none; /* Hide description column on mobile */
-  }
-  
-  .page-title {
-    font-size: 22px;
-  }
-  
-  .modal-content {
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .equipment-table {
-    font-size: 13px;
-  }
-  
-  .equipment-table th:nth-child(3),
-  .equipment-table td:nth-child(3) {
-    display: none; /* Hide lab column on very small screens */
-  }
-  
-  .book-button {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-}
-
-
-
-.form-group {
-  position: relative;
-  max-width:100%;
-}
-
-.input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.form-input {
-  width: 100%;
-  padding-right: 40px; /* Space for the calendar icon */
-}
-
-.input-container svg {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #555;
+.reject-button:hover {
+  background-color: #ef4444;
 }

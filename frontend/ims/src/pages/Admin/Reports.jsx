@@ -1,301 +1,291 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useTable } from 'react-table';
+import React, { useState, useEffect } from "react";
+import { useTable, useSortBy, useGlobalFilter, usePagination } from "react-table";
+import { FaFilePdf, FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { usePDF } from "react-to-pdf";
 import Sidebar from "/src/components/Admin/Sidebar.jsx";
 import Topbar from "/src/components/Admin/Topbar.jsx";
-import "/src/pages/Admin/styles/Reports.css"; // Import the CSS file
+import "/src/pages/Admin/styles/MedTechLab.css";
 
-// Updated import for react-to-pdf
-import { usePDF } from 'react-to-pdf';
+const Reports = () => {
+  const [labReports, setLabReports] = useState([]);
+  const [userReports, setUserReports] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeReport, setActiveReport] = useState("lab"); // 'lab' or 'user'
+  const { toPDF, targetRef } = usePDF({ filename: `${activeReport}-report.pdf` });
 
-const ReportPage = () => {
-  const [transfers, setTransfers] = useState([]);
-  const [equipment, setEquipment] = useState({});
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [equipmentLoading, setEquipmentLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [fileName, setFileName] = useState('transfer_log_report');
-  const [pdfError, setPdfError] = useState(null);
-  
-  // Use the usePDF hook instead of direct toPDF function
-  const { toPDF, targetRef } = usePDF({
-    filename: `${fileName}.pdf`,
-    page: {
-      // You can adjust these settings as needed
-      margin: 20,
-      format: 'a4',
-      orientation: 'landscape',
-    },
-    overrides: {
-      // Optional: Add custom styling for PDF
-      pdf: {
-        compress: true
-      },
-      canvas: {
-        // Optional: Adjust quality
-        scale: 2
-      }
-    }
-  });
-
-  // Fetch transfer data from the API
   useEffect(() => {
-    const fetchTransfers = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8000/api/asset-transfers/', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch transfer data');
-        }
-
-        const data = await response.json();
-        setTransfers(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchTransfers();
+    fetchReports();
   }, []);
 
-  // Fetch equipment data for all equipment IDs in transfers
-  useEffect(() => {
-    const fetchEquipmentDetails = async () => {
-      if (transfers.length === 0 || !Array.isArray(transfers)) {
-        setEquipmentLoading(false);
-        return;
-      }
-      
-      try {
-        const token = localStorage.getItem('token');
-        const equipmentIds = [...new Set(transfers.map(transfer => transfer.equipment_id))];
-        const equipmentData = {};
-        
-        await Promise.all(equipmentIds.map(async (id) => {
-          if (!id) return; // Skip if ID is null or undefined
-          
-          const response = await fetch(`http://localhost:8000/api/equipment/${id}/`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+  const fetchReports = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch lab reports (equipment transfers)
+      const labResponse = await fetch("http://localhost:8000/api/reports/lab", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const labData = await labResponse.json();
+      setLabReports(labData);
 
-          if (response.ok) {
-            const data = await response.json();
-            equipmentData[id] = data;
-          } else {
-            console.warn(`Could not fetch details for equipment ID ${id}`);
-            equipmentData[id] = { name: 'Unknown' };
-          }
-        }));
-        
-        setEquipment(equipmentData);
-        setEquipmentLoading(false);
-      } catch (err) {
-        console.error('Error fetching equipment details:', err);
-        setEquipmentLoading(false);
-      }
-    };
-
-    if (!loading && transfers.length > 0) {
-      fetchEquipmentDetails();
+      // Fetch user reports (user joins)
+      const userResponse = await fetch("http://localhost:8000/api/reports/user", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const userData = await userResponse.json();
+      setUserReports(userData);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [transfers, loading]);
+  };
 
-  // Filter transfers based on search term
-  const filteredTransfers = transfers.filter((transfer) =>
-    transfer.from_lab.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transfer.to_lab.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (equipment[transfer.equipment_id]?.name && 
-     equipment[transfer.equipment_id].name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  // Define columns for the table
-  const columns = React.useMemo(
+  // Columns for Lab Report (Equipment Transfers)
+  const labColumns = React.useMemo(
     () => [
       {
-        Header: 'ID',
-        accessor: 'id',
+        Header: "Equipment Name",
+        accessor: "equipmentName",
       },
       {
-        Header: 'From Lab',
-        accessor: 'from_lab',
+        Header: "From Lab",
+        accessor: "fromLab",
       },
       {
-        Header: 'To Lab',
-        accessor: 'to_lab',
+        Header: "To Lab",
+        accessor: "toLab",
       },
       {
-        Header: 'Transfer Date',
-        accessor: 'transfer_date',
-        Cell: ({ value }) => {
-          const date = new Date(value);
-          return date.toLocaleDateString();
-        }
-      },
-      {
-        Header: 'Equipment ID',
-        accessor: 'equipment_id',
-      },
-      {
-        Header: 'Equipment Name',
-        accessor: row => equipment[row.equipment_id]?.name || 'Loading...',
-        id: 'equipment_name',
-      },
-      {
-        Header: 'Synced',
-        accessor: 'is_synced',
-        Cell: ({ value }) => (value ? 'Yes' : 'No'),
+        Header: "Transfer Date",
+        accessor: "transferDate",
+        Cell: ({ value }) => new Date(value).toLocaleDateString(),
       },
     ],
-    [equipment]
+    []
   );
 
-  // Use react-table to create the table
+  // Columns for User Report (User Joins)
+  const userColumns = React.useMemo(
+    () => [
+      {
+        Header: "User Name",
+        accessor: "userName",
+      },
+      {
+        Header: "Email",
+        accessor: "email",
+      },
+      {
+        Header: "Join Date",
+        accessor: "joinDate",
+        Cell: ({ value }) => new Date(value).toLocaleDateString(),
+      },
+    ],
+    []
+  );
+
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
-    rows,
+    page,
     prepareRow,
-  } = useTable({ columns, data: filteredTransfers });
+    state,
+    setGlobalFilter,
+    nextPage,
+    previousPage,
+    canNextPage,
+    canPreviousPage,
+    pageOptions,
+    gotoPage,
+    pageCount,
+    setPageSize,
+  } = useTable(
+    {
+      columns: activeReport === "lab" ? labColumns : userColumns,
+      data: activeReport === "lab" ? labReports : userReports,
+      initialState: { pageIndex: 0, pageSize: 10 },
+    },
+    useGlobalFilter,
+    useSortBy,
+    usePagination
+  );
 
-  // Updated function to download the report as PDF
-  const downloadPDF = () => {
-    setPdfError(null);
-    
-    try {
-      toPDF()
-        .then(() => console.log('PDF generated successfully'))
-        .catch(err => {
-          console.error('PDF generation failed:', err);
-          setPdfError(err.message || 'Failed to generate PDF');
-        });
-    } catch (err) {
-      console.error('Error generating PDF:', err);
-      setPdfError(err.message || 'Failed to generate PDF');
-    }
-  };
+  const { pageIndex, pageSize } = state;
 
-  if (loading) {
-    return <div className="loading-container">Loading transfer data...</div>;
-  }
+  useEffect(() => {
+    setGlobalFilter(searchTerm);
+  }, [searchTerm, setGlobalFilter]);
 
-  if (error) {
-    return <div className="error-message">{error}</div>;
+  if (isLoading) {
+    return (
+      <div className="medtech-lab-container">
+        <Sidebar />
+        <div className="main-content">
+          <Topbar />
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading reports...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="report-container">
+    <div className="medtech-lab-container">
       <Sidebar />
-      <Topbar />
-      <h2 className="page-title">Transfer Log</h2>
+      <div className="main-content">
+        <Topbar />
 
-      {/* Search Bar and Download Options */}
-      <div className="actions-container">
-        <input
-          type="text"
-          placeholder="Search by Lab or Equipment Name"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-bar"
-        />
-        
-        <div className="export-options">
-          <input
-            type="text"
-            placeholder="File name"
-            value={fileName}
-            onChange={(e) => setFileName(e.target.value)}
-            className="filename-input"
-          />
-          <button 
-            className="download-button" 
-            onClick={downloadPDF}
-            disabled={equipmentLoading}
-          >
-            {equipmentLoading ? 'Loading Equipment Data...' : 'Download Report (PDF)'}
+        <div className="content-header">
+          <h1>Reports</h1>
+          <p>View and download lab and user reports</p>
+        </div>
+
+        <div className="actions-container">
+          <div className="search-container">
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search reports..."
+              className="search-input"
+            />
+          </div>
+          <div className="report-type-buttons">
+            <button
+              className={`report-type-button ${activeReport === "lab" ? "active" : ""}`}
+              onClick={() => setActiveReport("lab")}
+            >
+              Lab Report
+            </button>
+            <button
+              className={`report-type-button ${activeReport === "user" ? "active" : ""}`}
+              onClick={() => setActiveReport("user")}
+            >
+              User Report
+            </button>
+          </div>
+          <button className="add-button" onClick={toPDF}>
+            <FaFilePdf /> Download PDF
           </button>
         </div>
-      </div>
 
-      {/* PDF Error Message */}
-      {pdfError && (
-        <div className="error-message pdf-error">
-          <p>Error generating PDF: {pdfError}</p>
-          <p>Please ensure react-to-pdf is correctly installed:</p>
-          <code>npm install --save react-to-pdf</code>
+        <div className="table-container" ref={targetRef}>
+          <table {...getTableProps()} className="equipment-table">
+            <thead>
+              {headerGroups.map((headerGroup) => (
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map((column) => (
+                    <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                      <div className="header-content">
+                        {column.render("Header")}
+                        <span className="sort-icon">
+                          {column.canSort ? (
+                            column.isSorted ? (
+                              column.isSortedDesc ? (
+                                <FaSortDown />
+                              ) : (
+                                <FaSortUp />
+                              )
+                            ) : (
+                              <FaSort />
+                            )
+                          ) : null}
+                        </span>
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+              {page.length === 0 ? (
+                <tr>
+                  <td colSpan={activeReport === "lab" ? labColumns.length : userColumns.length} className="no-data">
+                    No reports found.
+                  </td>
+                </tr>
+              ) : (
+                page.map((row) => {
+                  prepareRow(row);
+                  return (
+                    <tr {...row.getRowProps()}>
+                      {row.cells.map((cell) => (
+                        <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                      ))}
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
 
-      {/* Content to be exported as PDF - now using targetRef */}
-      <div className="pdf-content" ref={targetRef}>
-        
-
-        {/* Report Summary */}
-        <div className="report-summary">
-          <p>Generated on: {new Date().toLocaleDateString()}</p>
-          <p>Total transfers: <strong>{filteredTransfers.length}</strong></p>
-          {searchTerm && <p>Filtered by: <strong>{searchTerm}</strong></p>}
-        </div>
-
-        {/* Table */}
-        <div className="table-wrapper">
-          {equipmentLoading ? (
-            <div className="loading-inline">Loading equipment details...</div>
-          ) : (
-            <table {...getTableProps()} className="transfers-table">
-              <thead>
-                {headerGroups.map(headerGroup => (
-                  <tr key={headerGroup.id} {...headerGroup.getHeaderGroupProps()}>
-                    {headerGroup.headers.map(column => (
-                      <th key={column.id} {...column.getHeaderProps()}>
-                        {column.render('Header')}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              <tbody {...getTableBodyProps()}>
-                {rows.length > 0 ? (
-                  rows.map(row => {
-                    prepareRow(row);
-                    return (
-                      <tr key={row.id} {...row.getRowProps()}>
-                        {row.cells.map(cell => (
-                          <td key={cell.column.id + "-" + cell.row.id} {...cell.getCellProps()}>
-                            {cell.render('Cell')}
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={columns.length} className="no-data">
-                      No transfer records found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
-        
-        {/* Report Footer - This will appear in the PDF */}
-        <div className="report-footer">
-          <p>This is an official report from Asset Management System</p>
+        {/* Pagination Controls */}
+        <div className="pagination-controls">
+          <div className="pagination-info">
+            Showing {page.length} of {activeReport === "lab" ? labReports.length : userReports.length} results
+          </div>
+          <div className="pagination-buttons">
+            <button
+              onClick={() => gotoPage(0)}
+              disabled={!canPreviousPage}
+              className="pagination-button"
+            >
+              {"<<"}
+            </button>
+            <button
+              onClick={() => previousPage()}
+              disabled={!canPreviousPage}
+              className="pagination-button"
+            >
+              {"<"}
+            </button>
+            <span className="pagination-page-info">
+              Page <strong>{pageIndex + 1}</strong> of <strong>{pageOptions.length}</strong>
+            </span>
+            <button
+              onClick={() => nextPage()}
+              disabled={!canNextPage}
+              className="pagination-button"
+            >
+              {">"}
+            </button>
+            <button
+              onClick={() => gotoPage(pageCount - 1)}
+              disabled={!canNextPage}
+              className="pagination-button"
+            >
+              {">>"}
+            </button>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+              }}
+              className="pagination-size-select"
+            >
+              {[10, 25, 50].map((size) => (
+                <option key={size} value={size}>
+                  Show {size}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default ReportPage;
+export default Reports;
