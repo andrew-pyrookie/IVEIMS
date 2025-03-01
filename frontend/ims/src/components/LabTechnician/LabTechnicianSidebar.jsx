@@ -33,7 +33,7 @@ const Sidebar = () => {
           <li>
             <NavLink
               to="/labtechnician/dashboard"
-              activeClassName="active" // Apply active class
+              activeClassName="active" 
               exact // Ensure exact match for the root path
             >
               <FaChartBar className="icon" />

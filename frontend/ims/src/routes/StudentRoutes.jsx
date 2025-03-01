@@ -4,6 +4,7 @@ import Bookings from "../pages/Student/Bookings";
 import Documents from "../pages/Student/Documents";
 import Profile from "../pages/Student/Profile";
 import Projects from "../pages/Student/Projects";
+import NotFound from "../pages/NotFound/NotFound"; 
 
 const StudentRoutes = () => {
   return (
@@ -22,7 +23,7 @@ const StudentRoutes = () => {
         <Route path="projects" element={<Projects />} />
         <Route path="projects/:userId" element={<Projects />} />
         
-        {/* <Route path="*" element={<NotFound />} /> */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
   );
 };

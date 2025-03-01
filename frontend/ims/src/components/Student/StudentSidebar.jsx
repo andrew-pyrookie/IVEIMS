@@ -70,7 +70,7 @@ const Sidebar = () => {
               <ul className={`submenu ${inventoryOpen ? "open" : ""}`}>
                 <li>
                   <NavLink
-                    to="/admin/inventory/design-studio"
+                    to="/student/designstudiolab"
                     activeClassName="active"
                   >
                     <FaTools className="submenu-icon" />
@@ -79,7 +79,7 @@ const Sidebar = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/admin/inventory/cezeri-lab"
+                    to="/student/cezerilab"
                     activeClassName="active"
                   >
                     <FaFlask className="submenu-icon" />
@@ -88,7 +88,7 @@ const Sidebar = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/admin/inventory/medtech-lab"
+                    to="/student/medtechlab"
                     activeClassName="active"
                   >
                     <FaMedkit className="submenu-icon" />

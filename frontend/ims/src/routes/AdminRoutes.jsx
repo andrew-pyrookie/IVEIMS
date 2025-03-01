@@ -9,6 +9,8 @@ import Profile from "../pages/Admin/AdminProfile";
 import DesignStudioLab from "../pages/Admin/DesignStudioLab";
 import CezeriLab from "../pages/Admin/CezeriLab";
 import MedTechLab from "../pages/Admin/MedTechLab";
+import Projects from "../pages/Admin/Projects";
+import NotFound from "../pages/NotFound/NotFound"; 
 
 const AdminRoutes = () => {
   return (
@@ -42,12 +44,19 @@ const AdminRoutes = () => {
          <Route path="reports" element={<Reports />} />
 
         <Route path="backup" element={<Backup />} />
+
+        
+        <Route path="projects" element={<Projects />} />
+        <Route path="projects/:userId" element={<Projects />} />
+
         <Route path="profile" element={<Profile />} />
         <Route path="profile/:userId" element={<Profile />} />
 
         <Route path="usermanagement" element={<UsersManagement />} />
         <Route path="usermanagement/:userId" element={<UsersManagement />} />
-        {/* <Route path="*" element={<NotFound />} /> */}
+
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
   );
 };

@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useTable } from 'react-table';
 import Sidebar from "/src/components/Admin/Sidebar.jsx";
-import {FaUser } from "react-icons/fa";
+import { FaUser, FaEdit, FaTrash } from "react-icons/fa";
 import Topbar from "/src/components/Admin/Topbar.jsx";
-import "/src/pages/Admin/styles/UserManagement.css"; // Import the CSS file
+import "/src/pages/Admin/styles/UserManagement.css";
 
 const UsersManagement = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false); // State for modal visibility
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [changePassword, setChangePassword] = useState(false);
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
@@ -16,10 +20,21 @@ const UsersManagement = () => {
     password: '',
     confirmPassword: '',
   });
-  const [submitError, setSubmitError] = useState(''); // Error message for form submission
+  const [editUser, setEditUser] = useState({
+    id: '',
+    name: '',
+    email: '',
+    role: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
-    // Fetch user data from your API
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = () => {
     fetch('http://localhost:8000/api/users/', {
       method: 'GET',
       headers: {
@@ -28,22 +43,20 @@ const UsersManagement = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        setUsers(data); // Set the fetched users data
+        setUsers(data);
       })
       .catch((error) => console.error('Error fetching users:', error));
-  }, []);
+  };
 
-  // Handle search input
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // Filter users based on the search term
   const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Handle input changes in the add user form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewUser({
@@ -52,17 +65,34 @@ const UsersManagement = () => {
     });
   };
 
-  // Handle form submission
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditUser({
+      ...editUser,
+      [name]: value,
+    });
+  };
+
+  const toggleChangePassword = () => {
+    setChangePassword(!changePassword);
+    if (!changePassword) {
+      // Reset password fields when enabling password change
+      setEditUser({
+        ...editUser,
+        password: '',
+        confirmPassword: ''
+      });
+    }
+  };
+
   const handleAddUser = async (e) => {
     e.preventDefault();
 
-    // Validate password match
     if (newUser.password !== newUser.confirmPassword) {
       setSubmitError('Passwords do not match.');
       return;
     }
 
-    // Prepare the user data to send to the API
     const userData = {
       name: newUser.name,
       email: newUser.email,
@@ -85,8 +115,8 @@ const UsersManagement = () => {
       }
 
       const data = await response.json();
-      setUsers([...users, data]); // Add the new user to the list
-      setShowAddModal(false); // Close the modal
+      setUsers([...users, data]);
+      setShowAddModal(false);
       setNewUser({
         name: '',
         email: '',
@@ -101,7 +131,97 @@ const UsersManagement = () => {
     }
   };
 
-  // Define the columns of the table
+  const handleEditClick = (user) => {
+    setEditUser({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      password: '',
+      confirmPassword: ''
+    });
+    setChangePassword(false);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteClick = (user) => {
+    setCurrentUser(user);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    
+    // Validate password if changing password
+    if (changePassword && editUser.password !== editUser.confirmPassword) {
+      setSubmitError('Passwords do not match.');
+      return;
+    }
+
+    // Create the user data to update
+    const userData = {
+      name: editUser.name,
+      email: editUser.email,
+      role: editUser.role,
+    };
+
+    // Add password to the update data if changing password
+    if (changePassword && editUser.password) {
+      userData.password = editUser.password;
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/users/${editUser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user.');
+      }
+
+      const updatedData = await response.json();
+      
+      // Update the users state with the updated user
+      setUsers(users.map(user => 
+        user.id === editUser.id ? updatedData : user
+      ));
+      
+      setShowEditModal(false);
+      setSubmitError('');
+      setChangePassword(false);
+    } catch (error) {
+      setSubmitError('Failed to update user. Please try again.');
+      console.error('Error updating user:', error);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/users/${currentUser.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user.');
+      }
+
+      // Remove the deleted user from the users state
+      setUsers(users.filter(user => user.id !== currentUser.id));
+      setShowDeleteConfirm(false);
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
   const columns = React.useMemo(
     () => [
       {
@@ -125,14 +245,33 @@ const UsersManagement = () => {
           </span>
         ),
       },
+      {
+        Header: 'Actions',
+        accessor: 'actions',
+        Cell: ({ row }) => (
+          <div className="action-buttons">
+            <button 
+              className="edit-button"
+              onClick={() => handleEditClick(row.original)}
+            >
+              <FaEdit /> Edit
+            </button>
+            <button 
+              className="delete-button"
+              onClick={() => handleDeleteClick(row.original)}
+            >
+              <FaTrash /> Delete
+            </button>
+          </div>
+        ),
+      },
     ],
     []
   );
 
-  // Use the table hook from React Table
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
     columns,
-    data: filteredUsers, // Pass the filtered users
+    data: filteredUsers,
   });
 
   return (
@@ -147,7 +286,7 @@ const UsersManagement = () => {
           type="text"
           value={searchTerm}
           onChange={handleSearchChange}
-          placeholder="Search by Email"
+          placeholder="Search by Email or Name"
           className="search-bar"
         />
         <button className="add-user-button" onClick={() => setShowAddModal(true)}>
@@ -267,6 +406,141 @@ const UsersManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title">Edit User</h2>
+              <button
+                className="close-button"
+                onClick={() => setShowEditModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleUpdateUser} className="edit-user-form">
+              <div className="form-group">
+                <label htmlFor="edit-name">Name</label>
+                <input
+                  type="text"
+                  id="edit-name"
+                  name="name"
+                  value={editUser.name}
+                  onChange={handleEditInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="edit-email">Email</label>
+                <input
+                  type="email"
+                  id="edit-email"
+                  name="email"
+                  value={editUser.email}
+                  onChange={handleEditInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="edit-role">Role</label>
+                <select
+                  id="edit-role"
+                  name="role"
+                  value={editUser.role}
+                  onChange={handleEditInputChange}
+                  required
+                >
+                  <option value="student">Student</option>
+                  <option value="admin">Admin</option>
+                  <option value="lab manager">Lab Manager</option>
+                  <option value="lab technician">Lab Technician</option>
+                </select>
+              </div>
+              
+              {/* Password change toggle */}
+              <div className="password-change-toggle">
+                <label className="checkbox-container">
+                  <input
+                    type="checkbox"
+                    checked={changePassword}
+                    onChange={toggleChangePassword}
+                  />
+                  Change Password
+                </label>
+              </div>
+              
+              {/* Password fields that appear when changePassword is true */}
+              {changePassword && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="edit-password">New Password</label>
+                    <input
+                      type="password"
+                      id="edit-password"
+                      name="password"
+                      value={editUser.password}
+                      onChange={handleEditInputChange}
+                      required={changePassword}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="edit-confirmPassword">Confirm New Password</label>
+                    <input
+                      type="password"
+                      id="edit-confirmPassword"
+                      name="confirmPassword"
+                      value={editUser.confirmPassword}
+                      onChange={handleEditInputChange}
+                      required={changePassword}
+                    />
+                  </div>
+                </>
+              )}
+              
+              {submitError && <div className="error-message">{submitError}</div>}
+              <div className="form-actions">
+                <button type="button" className="cancel-button" onClick={() => setShowEditModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="submit-button">
+                  Update User
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && currentUser && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-confirm-modal">
+            <div className="modal-header">
+              <h2 className="modal-title">Confirm Delete</h2>
+              <button
+                className="close-button"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="confirm-message">
+              <p>Are you sure you want to delete the user <strong>{currentUser.name}</strong>?</p>
+              <p>This action cannot be undone.</p>
+            </div>
+            <div className="form-actions">
+              <button type="button" className="cancel-button" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
+              </button>
+              <button type="button" className="delete-confirm-button" onClick={handleDeleteUser}>
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

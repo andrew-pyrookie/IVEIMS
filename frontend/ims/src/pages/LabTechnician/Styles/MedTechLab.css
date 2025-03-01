@@ -1,0 +1,482 @@
+.medtech-lab-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f5f7fa;
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 24px;
+    margin-left: 250px; /* Adjust based on your sidebar width */
+    margin-top: 60px; /* Adjust based on your topbar height */
+  }
+  
+  .content-header {
+    margin-bottom: 24px;
+  }
+  
+  .content-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .content-header p {
+    color: #7f8c8d;
+    font-size: 14px;
+  }
+  
+  /* Actions Container */
+  .actions-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .search-container {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 6px;
+    padding: 8px 16px;
+    width: 300px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .search-icon {
+    color: #95a5a6;
+    margin-right: 10px;
+  }
+  
+  .search-input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+  }
+  
+  .add-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+  }
+  
+  .add-button:hover {
+    background-color: #2980b9;
+  }
+  
+  /* Table Styles */
+  .table-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  
+  .equipment-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .equipment-table th {
+    background-color: #f8fafc;
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #4a5568;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+  
+  .equipment-table thead tr {
+    height: 60px;
+  }
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .sort-icon {
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .equipment-table td {
+    padding: 16px; /* Ensure sufficient padding */
+    border-bottom: 1px solid #e2e8f0;
+    color: #2d3748;
+    vertical-align: top; /* Align content to the top */
+  }
+  
+  .equipment-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .equipment-table tr:hover {
+    background-color: #f7fafc;
+  }
+  
+  .equipment-name-cell {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .equipment-description {
+    font-size: 14px;
+    color: #4a5568; /* Darker color for better readability */
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 300px; /* Adjust as needed */
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  
+  .status-available {
+    background-color: #e3fcef;
+    color: #0f766e;
+  }
+  
+  .status-in-use {
+    background-color: #e1effe;
+    color: #1e429f;
+  }
+  
+  .status-maintenance {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .action-button {
+    border: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s;
+  }
+  
+  .qr-button {
+    background-color: #6b7280;
+  }
+  
+  .qr-button:hover {
+    background-color: #4b5563;
+  }
+  
+  .edit-button {
+    background-color: #3498db;
+  }
+  
+  .edit-button:hover {
+    background-color: #2980b9;
+  }
+  
+  .delete-button {
+    background-color: #e74c3c;
+  }
+  
+  .delete-button:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #95a5a6;
+  }
+  
+  .close-button:hover {
+    color: #2c3e50;
+  }
+  
+  .equipment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-group label {
+    font-weight: 500;
+    color: #4a5568;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .form-row .form-group {
+    flex: 1;
+  }
+  
+  .error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  .cancel-button {
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  .cancel-button:hover {
+    background-color: #7f8c8d;
+  }
+  
+  .submit-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #2980b9;
+  }
+  
+  .delete-confirm-modal .confirm-message {
+    margin-bottom: 20px;
+  }
+  
+  .delete-confirm-modal .delete-confirm-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  .delete-confirm-modal .delete-confirm-button:hover {
+    background-color: #c0392b;
+  }
+  
+  .qr-modal .qr-content {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  
+  .qr-modal .qr-code-container {
+    flex-shrink: 0;
+  }
+  
+  .qr-modal .qr-code-image {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .qr-modal .qr-details {
+    flex: 1;
+  }
+  
+  .qr-modal .qr-details h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+  }
+  
+  .qr-modal .qr-description {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 12px;
+  }
+  
+  .qr-modal .qr-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  
+  .qr-modal .print-button,
+  .qr-modal .download-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  .qr-modal .print-button:hover,
+  .qr-modal .download-button:hover {
+    background-color: #2980b9;
+  }
+  
+  /* Pagination Styles */
+  .pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+  }
+  
+  .pagination-info {
+    font-size: 14px;
+    color: #718096;
+  }
+  
+  .pagination-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .pagination-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  
+  .pagination-button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+  
+  .pagination-button:hover:not(:disabled) {
+    background-color: #2980b9;
+  }
+  
+  .pagination-page-info {
+    font-size: 14px;
+    color: #4a5568;
+  }
+  
+  .pagination-size-select {
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  /* Loading Spinner */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+  }
+  
+  .loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }

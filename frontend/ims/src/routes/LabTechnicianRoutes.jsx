@@ -6,6 +6,7 @@ import Reports from "../pages/LabTechnician/Reports";
 import DesignStudioLab from "../pages/LabTechnician/DesignStudioLab";
 import CezeriLab from "../pages/LabTechnician/CezeriLab";
 import MedTechLab from "../pages/LabTechnician/MedTechLab";
+import NotFound from "../pages/NotFound/NotFound"; 
 
 const LabTechnicianRoutes = () => {
   return (
@@ -36,7 +37,7 @@ const LabTechnicianRoutes = () => {
 
         
 
-        {/* <Route path="*" element={<NotFound />} /> */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
   );
 };

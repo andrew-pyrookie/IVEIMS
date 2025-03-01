@@ -1,4 +1,5 @@
-.medtech-lab-container {
+
+.projects-container {
     display: flex;
     min-height: 100vh;
     background-color: #f5f7fa;
@@ -83,12 +84,12 @@
     margin-bottom: 24px;
   }
   
-  .equipment-table {
+  .projects-table {
     width: 100%;
     border-collapse: collapse;
   }
   
-  .equipment-table th {
+  .projects-table th {
     background-color: #f8fafc;
     padding: 16px;
     text-align: left;
@@ -98,7 +99,7 @@
     white-space: nowrap;
   }
   
-  .equipment-table thead tr {
+  .projects-table thead tr {
     height: 60px;
   }
   
@@ -114,34 +115,18 @@
     align-items: center;
   }
   
-  .equipment-table td {
-    padding: 16px; /* Ensure sufficient padding */
+  .projects-table td {
+    padding: 16px;
     border-bottom: 1px solid #e2e8f0;
     color: #2d3748;
-    vertical-align: top; /* Align content to the top */
   }
   
-  .equipment-table tr:last-child td {
+  .projects-table tr:last-child td {
     border-bottom: none;
   }
   
-  .equipment-table tr:hover {
+  .projects-table tr:hover {
     background-color: #f7fafc;
-  }
-  
-  .equipment-name-cell {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .equipment-description {
-    font-size: 14px;
-    color: #4a5568; /* Darker color for better readability */
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limit to 2 lines */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    max-width: 300px; /* Adjust as needed */
   }
   
   .status-badge {
@@ -153,19 +138,44 @@
     text-transform: capitalize;
   }
   
-  .status-available {
+  .status-active {
     background-color: #e3fcef;
     color: #0f766e;
   }
   
-  .status-in-use {
+  .status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  
+  .status-completed {
     background-color: #e1effe;
     color: #1e429f;
   }
   
-  .status-maintenance {
-    background-color: #fef3c7;
-    color: #92400e;
+  .students-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .student-email {
+    background-color: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .remove-student-button {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 12px;
   }
   
   .action-buttons {
@@ -184,14 +194,6 @@
     cursor: pointer;
     color: white;
     transition: background-color 0.2s;
-  }
-  
-  .qr-button {
-    background-color: #6b7280;
-  }
-  
-  .qr-button:hover {
-    background-color: #4b5563;
   }
   
   .edit-button {
@@ -258,7 +260,7 @@
     color: #2c3e50;
   }
   
-  .equipment-form {
+  .project-form {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -352,59 +354,6 @@
     background-color: #c0392b;
   }
   
-  .qr-modal .qr-content {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-  }
-  
-  .qr-modal .qr-code-container {
-    flex-shrink: 0;
-  }
-  
-  .qr-modal .qr-code-image {
-    width: 150px;
-    height: 150px;
-  }
-  
-  .qr-modal .qr-details {
-    flex: 1;
-  }
-  
-  .qr-modal .qr-details h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 8px;
-  }
-  
-  .qr-modal .qr-description {
-    font-size: 14px;
-    color: #718096;
-    margin-bottom: 12px;
-  }
-  
-  .qr-modal .qr-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 16px;
-  }
-  
-  .qr-modal .print-button,
-  .qr-modal .download-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-  }
-  
-  .qr-modal .print-button:hover,
-  .qr-modal .download-button:hover {
-    background-color: #2980b9;
-  }
-  
   /* Pagination Styles */
   .pagination-controls {
     display: flex;
@@ -472,6 +421,15 @@
     animation: spin 1s linear infinite;
   }
   
+  .add-student-button {
+    display: flex;
+    align-items: center;
+    background-color: #3498db;
+    padding: 5px;
+    margin-top: 10px;
+    border-radius: 3px;
+    color: white;
+  }
   @keyframes spin {
     0% {
       transform: rotate(0deg);

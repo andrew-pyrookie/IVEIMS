@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom"; // Use NavLink instead of Link
 import "./Sidebar.css"; // Import styles
-import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars, FaUser, FaTimes,FaChevronDown,FaChevronRight,FaTools,FaFlask,FaMedkit
+import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars, FaUser, FaTimes,FaChevronDown,FaChevronRight,FaTools,FaFlask,FaMedkit,FaProjectDiagram
 } from "react-icons/fa"; // Import icons
 
 const Sidebar = () => {
@@ -103,6 +103,15 @@ const Sidebar = () => {
             >
               <FaFileAlt className="icon" />
               <span className="text">Reports</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/admin/projects"
+              activeClassName="active" // Apply active class
+            >
+              <FaProjectDiagram className="icon" />
+              <span className="text">Projects</span>
             </NavLink>
           </li>
           <li>
