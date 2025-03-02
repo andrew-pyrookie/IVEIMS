@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.permissions import BasePermission, IsAuthenticated
+from django.core.exceptions import PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -66,7 +67,7 @@ class LoginView(APIView):
         }, status=status.HTTP_200_OK)
 
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         try:
@@ -74,7 +75,7 @@ class LogoutView(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        except Exception:
+        except Exception as e:
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfileView(generics.RetrieveUpdateAPIView):
@@ -155,7 +156,7 @@ class UserDetailView(generics.RetrieveAPIView):
 class ProjectListCreateView(generics.ListCreateAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsAdminOrStaff]  # Changed from IsAuthenticated
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         if self.request.user.role in [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER, Users.RoleChoices.TECHNICIAN]:
@@ -191,14 +192,14 @@ class BookingViewSet(viewsets.ModelViewSet):
         return Booking.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        print("Validated Data:", serializer.validated_data)  # Debug
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
         if 'status' in serializer.validated_data and serializer.validated_data['status'] == 'approved':
             if self.request.user.role not in [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER, Users.RoleChoices.TECHNICIAN]:
-                return Response({"error": "Only Admin, Lab Manager, or Technician can approve bookings."}, status=status.HTTP_403_FORBIDDEN)
+                raise PermissionDenied("Only Admin, Lab Manager, or Technician can approve bookings.")
         serializer.save()
-
 class BorrowRequestListCreateView(generics.ListCreateAPIView):
     queryset = BorrowRequest.objects.all()
     serializer_class = BorrowRequestSerializer
