@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom"; // Use NavLink instead of Link
 import "./Sidebar.css"; // Import styles
-import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars, FaUser, FaTimes,FaChevronDown,FaChevronRight,FaTools,FaFlask,FaMedkit
-} from "react-icons/fa"; // Import icons
+import { FaChartBar, FaProjectDiagram, FaCalendarAlt, FaUser, FaTimes,FaBox,FaTools,FaFlask,FaMedkit,FaChevronRight,FaChevronDown } from "react-icons/fa"; // Import icons
+import { MdWork } from "react-icons/md";
+import { FaBars } from "react-icons/fa"; // Import Hamburger icon
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false); // Sidebar is hidden by default on small screens
-  const [inventoryOpen, setInventoryOpen] = useState(false); // State for inventory dropdown
+  const [isOpen, setIsOpen] = useState(false); // Sidebar is hidden by default
+    const [inventoryOpen, setInventoryOpen] = useState(false); 
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen); // Toggle sidebar visibility
@@ -27,72 +28,73 @@ const Sidebar = () => {
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="sidebar-header">
-          <h1>labTech Dashboard</h1>
+          <h1>LabTech Dashboard</h1>
         </div>
         <ul>
           <li>
             <NavLink
               to="/labtechnician/dashboard"
-              activeClassName="active" 
+              activeClassName="active" // Apply active class
               exact // Ensure exact match for the root path
             >
               <FaChartBar className="icon" />
               <span className="text">Dashboard</span>
             </NavLink>
           </li>
-          <li className={inventoryOpen ? "submenu-open" : ""}>
-            <a href="#" onClick={toggleInventory} className="dropdown-link">
-              <FaBox className="icon" />
-              <span className="text">Inventory</span>
-              <span className="dropdown-icon">
-                {inventoryOpen ? <FaChevronDown /> : <FaChevronRight />}
-              </span>
-            </a>
-            <ul className={`submenu ${inventoryOpen ? "open" : ""}`}>
-              <li>
-                <NavLink
-                  to="/labtechnician/designstudiolab"
-                  activeClassName="active"
-                >
-                  <FaTools className="submenu-icon" />
-                  <span className="text">Design Studio</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/labtechnician/cezerilab"
-                  activeClassName="active"
-                >
-                  <FaFlask className="submenu-icon" />
-                  <span className="text">Cezeri Lab</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/labtechnician/medtechlab"
-                  activeClassName="active"
-                >
-                  <FaMedkit className="submenu-icon" />
-                  <span className="text">MedTech Lab</span>
-                </NavLink>
-              </li>
-            </ul>
-          </li>
+
+            <li className={inventoryOpen ? "submenu-open" : ""}>
+              <a href="#" onClick={toggleInventory} className="dropdown-link">
+                <FaBox className="icon" />
+                <span className="text">Inventory</span>
+                <span className="dropdown-icon">
+                  {inventoryOpen ? <FaChevronDown /> : <FaChevronRight />}
+                </span>
+              </a>
+              <ul className={`submenu ${inventoryOpen ? "open" : ""}`}>
+                <li>
+                  <NavLink
+                    to="/labtechnician/designstudiolab"
+                    activeClassName="active"
+                  >
+                    <FaTools className="submenu-icon" />
+                    <span className="text">Design Studio</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/labtechnician/cezerilab"
+                    activeClassName="active"
+                  >
+                    <FaFlask className="submenu-icon" />
+                    <span className="text">Cezeri Lab</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/labtechnician/medtechlab"
+                    activeClassName="active"
+                  >
+                    <FaMedkit className="submenu-icon" />
+                    <span className="text">MedTech Lab</span>
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
           <li>
             <NavLink
               to="/labtechnician/bookings"
               activeClassName="active" // Apply active class
             >
-              <FaCalendarAlt className="icon" />
+              <FaUser className="icon" />
               <span className="text">Bookings</span>
             </NavLink>
           </li>
           <li>
             <NavLink
-              to="/labtechnician/Reports"
+              to="/labtechnician/reports"
               activeClassName="active" // Apply active class
             >
-              <FaDatabase className="icon" />
+              <FaUser className="icon" />
               <span className="text">Reports</span>
             </NavLink>
           </li>

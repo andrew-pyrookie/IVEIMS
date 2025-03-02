@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "/src/components/Admin/Sidebar.jsx";
+import Topbar from "/src/components/Admin/Topbar.jsx";
 import axios from "axios";
 import "/src/pages/Admin/styles/AdminProfile.css";
 
@@ -88,6 +89,8 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="loading-container">
+        <Sidebar/>
+        <Topbar/>
         <div className="loading-spinner"></div>
         <p>Loading profile...</p>
       </div>
@@ -97,6 +100,7 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <Sidebar />
+      <Topbar/>
       <div className="profile-card">
         <div className="profile-info">
           <h2 className="user-name">Name: {profile.name}</h2>

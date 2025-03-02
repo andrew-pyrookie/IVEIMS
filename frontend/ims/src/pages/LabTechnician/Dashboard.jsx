@@ -1,5 +1,16 @@
-const Booking = () => {
-    return ( <h1>Booking</h1> );
+import React from "react";
+import LabTechnicianSidebar from "/src/components/LabTechnician/LabTechnicianSidebar.jsx";
+import LabTechnicianTopbar from "/src/components/LabTechnician/LabTechnicianTopbar.jsx"
+
+const Dashboard = () => {
+    return ( 
+        <div>
+            <LabTechnicianSidebar/>
+            <LabTechnicianTopbar/>
+            <h1>DASHBOARD</h1>
+        </div>
+
+     );
 }
  
-export default Booking;
+export default Dashboard;
