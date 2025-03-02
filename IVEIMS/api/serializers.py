@@ -22,10 +22,13 @@ class LabSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'manager']
 
 class EquipmentSerializer(serializers.ModelSerializer):
-    current_lab = serializers.CharField(source='current_lab.name')
+    current_lab = serializers.PrimaryKeyRelatedField(queryset=Lab.objects.all())
     class Meta:
         model = Equipment
         fields = ['id', 'name', 'current_lab', 'category', 'status', 'unique_code', 'qr_code']
+
+    def create(self, validated_data):
+        return Equipment.objects.create(**validated_data)
 
 class ProjectSerializer(serializers.ModelSerializer):
     members = UsersSerializer(many=True, read_only=True)
@@ -33,59 +36,72 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ['id', 'title', 'description', 'status', 'start_date', 'end_date', 'members', 'equipment', 'progress']
-        
 
 class BookingSerializer(serializers.ModelSerializer):
     user = UsersSerializer(read_only=True)
-    equipment = EquipmentSerializer(read_only=True)
-    lab_space = serializers.CharField(source='lab_space.name', allow_null=True)
+    equipment = serializers.PrimaryKeyRelatedField(queryset=Equipment.objects.all())
+    lab_space = serializers.PrimaryKeyRelatedField(queryset=Lab.objects.all(), allow_null=True, required=False)
+    start_time = serializers.DateTimeField()
+    end_time = serializers.DateTimeField()
     class Meta:
         model = Booking
         fields = ['id', 'user', 'equipment', 'lab_space', 'start_time', 'end_time', 'status', 'checked_in_at', 'checked_out_at']
 
 class ProjectAllocationSerializer(serializers.ModelSerializer):
-    project = ProjectSerializer(read_only=True)
-    equipment = EquipmentSerializer(read_only=True)
+    project = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all())
+    equipment = serializers.PrimaryKeyRelatedField(queryset=Equipment.objects.all())
     allocated_by = UsersSerializer(read_only=True)
     class Meta:
         model = ProjectAllocation
         fields = ['id', 'project', 'equipment', 'allocation_start', 'allocation_end', 'allocated_by']
 
+    def create(self, validated_data):
+        return ProjectAllocation.objects.create(**validated_data)
+
 class BorrowRequestSerializer(serializers.ModelSerializer):
-    equipment = EquipmentSerializer(read_only=True)
-    requesting_lab = serializers.CharField(source='requesting_lab.name')
-    owning_lab = serializers.CharField(source='owning_lab.name')
+    equipment = serializers.PrimaryKeyRelatedField(queryset=Equipment.objects.all())
+    requesting_lab = serializers.PrimaryKeyRelatedField(queryset=Lab.objects.all())
+    owning_lab = serializers.PrimaryKeyRelatedField(queryset=Lab.objects.all())
     requested_by = UsersSerializer(read_only=True)
     class Meta:
         model = BorrowRequest
         fields = ['id', 'equipment', 'requesting_lab', 'owning_lab', 'requested_by', 'status', 'request_date']
 
+    def create(self, validated_data):
+        return BorrowRequest.objects.create(**validated_data)
+
 class AssetTransfersSerializer(serializers.ModelSerializer):
-    equipment = EquipmentSerializer(read_only=True)
-    from_lab = serializers.CharField(source='from_lab.name')
-    to_lab = serializers.CharField(source='to_lab.name')
+    equipment = serializers.PrimaryKeyRelatedField(queryset=Equipment.objects.all())
+    from_lab = serializers.PrimaryKeyRelatedField(queryset=Lab.objects.all())
+    to_lab = serializers.PrimaryKeyRelatedField(queryset=Lab.objects.all())
     class Meta:
         model = AssetTransfer
         fields = ['id', 'equipment', 'from_lab', 'to_lab', 'transfer_date', 'is_synced']
 
 class MaintenanceRemindersSerializer(serializers.ModelSerializer):
-    equipment = EquipmentSerializer(read_only=True)
+    equipment = serializers.PrimaryKeyRelatedField(queryset=Equipment.objects.all())
     class Meta:
         model = MaintenanceReminders
         fields = ['id', 'equipment', 'reminder_date', 'status']
 
 class MaintenanceLogSerializer(serializers.ModelSerializer):
-    equipment = EquipmentSerializer(read_only=True)
+    equipment = serializers.PrimaryKeyRelatedField(queryset=Equipment.objects.all())
     technician = UsersSerializer(read_only=True)
     class Meta:
         model = MaintenanceLog
         fields = ['id', 'equipment', 'date_performed', 'details', 'technician']
 
+    def create(self, validated_data):
+        return MaintenanceLog.objects.create(**validated_data)
+
 class ProjectDocumentSerializer(serializers.ModelSerializer):
-    project = ProjectSerializer(read_only=True)
+    project = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all())
     class Meta:
         model = ProjectDocument
         fields = ['id', 'project', 'file', 'uploaded_at']
+
+    def create(self, validated_data):
+        return ProjectDocument.objects.create(**validated_data)
 
 class BackupLogSerializer(serializers.ModelSerializer):
     class Meta:
