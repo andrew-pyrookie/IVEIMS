@@ -3,12 +3,40 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.conf import settings
 from django.utils.timezone import now
 import qrcode
+import uuid
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.conf import settings
 
+class Lab(models.Model):
+    LAB_CHOICES = [
+        ('DS', 'Design Studio'),
+        ('CL', 'Cezeri Lab'),
+        ('MT', 'MedTech Lab')
+    ]
+    name = models.CharField(max_length=2, choices=LAB_CHOICES, unique=True)
+    description = models.TextField(blank=True, null=True)
+    manager = models.ForeignKey(
+        'Users', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        limit_choices_to={'role': 'lab_manager'},
+        related_name='managed_labs'  # Add this to resolve the conflict
+    )
+
+    def get_full_name(self):
+        return dict(self.LAB_CHOICES)[self.name]
+
+    def __str__(self):
+        return self.get_full_name()
+
+    class Meta:
+        db_table = 'labs'
+
+# Custom User Manager
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -21,23 +49,24 @@ class CustomUserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_staff", True)
         return self.create_user(email, password, **extra_fields)
 
-# Updated User Model
-from django.db import models
 
 class Users(AbstractBaseUser, PermissionsMixin):
-    class RoleChoices(models.TextChoices):  # Define the available roles
+    class RoleChoices(models.TextChoices):
         ADMIN = "admin", "Admin"
         STUDENT = "student", "Student"
-        LAB_MANAGER = "lab manager", "Lab Manager"
-        TECHNICIAN = 'Technician', "Technician"
+        LAB_MANAGER = "lab_manager", "Lab Manager"
+        TECHNICIAN = "technician", "Technician"
 
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True, max_length=255)
     role = models.CharField(max_length=20, choices=RoleChoices.choices, default=RoleChoices.STUDENT)
+    lab = models.ForeignKey(Lab, null=True, blank=True, on_delete=models.SET_NULL)  # For Lab Managers
     created_at = models.DateTimeField(default=now)
     approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -53,31 +82,36 @@ class Users(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = "users"
-        verbose_name_plural = "Users"
 
-# Equipment Model
 class Equipment(models.Model):
+    class CategoryChoices(models.TextChoices):
+        ELECTRICAL = "electrical", "Electrical"
+        MECHANICAL = "mechanical", "Mechanical"
+        CONSUMABLE = "consumable", "Consumable"
+        MEDICAL = "medical", "Medical"
+
     name = models.CharField(max_length=255)
-    lab = models.CharField(max_length=100)
+    current_lab = models.ForeignKey('Lab', on_delete=models.CASCADE)
+    category = models.CharField(max_length=50, choices=CategoryChoices.choices, default=CategoryChoices.ELECTRICAL)
     STATUS_CHOICES = [
         ('available', 'Available'),
-        ('in use', 'In Use'),
+        ('in_use', 'In Use'),
         ('maintenance', 'Maintenance'),
     ]
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
-    unique_code = models.CharField(unique=True, max_length=255)
+    needs_sterilization = models.BooleanField(default=False)
+    unique_code = models.CharField(unique=True, max_length=255, editable=False)
     qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True)
     last_maintenance = models.DateField(blank=True, null=True)
     next_maintenance = models.DateField(blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
-    current_lab = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
-    last_sync = models.DateTimeField(auto_now=True)  
+    last_sync = models.DateTimeField(auto_now=True)
     is_synced = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.name
-    
+    def generate_unique_code(self):
+        return f"{self.current_lab.name}-{str(uuid.uuid4())[:8]}"
+
     def generate_qr_code(self):
         qr = qrcode.make(self.unique_code)
         buffer = BytesIO()
@@ -85,13 +119,18 @@ class Equipment(models.Model):
         self.qr_code.save(f"{self.unique_code}.png", ContentFile(buffer.getvalue()), save=False)
 
     def save(self, *args, **kwargs):
+        if not self.unique_code:
+            self.unique_code = self.generate_unique_code()
         if not self.qr_code:
             self.generate_qr_code()
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.name} ({self.current_lab})"
+
     class Meta:
         db_table = 'equipment'
-
+        
 class Project(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -105,36 +144,103 @@ class Project(models.Model):
     start_date = models.DateTimeField(default=now)
     end_date = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    members = models.ManyToManyField(Users, related_name='projects')
+    equipment = models.ManyToManyField(Equipment, related_name='projects')
+    progress = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.title} - {self.status}"
 
     class Meta:
         db_table = 'projects'
-class AssetTransfers(models.Model):
-    equipment = models.ForeignKey(Equipment, models.CASCADE, null=True, blank=True)
-    from_lab = models.CharField(max_length=100)
-    to_lab = models.CharField(max_length=100)
-    transfer_date = models.DateTimeField(blank=True, null=True)
+        
+class ProjectDocument(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='projects/%Y/%m/%d/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Doc for {self.project.title}"
+
+    class Meta:
+        db_table = 'project_documents'
+
+
+class BorrowRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    requesting_lab = models.ForeignKey(Lab, related_name='requests_made', on_delete=models.CASCADE)
+    owning_lab = models.ForeignKey(Lab, related_name='requests_received', on_delete=models.CASCADE)
+    requested_by = models.ForeignKey(Users, on_delete=models.CASCADE)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    request_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.equipment.name} from {self.owning_lab} to {self.requesting_lab}"
+
+    class Meta:
+        db_table = 'borrow_requests'
+class AssetTransfer(models.Model):
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    from_lab = models.ForeignKey(Lab, related_name='transfers_out', on_delete=models.CASCADE)
+    to_lab = models.ForeignKey(Lab, related_name='transfers_in', on_delete=models.CASCADE)
+    transfer_date = models.DateTimeField(auto_now_add=True)
     is_synced = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.equipment.name} from {self.from_lab} to {self.to_lab}"
 
     class Meta:
         db_table = 'asset_transfers'
 
-# Maintenance Reminders Model
 class MaintenanceReminders(models.Model):
-    equipment = models.ForeignKey(Equipment, models.CASCADE, null=True, blank=True)
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('sent', 'Sent'),
+        ('completed', 'Completed'),
+    ]
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, null=True, blank=True)
     reminder_date = models.DateTimeField(blank=True, null=True)
-    status = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return f"Reminder for {self.equipment.name} on {self.reminder_date}"
 
     class Meta:
         db_table = 'maintenance_reminders'
         
-class Booking(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+class MaintenanceLog(models.Model):
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    date_performed = models.DateTimeField()
+    details = models.TextField()
+    technician = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"Maintenance on {self.equipment.name} at {self.date_performed}"
+
+    class Meta:
+        db_table = 'maintenance_logs'
+        
+class Booking(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    lab_space = models.ForeignKey(Lab, on_delete=models.CASCADE, null=True, blank=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    checked_out_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ('equipment', 'start_time', 'end_time')
@@ -142,13 +248,11 @@ class Booking(models.Model):
     def clean(self):
         if self.start_time >= self.end_time:
             raise ValidationError("End time must be after start time.")
-        
         overlapping_bookings = Booking.objects.filter(
             equipment=self.equipment,
             start_time__lt=self.end_time,
             end_time__gt=self.start_time
         ).exclude(id=self.id)
-        
         if overlapping_bookings.exists():
             raise ValidationError("This equipment is already booked for the selected time range.")
 
@@ -157,5 +261,49 @@ class Booking(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.equipment.name} booked by {self.user.username} from {self.start_time} to {self.end_time}"
+        return f"{self.equipment.name} booked by {self.user.name} from {self.start_time}"
 
+    class Meta:
+        db_table = 'bookings'
+
+class ProjectAllocation(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    allocation_start = models.DateField()
+    allocation_end = models.DateField()
+    allocated_by = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+
+    def clean(self):
+        if self.allocation_start >= self.allocation_end:
+            raise ValidationError("End date must be after start date.")
+        overlaps = ProjectAllocation.objects.filter(
+            equipment=self.equipment,
+            allocation_start__lt=self.allocation_end,
+            allocation_end__gt=self.allocation_start
+        ).exclude(id=self.id)
+        if overlaps.exists():
+            raise ValidationError("Equipment is already allocated for this period.")
+
+    def save(self, *args, **kwargs):
+        if self.allocated_by and self.allocated_by.role not in [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER, Users.RoleChoices.TECHNICIAN]:
+            raise ValidationError("Only Admin, Lab Manager, or Technician can allocate equipment.")
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.equipment.name} allocated to {self.project.title}"
+
+    class Meta:
+        db_table = 'project_allocations'
+        
+        
+class BackupLog(models.Model):
+    date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, choices=[('success', 'Success'), ('failed', 'Failed')])
+    file_path = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"Backup on {self.date} - {self.status}"
+
+    class Meta:
+        db_table = 'backup_logs'
