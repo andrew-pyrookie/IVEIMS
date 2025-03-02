@@ -90,6 +90,8 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="loading-container">
+        <Sidebar/>
+        <Topbar/>
         <div className="loading-spinner"></div>
         <p>Loading profile...</p>
       </div>

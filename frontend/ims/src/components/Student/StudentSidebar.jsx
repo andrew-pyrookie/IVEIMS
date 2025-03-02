@@ -50,15 +50,6 @@ const Sidebar = () => {
               <span className="text">Projects</span>
             </NavLink>
           </li>
-          <li>
-            <NavLink
-              to="/student/documents"
-              activeClassName="active" // Apply active class
-            >
-              <MdWork className="icon" />
-              <span className="text">Documents</span>
-            </NavLink>
-          </li>
             <li className={inventoryOpen ? "submenu-open" : ""}>
               <a href="#" onClick={toggleInventory} className="dropdown-link">
                 <FaBox className="icon" />

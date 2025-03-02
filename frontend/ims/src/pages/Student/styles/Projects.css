@@ -1,123 +1,111 @@
-/* Style the dropdown container */
-select {
-  appearance: none; /* Remove default styling */
-  -webkit-appearance: none; /* For Safari */
-  -moz-appearance: none; /* For Firefox */
-  width: 100%;
-  padding: 8px 32px 8px 12px; /* Add padding for text and arrow */
-  border: 1px solid #e2e8f0; /* Border color */
-  border-radius: 4px; /* Rounded corners */
-  background-color: white; /* Background color */
-  font-size: 14px; /* Font size */
-  color: #4a5568; /* Text color */
-  cursor: pointer; /* Pointer cursor on hover */
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a5568'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Custom arrow */
-  background-repeat: no-repeat;
-  background-position: right 8px center; /* Position the arrow */
-  background-size: 16px; /* Size of the arrow */
+/* StudentDashboard.css */
+.student-dashboard {
+  padding-top: 70px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 250px;
+
 }
 
-/* Hover and Focus States */
-select:hover {
-  border-color: #cbd5e0; /* Change border color on hover */
+.dashboard-header {
+  margin-bottom: 20px;
 }
 
-select:focus {
-  outline: none; /* Remove default focus outline */
-  border-color: #3498db; /* Change border color on focus */
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Add a focus ring */
+.dashboard-header h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 10px;
 }
 
-/* Disabled State */
-select:disabled {
-  background-color: #f7fafc; /* Light gray background */
-  color: #a0aec0; /* Gray text */
-  cursor: not-allowed; /* Disabled cursor */
-}
-/* Booking Form */
-.booking-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
+.dashboard-header p {
+  font-size: 1.1rem;
+  color: #666;
 }
 
-.booking-form .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.files-section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.booking-form label {
-  font-weight: 500;
-  color: #4a5568;
-}
-
-.booking-form select,
-.booking-form input {
-  padding: 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-/* Status Badges */
-.status-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.status-accepted {
-  background-color: #e3fcef;
-  color: #0f766e;
-}
-
-.status-rejected {
-  background-color: #fee2e2;
-  color: #dc2626;
-}
-
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.action-button {
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
+.files-section h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 15px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 10px;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.3s ease;
+}
+
+.file-item:hover {
+  background-color: #f5f5f5;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-icon {
+  font-size: 1.2rem;
+  color: #007bff;
+}
+
+.file-name {
+  font-size: 1rem;
+  color: #333;
+}
+
+.download-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
 }
 
-.accept-button {
-  background-color: #34d399;
-  color: white;
+.download-button:hover {
+  background-color: #0056b3;
 }
 
-.accept-button:hover {
-  background-color: #10b981;
+.no-files {
+  font-size: 1rem;
+  color: #666;
+  text-align: center;
+  margin-top: 20px;
 }
 
-.reject-button {
-  background-color: #f87171;
-  color: white;
-}
-
-.reject-button:hover {
-  background-color: #ef4444;
+.loading,
+.error {
+  font-size: 1.2rem;
+  color: #333;
+  text-align: center;
+  margin-top: 20px;
 }

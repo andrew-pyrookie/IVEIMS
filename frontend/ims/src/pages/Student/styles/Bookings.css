@@ -1,87 +1,41 @@
-/* Booking Form */
-.booking-form {
+.student-dashboard {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.student-dashboard h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.student-dashboard p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.student-dashboard ul {
+  list-style: none;
+  padding: 0;
+}
+
+.student-dashboard li {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.booking-form .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.booking-form label {
-  font-weight: 500;
-  color: #4a5568;
-}
-
-.booking-form select,
-.booking-form input {
-  padding: 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-/* Status Badges */
-.status-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.status-accepted {
-  background-color: #e3fcef;
-  color: #0f766e;
-}
-
-.status-rejected {
-  background-color: #fee2e2;
-  color: #dc2626;
-}
-
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.action-button {
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 4px;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.download-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
+  border-radius: 5px;
 }
 
-.accept-button {
-  background-color: #34d399;
-  color: white;
-}
-
-.accept-button:hover {
-  background-color: #10b981;
-}
-
-.reject-button {
-  background-color: #f87171;
-  color: white;
-}
-
-.reject-button:hover {
-  background-color: #ef4444;
+.download-button:hover {
+  background-color: #0056b3;
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaRegThumbsUp, FaRegBell, FaChevronDown, FaUser, FaEdit, FaSignOutAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import Sidebar from "/src/components/LabTechnician/LabTechnicianSidebar.jsx"; // Import Sidebar
+import Sidebar from "/src/components/LabManager/LabManagerSidebar.jsx"; // Import Sidebar
 import "./TopBar.css";
 
 const TopBar = () => {

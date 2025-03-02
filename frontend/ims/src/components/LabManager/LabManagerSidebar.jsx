@@ -60,7 +60,7 @@ const Sidebar = () => {
               </li>
               <li>
                 <NavLink
-                  to="/lamanager/cezerilab"
+                  to="/labmanager/cezerilab"
                   activeClassName="active"
                 >
                   <FaFlask className="submenu-icon" />
@@ -89,7 +89,16 @@ const Sidebar = () => {
           </li>
           <li>
             <NavLink
-              to="lLabmanager/SharedResourses"
+              to="/labmanager/projects"
+              activeClassName="active" // Apply active class
+            >
+              <FaDatabase className="icon" />
+              <span className="text">Projects</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="lLabmanager/sharedResourses"
               activeClassName="active" // Apply active class
             >
               <FaFileAlt className="icon" />
@@ -104,15 +113,7 @@ const Sidebar = () => {
               <FaDatabase className="icon" />
               <span className="text">Reports</span>
             </NavLink>
-            <li>
-            <NavLink
-              to="/labmanager/Projects"
-              activeClassName="active" // Apply active class
-            >
-              <FaDatabase className="icon" />
-              <span className="text">Projects</span>
-            </NavLink>
-          </li>
+
           </li>
         </ul>
       </div>

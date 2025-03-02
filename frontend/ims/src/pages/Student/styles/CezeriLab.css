@@ -1,0 +1,297 @@
+/* Styling for the Book button */
+.book-button {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+    margin-left: 8px;
+  }
+  
+  .book-button:hover {
+    background-color:#1875c1;
+  }
+  
+  .book-button .button-text {
+    margin-left: 5px;
+  }
+  
+  /* Update action buttons container to accommodate the new button */
+  .action-buttons {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  /* Booking modal specific styles */
+  .modal-content.booking-modal {
+    max-width: 500px;
+  }
+  
+  /* Datetime input styling */
+  input[type="datetime-local"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+  }
+  
+  input[type="datetime-local"]:focus {
+    border-color: #2196f3;
+    outline: none;
+  }
+  
+  /* Status indicators for booked equipment */
+  .status-badge.status-booked {
+    background-color: #ff9800;
+    color: white;
+  }
+  
+  /* Form validation styles */
+  input:required:invalid,
+  input:focus:invalid {
+    border-color: #f44336;
+  }
+  
+  input:required:valid {
+    border-color: #4caf50;
+  }
+  
+  /* Booking confirmation message */
+  .booking-confirmation {
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+  }
+  
+  .booking-confirmation h3 {
+    margin-top: 0;
+    color: #2e7d32;
+  }
+  
+  /* Equipment availability indicator */
+  .availability-indicator {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .availability-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .availability-dot.available {
+    background-color: #4caf50;
+  }
+  
+  .availability-dot.soon {
+    background-color: #ff9800;
+  }
+  
+  .availability-dot.booked {
+    background-color: #f44336;
+  }
+  
+  /* Time slot selection */
+  .time-slots-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .time-slot-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  
+  .time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  
+  .time-slot {
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .time-slot:hover {
+    border-color: #2196f3;
+    background-color: #e3f2fd;
+  }
+  
+  .time-slot.selected {
+    background-color: #2196f3;
+    color: white;
+    border-color: #2196f3;
+  }
+  
+  .time-slot.unavailable {
+    background-color: #f5f5f5;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+  
+  /* Responsive adjustments for the booking modal */
+  @media (max-width: 768px) {
+    .form-row {
+      flex-direction: column;
+    }
+    
+    .form-group.half {
+      width: 100%;
+    }
+    
+    .time-slots-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  /* Current bookings table inside the booking modal */
+  .current-bookings {
+    margin-top: 16px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 16px;
+  }
+  
+  .current-bookings h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #424242;
+  }
+  
+  .bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  
+  .bookings-table th, 
+  .bookings-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .bookings-table th {
+    font-weight: 600;
+    color: #424242;
+  }
+  
+  /* Equipment details in the booking modal */
+  .booking-equipment-details {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .equipment-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    object-fit: cover;
+    margin-right: 16px;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .equipment-image-placeholder {
+    color: #9e9e9e;
+    font-size: 24px;
+  }
+  
+  .equipment-info h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+  }
+  
+  .equipment-meta {
+    display: flex;
+    gap: 16px;
+    color: #616161;
+    font-size: 13px;
+  }
+  
+  /* Booking success animation */
+  @keyframes successCheckmark {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .booking-success {
+    text-align: center;
+    padding: 32px 16px;
+  }
+  
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    background-color: #4caf50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    color: white;
+    font-size: 32px;
+    animation: successCheckmark 0.5s ease-in-out forwards;
+  }
+  
+  .booking-success h3 {
+    margin-top: 0;
+    color: #2e7d32;
+  }
+  
+  .booking-success p {
+    margin-bottom: 24px;
+    color: #616161;
+  }
+  
+  .view-bookings-button {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+  }
+  
+  .view-bookings-button:hover {
+    background-color: #1976d2;
+  }
+
+  
