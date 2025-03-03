@@ -11,7 +11,7 @@ from .views import (
     # Users
     UserListView, UserDetailView,
     # Equipment
-    EquipmentListCreateView, EquipmentDetailView, TransferEquipmentView,
+    EquipmentListCreateView, EquipmentDetailView, TransferEquipmentView, EquipmentByLabView,
     # Projects
     ProjectListCreateView, ProjectDetailView,
     # Project Allocation
@@ -89,6 +89,7 @@ urlpatterns = [
     # Equipment
     path('equipment/', EquipmentListCreateView.as_view(), name='equipment-list'),
     path('equipment/<int:pk>/', EquipmentDetailView.as_view(), name='equipment-detail'),
+    path('equipment/by-lab/<int:lab_id>/', EquipmentByLabView.as_view(), name='equipment-by-lab'),
     path('transfer-equipment/', TransferEquipmentView.as_view(), name='transfer-equipment'),
 
     # Projects (Admin Creates, Others View/Manage)
