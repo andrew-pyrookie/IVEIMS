@@ -91,7 +91,8 @@ class Equipment(models.Model):
         MEDICAL = "medical", "Medical"
 
     name = models.CharField(max_length=255)
-    current_lab = models.ForeignKey('Lab', on_delete=models.CASCADE)
+    current_lab = models.ForeignKey('Lab', on_delete=models.CASCADE, related_name='current_equipment')
+    home_lab = models.ForeignKey('Lab', on_delete=models.CASCADE, related_name='home_equipment', null=True, blank=True)  # New field
     category = models.CharField(max_length=50, choices=CategoryChoices.choices, default=CategoryChoices.ELECTRICAL)
     STATUS_CHOICES = [
         ('available', 'Available'),
@@ -108,6 +109,8 @@ class Equipment(models.Model):
     description = models.TextField(blank=True, null=True)
     last_sync = models.DateTimeField(auto_now=True)
     is_synced = models.BooleanField(default=False)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # New field
+    quantity = models.PositiveIntegerField(default=1)  # New field
 
     def generate_unique_code(self):
         return f"{self.current_lab.name}-{str(uuid.uuid4())[:8]}"
