@@ -3,7 +3,8 @@ import { NavLink } from "react-router-dom"; // Use NavLink instead of Link
 import "./Sidebar.css"; // Import styles
 import { FaChartBar, FaProjectDiagram, FaCalendarAlt, FaUser, FaTimes,FaBox,FaTools,FaFlask,FaMedkit,FaChevronRight,FaChevronDown } from "react-icons/fa"; // Import icons
 import { MdWork } from "react-icons/md";
-import { FaBars } from "react-icons/fa"; // Import Hamburger icon
+import { FaBars } from "react-icons/fa";
+import Kulogo from "/src/assets/kulogo.png";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // Sidebar is hidden by default
@@ -28,7 +29,7 @@ const Sidebar = () => {
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="sidebar-header">
-          <h1>Student Dashboard</h1>
+          <img src={Kulogo} alt="Logo" className="sidebar-logo" />
         </div>
         <ul>
           <li>
