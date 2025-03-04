@@ -47,6 +47,9 @@ class EquipmentSerializer(serializers.ModelSerializer):
     home_lab_id = serializers.PrimaryKeyRelatedField(queryset=Lab.objects.all(), source='home_lab', required=False, allow_null=True, write_only=True)
     unit_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, default=0.00)
     quantity = serializers.IntegerField(required=False, default=1)
+    last_maintenance = serializers.DateField(required=False, allow_null=True) 
+    next_maintenance = serializers.DateField(required=False, allow_null=True)  
+    description = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Equipment
@@ -54,7 +57,7 @@ class EquipmentSerializer(serializers.ModelSerializer):
             'id', 'name', 'current_lab', 'home_lab', 'category', 'status',
             'unique_code', 'qr_code', 'unit_price', 'quantity', 'total_price',
             'last_maintenance', 'next_maintenance', 'description',
-            'current_lab_id', 'home_lab_id'  # Include write-only fields
+            'current_lab_id', 'home_lab_id' 
         ]
 
     def create(self, validated_data):
