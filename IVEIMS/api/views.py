@@ -151,9 +151,11 @@ class LabDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LabSerializer
     permission_classes = [IsAdmin]
 
+
 class EquipmentListCreateView(generics.ListCreateAPIView):
     serializer_class = EquipmentSerializer
     permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         user = self.request.user
         if user.role == 'admin':
@@ -163,6 +165,7 @@ class EquipmentListCreateView(generics.ListCreateAPIView):
         elif user.role == 'student':
             return Equipment.objects.filter(status='available')
         return Equipment.objects.none()
+
     def perform_create(self, serializer):
         if self.request.user.role not in ['admin', 'lab_manager', 'technician']:
             raise PermissionDenied("Only staff can create equipment.")
