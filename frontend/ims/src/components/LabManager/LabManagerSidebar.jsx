@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom"; // Use NavLink instead of Link
 import "./Sidebar.css"; // Import styles
 import { FaChartBar, FaUsers, FaBox, FaCalendarAlt, FaFileAlt, FaDatabase, FaBars, FaUser, FaTimes,FaChevronDown,FaChevronRight,FaTools,FaFlask,FaMedkit
-} from "react-icons/fa"; // Import icons
+} from "react-icons/fa"; 
+import Kulogo from "/src/assets/kulogo.png";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // Sidebar is hidden by default on small screens
@@ -27,7 +28,7 @@ const Sidebar = () => {
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="sidebar-header">
-          <h1>labMan Dashboard</h1>
+          <img src={Kulogo} alt="Logo" className="sidebar-logo" />
         </div>
         <ul>
           <li>
