@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -19,39 +20,43 @@ from .serializers import (
 
 Users = get_user_model()
 
-class IsAdminOrStaff(BasePermission):
+class IsAdmin(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and (request.user.role == 'admin' or request.user.is_staff)
-
-class IsAdminLabManagerTechnician(BasePermission):
-    def has_permission(self, request, view):
-        allowed_roles = [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER, Users.RoleChoices.TECHNICIAN]
-        return request.user.is_authenticated and request.user.role in allowed_roles
+        return request.user.is_authenticated and request.user.role == 'admin'
 
 class IsLabManagerOrAdmin(BasePermission):
     def has_permission(self, request, view):
-        allowed_roles = [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER]
-        return request.user.is_authenticated and request.user.role in allowed_roles
+        return request.user.is_authenticated and request.user.role in ['admin', 'lab_manager']
+    
+class IsStudent(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'student'
+
+class IsLabStaff(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role in ['admin', 'lab_manager', 'technician']
+    def has_object_permission(self, request, view, obj):
+        if request.user.role == 'admin':
+            return True
+        if hasattr(obj, 'current_lab'):
+            return obj.current_lab == request.user.lab
+        if hasattr(obj, 'lab'):
+            return obj.lab == request.user.lab
+        return True
 
 class RegisterView(generics.CreateAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     permission_classes = [permissions.AllowAny]
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def perform_create(self, serializer):
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
-        return Response({
-            "user": UsersSerializer(user).data,
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED)
+        self.request.data['refresh'] = str(refresh)
+        self.request.data['access'] = str(refresh.access_token)
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
-
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -63,12 +68,11 @@ class LoginView(APIView):
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
-            "user": {"id": user.id, "role": user.role, "lab": user.lab.name if user.lab else None},
+            "user": {"id": user.id, "role": user.role, "lab": user.lab.get_full_name() if user.lab else None},
         }, status=status.HTTP_200_OK)
 
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
     def post(self, request):
         try:
             refresh_token = request.data["refresh"]
@@ -81,130 +85,188 @@ class LogoutView(APIView):
 class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
-
     def get_object(self):
         return self.request.user
 
 class DashboardView(APIView):
     permission_classes = [IsAuthenticated]
-
     def get(self, request):
         user = request.user
         data = {"role": user.role}
-        if user.role == Users.RoleChoices.ADMIN:
+        if user.role == 'admin':
             data.update({
                 "users": Users.objects.count(),
+                "labs": Lab.objects.count(),
                 "equipment": Equipment.objects.count(),
                 "projects": Project.objects.count(),
                 "pending_bookings": Booking.objects.filter(status='pending').count(),
             })
-        elif user.role == Users.RoleChoices.LAB_MANAGER:
+        elif user.role == 'lab_manager':
             lab = user.lab
+            equipment = EquipmentSerializer(Equipment.objects.filter(current_lab=lab), many=True).data
             data.update({
-                "lab": lab.name,
-                "equipment": Equipment.objects.filter(current_lab=lab).count(),
-                "projects": Project.objects.filter(members=user).count(),
-                "pending_borrow_requests": BorrowRequest.objects.filter(owning_lab=lab, status='pending').count(),
+                "lab": lab.get_full_name(),
+                "equipment": equipment,
+                "projects": Project.objects.filter(lab=lab).count(),
+                "transfers": AssetTransfer.objects.filter(from_lab=lab).count(),
+                "pending_bookings": Booking.objects.filter(lab_space=lab, status='pending').count(),
             })
-        elif user.role == Users.RoleChoices.TECHNICIAN:
+        elif user.role == 'technician':
+            lab = user.lab
+            equipment_qs = Equipment.objects.filter(current_lab=lab) if lab else Equipment.objects.all()
             data.update({
-                "maintenance_reminders": MaintenanceReminders.objects.filter(status='pending').count(),
-                "equipment_in_maintenance": Equipment.objects.filter(status='maintenance').count(),
+                "lab": lab.get_full_name() if lab else "All Labs",
+                "equipment_maintenance": equipment_qs.filter(status='maintenance').count(),
+                "pending_reminders": MaintenanceReminders.objects.filter(status='pending').count(),
             })
-        elif user.role == Users.RoleChoices.STUDENT:
+        elif user.role == 'student':
+            projects = ProjectSerializer(Project.objects.filter(members=user), many=True).data
+            bookings = BookingSerializer(Booking.objects.filter(user=user), many=True).data
             data.update({
-                "projects": Project.objects.filter(members=user).count(),
-                "bookings": Booking.objects.filter(user=user).count(),
+                "projects": projects,
+                "bookings": bookings,
             })
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(data)
 
 class LabListCreateView(generics.ListCreateAPIView):
     queryset = Lab.objects.all()
     serializer_class = LabSerializer
-    permission_classes = [IsAdminOrStaff]
+    permission_classes = [IsAdmin]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            self.perform_create(serializer)
+        except IntegrityError as e:
+            return Response(
+                {"detail": f"Lab with name '{request.data.get('name')}' already exists."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class LabDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lab.objects.all()
     serializer_class = LabSerializer
-    permission_classes = [IsAdminOrStaff]
+    permission_classes = [IsAdmin]
 
 class EquipmentListCreateView(generics.ListCreateAPIView):
-    queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
     permission_classes = [IsAuthenticated]
-
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'admin':
+            return Equipment.objects.all()
+        elif user.role in ['lab_manager', 'technician']:
+            return Equipment.objects.filter(current_lab=user.lab)
+        elif user.role == 'student':
+            return Equipment.objects.filter(status='available')
+        return Equipment.objects.none()
     def perform_create(self, serializer):
-        equipment = serializer.save()
-        equipment.generate_qr_code()
-        equipment.save()
+        if self.request.user.role not in ['admin', 'lab_manager', 'technician']:
+            raise PermissionDenied("Only staff can create equipment.")
+        serializer.save()
+
+class EquipmentByLabView(generics.ListAPIView):
+    serializer_class = EquipmentSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        user = self.request.user
+        lab_id = self.kwargs['lab_id']
+        lab = get_object_or_404(Lab, id=lab_id)
+        queryset = Equipment.objects.filter(current_lab=lab)
+        if user.role == 'admin':
+            return queryset
+        elif user.role in ['lab_manager', 'technician']:
+            if user.lab != lab:
+                raise PermissionDenied("You can only view your lab's equipment.")
+            return queryset
+        elif user.role == 'student':
+            return queryset.filter(status='available')
+        return queryset.none()
 
 class EquipmentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLabStaff]
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'admin':
+            return Equipment.objects.all()
+        elif user.role in ['lab_manager', 'technician']:
+            return Equipment.objects.filter(current_lab=user.lab)
+        return Equipment.objects.none()
 
 class UserListView(generics.ListAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
-    permission_classes = [IsAdminOrStaff]
+    permission_classes = [IsAdmin]
 
-class UserDetailView(generics.RetrieveAPIView):
+class UserDetailView(generics.RetrieveUpdateAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdmin]
 
 class ProjectListCreateView(generics.ListCreateAPIView):
-    queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
-
     def get_queryset(self):
-        if self.request.user.role in [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER, Users.RoleChoices.TECHNICIAN]:
+        user = self.request.user
+        if user.role == 'admin':
             return Project.objects.all()
-        return Project.objects.filter(members=self.request.user)
+        elif user.role in ['lab_manager', 'technician']:
+            return Project.objects.filter(lab=user.lab)
+        elif user.role == 'student':
+            return Project.objects.filter(members=user)
+        return Project.objects.none()
+    def perform_create(self, serializer):
+        if self.request.user.role not in ['admin', 'lab_manager']:
+            raise PermissionDenied("Only Admin or Lab Manager can create projects.")
+        serializer.save()
 
 class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLabManagerOrAdmin]
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'admin':
+            return Project.objects.all()
+        elif user.role == 'lab_manager':
+            return Project.objects.filter(lab=user.lab)
+        return Project.objects.none()
 
 class ProjectAllocationListCreateView(generics.ListCreateAPIView):
     queryset = ProjectAllocation.objects.all()
     serializer_class = ProjectAllocationSerializer
-    permission_classes = [IsAdminLabManagerTechnician]
-
+    permission_classes = [IsLabManagerOrAdmin]
     def perform_create(self, serializer):
         serializer.save(allocated_by=self.request.user)
 
 class ProjectAllocationDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProjectAllocation.objects.all()
     serializer_class = ProjectAllocationSerializer
-    permission_classes = [IsAdminLabManagerTechnician]
+    permission_classes = [IsLabManagerOrAdmin]
 
 class BookingViewSet(viewsets.ModelViewSet):
-    queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
-
     def get_queryset(self):
-        if self.request.user.role in [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER, Users.RoleChoices.TECHNICIAN]:
-            return Booking.objects.all()
-        return Booking.objects.filter(user=self.request.user)
-
+        user = self.request.user
+        if user.role in ['admin', 'lab_manager', 'technician']:
+            return Booking.objects.filter(lab_space=user.lab) if user.lab else Booking.objects.all()
+        return Booking.objects.filter(user=user)
     def perform_create(self, serializer):
-        print("Validated Data:", serializer.validated_data)  # Debug
         serializer.save(user=self.request.user)
-
     def perform_update(self, serializer):
-        if 'status' in serializer.validated_data and serializer.validated_data['status'] == 'approved':
-            if self.request.user.role not in [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER, Users.RoleChoices.TECHNICIAN]:
-                raise PermissionDenied("Only Admin, Lab Manager, or Technician can approve bookings.")
+        if 'status' in serializer.validated_data and serializer.validated_data['status'] in ['approved', 'rejected']:
+            if self.request.user.role not in ['admin', 'lab_manager', 'technician']:
+                raise PermissionDenied("Only staff can approve/reject bookings.")
         serializer.save()
+
 class BorrowRequestListCreateView(generics.ListCreateAPIView):
     queryset = BorrowRequest.objects.all()
     serializer_class = BorrowRequestSerializer
     permission_classes = [IsAuthenticated]
-
     def perform_create(self, serializer):
         serializer.save(requested_by=self.request.user)
 
@@ -225,50 +287,48 @@ class AssetTransferDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class TransferEquipmentView(APIView):
     permission_classes = [IsLabManagerOrAdmin]
-
-    def post(self, request, *args, **kwargs):
-        data = request.data
-        equipment = get_object_or_404(Equipment, id=data['equipment_id'])
-        from_lab = get_object_or_404(Lab, name=data['from_lab'])
-        to_lab = get_object_or_404(Lab, name=data['to_lab'])
+    def post(self, request):
+        equipment_id = request.data.get('equipment_id')
+        to_lab_name = request.data.get('to_lab')
+        equipment = get_object_or_404(Equipment, id=equipment_id)
+        to_lab = get_object_or_404(Lab, name=to_lab_name)
+        from_lab = equipment.current_lab
         equipment.current_lab = to_lab
         equipment.save()
         transfer = AssetTransfer.objects.create(
-            equipment=equipment,
-            from_lab=from_lab,
-            to_lab=to_lab,
+            equipment=equipment, 
+            from_lab=from_lab, 
+            to_lab=to_lab, 
+            transferred_by=request.user
         )
-        return Response({"message": "Equipment transferred successfully", "transfer_id": transfer.id}, status=status.HTTP_200_OK)
-
+        return Response({"message": "Equipment transferred", "transfer_id": transfer.id}, status=status.HTTP_200_OK)
 
 class MaintenanceRemindersListCreateView(generics.ListCreateAPIView):
     queryset = MaintenanceReminders.objects.all()
     serializer_class = MaintenanceRemindersSerializer
-    permission_classes = [IsAdminLabManagerTechnician]
+    permission_classes = [IsLabStaff]
 
 class MaintenanceRemindersDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MaintenanceReminders.objects.all()
     serializer_class = MaintenanceRemindersSerializer
-    permission_classes = [IsAdminLabManagerTechnician]
+    permission_classes = [IsLabStaff]
 
 class MaintenanceLogListCreateView(generics.ListCreateAPIView):
     queryset = MaintenanceLog.objects.all()
     serializer_class = MaintenanceLogSerializer
-    permission_classes = [IsAdminLabManagerTechnician]
-
+    permission_classes = [IsLabStaff]
     def perform_create(self, serializer):
         serializer.save(technician=self.request.user)
 
 class MaintenanceLogDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MaintenanceLog.objects.all()
     serializer_class = MaintenanceLogSerializer
-    permission_classes = [IsAdminLabManagerTechnician]
+    permission_classes = [IsLabStaff]
 
 class ProjectDocumentListCreateView(generics.ListCreateAPIView):
     queryset = ProjectDocument.objects.all()
     serializer_class = ProjectDocumentSerializer
     permission_classes = [IsAuthenticated]
-
     def get_queryset(self):
         if self.request.user.role in [Users.RoleChoices.ADMIN, Users.RoleChoices.LAB_MANAGER, Users.RoleChoices.TECHNICIAN]:
             return ProjectDocument.objects.all()
@@ -277,25 +337,22 @@ class ProjectDocumentListCreateView(generics.ListCreateAPIView):
 class ProjectDocumentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProjectDocument.objects.all()
     serializer_class = ProjectDocumentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLabManagerOrAdmin]
 
 class BackupLogListView(generics.ListAPIView):
     queryset = BackupLog.objects.all()
     serializer_class = BackupLogSerializer
-    permission_classes = [IsAdminOrStaff]
+    permission_classes = [IsAdmin]
 
 class OfflineSyncView(APIView):
-    permission_classes = [IsAdminOrStaff]
-
+    permission_classes = [IsAdmin]
     def post(self, request):
         unsynced_transfers = AssetTransfer.objects.filter(is_synced=False)
         for transfer in unsynced_transfers:
             transfer.is_synced = True
             transfer.save()
-
         unsynced_equipment = Equipment.objects.filter(is_synced=False)
         for equipment in unsynced_equipment:
             equipment.is_synced = True
             equipment.save()
-
         return Response({"message": "Offline data synced successfully."}, status=status.HTTP_200_OK)
