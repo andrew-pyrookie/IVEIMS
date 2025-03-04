@@ -24,11 +24,24 @@ class Lab(models.Model):
         null=True, 
         blank=True,
         limit_choices_to={'role': 'lab_manager'},
-        related_name='managed_labs'  # Add this to resolve the conflict
+        related_name='managed_labs'
     )
 
     def get_full_name(self):
-        return dict(self.LAB_CHOICES)[self.name]
+        # Handle invalid or empty name gracefully
+        try:
+            return dict(self.LAB_CHOICES).get(self.name, 'Unknown Lab')
+        except (TypeError, AttributeError):
+            return 'Unknown Lab'
+
+    def clean(self):
+        # Validate name against LAB_CHOICES
+        if self.name not in dict(self.LAB_CHOICES):
+            raise ValidationError(f"Name must be one of: {', '.join(dict(self.LAB_CHOICES).keys())}")
+
+    def save(self, *args, **kwargs):
+        self.clean()  # Run validation before saving
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.get_full_name()
@@ -76,6 +89,11 @@ class Users(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["name", "role"]
 
     objects = CustomUserManager()
+    
+    def can_access_lab(self, lab):
+        if self.role == 'admin':
+            return True
+        return self.lab == lab
 
     def __str__(self):
         return f"{self.name} - {self.email}"
@@ -91,7 +109,8 @@ class Equipment(models.Model):
         MEDICAL = "medical", "Medical"
 
     name = models.CharField(max_length=255)
-    current_lab = models.ForeignKey('Lab', on_delete=models.CASCADE)
+    current_lab = models.ForeignKey('Lab', on_delete=models.CASCADE, related_name='current_equipment')
+    home_lab = models.ForeignKey('Lab', on_delete=models.CASCADE, related_name='home_equipment', null=True, blank=True)  # New field
     category = models.CharField(max_length=50, choices=CategoryChoices.choices, default=CategoryChoices.ELECTRICAL)
     STATUS_CHOICES = [
         ('available', 'Available'),
@@ -99,15 +118,16 @@ class Equipment(models.Model):
         ('maintenance', 'Maintenance'),
     ]
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
-    needs_sterilization = models.BooleanField(default=False)
     unique_code = models.CharField(unique=True, max_length=255, editable=False)
     qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True)
     last_maintenance = models.DateField(blank=True, null=True)
     next_maintenance = models.DateField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     last_sync = models.DateTimeField(auto_now=True)
     is_synced = models.BooleanField(default=False)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # New field
+    quantity = models.PositiveIntegerField(default=1)  # New field
+    total_price = models.DecimalField(max_digits=12, decimal_places=2, editable=False, default=0.00)
 
     def generate_unique_code(self):
         return f"{self.current_lab.name}-{str(uuid.uuid4())[:8]}"
@@ -119,6 +139,7 @@ class Equipment(models.Model):
         self.qr_code.save(f"{self.unique_code}.png", ContentFile(buffer.getvalue()), save=False)
 
     def save(self, *args, **kwargs):
+        self.total_price = self.unit_price * self.quantity
         if not self.unique_code:
             self.unique_code = self.generate_unique_code()
         if not self.qr_code:
@@ -126,7 +147,7 @@ class Equipment(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} ({self.current_lab})"
+        return f"{self.name} ({self.current_lab.get_full_name()})"
 
     class Meta:
         db_table = 'equipment'
@@ -137,7 +158,7 @@ class Project(models.Model):
         ('active', 'Active'),
         ('completed', 'Completed'),
     ]
-
+    lab = models.ForeignKey(Lab, on_delete=models.CASCADE, null=True, blank=True)  # Allow null values
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
@@ -149,7 +170,7 @@ class Project(models.Model):
     progress = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.title} - {self.status}"
+        return f"{self.title} - {self.lab.get_full_name() if self.lab else 'No Lab'}"
 
     class Meta:
         db_table = 'projects'
@@ -190,6 +211,7 @@ class AssetTransfer(models.Model):
     from_lab = models.ForeignKey(Lab, related_name='transfers_out', on_delete=models.CASCADE)
     to_lab = models.ForeignKey(Lab, related_name='transfers_in', on_delete=models.CASCADE)
     transfer_date = models.DateTimeField(auto_now_add=True)
+    transferred_by = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
     is_synced = models.BooleanField(default=False)
 
     def __str__(self):
@@ -241,6 +263,7 @@ class Booking(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     checked_in_at = models.DateTimeField(null=True, blank=True)
     checked_out_at = models.DateTimeField(null=True, blank=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         unique_together = ('equipment', 'start_time', 'end_time')
