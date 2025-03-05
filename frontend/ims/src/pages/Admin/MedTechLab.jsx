@@ -921,10 +921,6 @@ const MedTechLab = () => {
                   </p>
                 </div>
               </div>
-              <div className="qr-actions">
-                <button className="print-button">Print QR Code</button>
-                <button className="download-button">Download QR Code</button>
-              </div>
             </div>
           </div>
         )}

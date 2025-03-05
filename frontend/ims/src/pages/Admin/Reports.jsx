@@ -21,46 +21,74 @@ const Reports = () => {
   const fetchReports = async () => {
     setIsLoading(true);
     try {
+      console.log("Fetching lab reports...");
+  
       // Fetch lab reports (equipment transfers)
-      const labResponse = await fetch("http://localhost:8000/api/reports/lab", {
+      const labResponse = await fetch("http://localhost:8000/api/asset-transfers/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+  
+      if (!labResponse.ok) {
+        throw new Error(`Lab reports fetch failed: ${labResponse.status} ${labResponse.statusText}`);
+      }
+  
       const labData = await labResponse.json();
+      console.log("Lab Reports Data:", labData);
       setLabReports(labData);
-
+  
+      console.log("Fetching user reports...");
+  
       // Fetch user reports (user joins)
-      const userResponse = await fetch("http://localhost:8000/api/reports/user", {
+      const userResponse = await fetch("http://localhost:8000/api/users/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+  
+      if (!userResponse.ok) {
+        throw new Error(`User reports fetch failed: ${userResponse.status} ${userResponse.statusText}`);
+      }
+  
       const userData = await userResponse.json();
+      console.log("User Reports Data:", userData);
+  
+      // Check if userData contains the created_at field
+      if (Array.isArray(userData)) {
+        userData.forEach((user, index) => {
+          console.log(`User ${index + 1} - created_at:`, user.created_at);
+        });
+      } else {
+        console.warn("Unexpected user data format:", userData);
+      }
+  
       setUserReports(userData);
     } catch (error) {
       console.error("Error fetching reports:", error);
     } finally {
       setIsLoading(false);
+      console.log("Fetch process complete.");
     }
   };
+  
 
   // Columns for Lab Report (Equipment Transfers)
   const labColumns = React.useMemo(
     () => [
       {
         Header: "Equipment Name",
-        accessor: "equipmentName",
+        accessor: "Name",
       },
       {
         Header: "From Lab",
-        accessor: "fromLab",
+        accessor: "from_lab",
       },
       {
         Header: "To Lab",
-        accessor: "toLab",
+        accessor: "to_lab",
       },
       {
         Header: "Transfer Date",
@@ -76,17 +104,17 @@ const Reports = () => {
     () => [
       {
         Header: "User Name",
-        accessor: "userName",
+        accessor: "name",
       },
       {
         Header: "Email",
         accessor: "email",
       },
       {
-        Header: "Join Date",
-        accessor: "joinDate",
-        Cell: ({ value }) => new Date(value).toLocaleDateString(),
-      },
+        Header: "Role",
+        accessor: "role",
+        
+      }
     ],
     []
   );
