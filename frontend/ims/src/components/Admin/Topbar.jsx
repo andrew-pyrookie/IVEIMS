@@ -15,7 +15,7 @@ const TopBar = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/profile/", {
+        const response = await axios.get("http://localhost:8000/api/auth/profile/", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

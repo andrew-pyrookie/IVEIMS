@@ -98,6 +98,7 @@ const UsersManagement = () => {
       email: newUser.email,
       role: newUser.role,
       password: newUser.password,
+      confirmPassword: newUser.confirmPassword,
     };
 
     try {
@@ -171,7 +172,7 @@ const UsersManagement = () => {
     }
     
     try {
-      const response = await fetch(`http://localhost:8000/api/users/${editUser.id}`, {
+      const response = await fetch(`http://localhost:8000/api/users/${editUser.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -202,7 +203,7 @@ const UsersManagement = () => {
 
   const handleDeleteUser = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/users/${currentUser.id}`, {
+      const response = await fetch(`http://localhost:8000/api/users/${currentUser.id}/`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
