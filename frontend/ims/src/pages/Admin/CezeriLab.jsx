@@ -40,7 +40,7 @@ const MedTechLab = () => {
   useEffect(() => {
     fetchEquipment();
   }, []);
-
+  
   const fetchEquipment = async () => {
     setIsLoading(true);
     try {
@@ -50,12 +50,13 @@ const MedTechLab = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to fetch equipment data");
       }
-
+  
       const data = await response.json();
+      console.log("Full Equipment Data:", JSON.stringify(data, null, 2));
       setEquipment(data);
     } catch (error) {
       console.error("Error fetching equipment:", error);
@@ -273,10 +274,33 @@ const MedTechLab = () => {
       {
         Header: "Home Lab",
         accessor: "home_lab",
+        Cell: ({ value }) => {
+          // If the value is exactly "Design Studio", return it
+          if (value === "Design Studio") return value;
+          
+          // If it's "Unknown Lab", try to find a match
+          const lab = labOptions.find(lab => 
+            lab.name.toLowerCase().includes(value.toLowerCase())
+          );
+          
+          return lab ? lab.name : value;
+        },
       },
       {
         Header: "Current Lab",
         accessor: "current_lab",
+        Cell: ({ value }) => {
+          // If the value is already a valid lab name, return it
+          const validLabNames = labOptions.map(lab => lab.name);
+          if (validLabNames.includes(value)) return value;
+          
+          // Try to find a match in the lab options
+          const lab = labOptions.find(lab => 
+            lab.name.toLowerCase().includes(value.toLowerCase())
+          );
+          
+          return lab ? lab.name : value;
+        },
       },
       {
         Header: "Last Maintenance",
@@ -921,10 +945,6 @@ const MedTechLab = () => {
                     <strong>Home Lab:</strong> {currentItem.home_lab}
                   </p>
                 </div>
-              </div>
-              <div className="qr-actions">
-                <button className="print-button">Print QR Code</button>
-                <button className="download-button">Download QR Code</button>
               </div>
             </div>
           </div>
