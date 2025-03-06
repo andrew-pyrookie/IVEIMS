@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useTable, useSortBy, useGlobalFilter, usePagination } from "react-table";
-import { FaEdit, FaTrash, FaQrcode, FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { FaEdit, FaTrash, FaQrcode, FaSearch, FaSort, FaSortUp, FaSortDown, FaExchangeAlt } from "react-icons/fa";
 import Sidebar from "/src/components/Admin/Sidebar.jsx";
 import Topbar from "/src/components/Admin/Topbar.jsx";
 import "/src/pages/Admin/styles/MedTechLab.css";
 
 const MedTechLab = () => {
   const [equipment, setEquipment] = useState([]);
+  const [labs, setLabs] = useState([]); // New state for labs
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false); // New state for transfer modal
   const [currentItem, setCurrentItem] = useState(null);
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState({
@@ -23,22 +25,24 @@ const MedTechLab = () => {
     status: "available",
     qr_code: "",
     quantity: 1,
-    unit_price:"",
+    unit_price: 0,
     last_maintenance: "",
     next_maintenance: "",
     description: "",
+    to_lab: "", // New field for transfer modal
   });
 
-  const statusOptions = ["available", "in use", "maintenance"];
+  const statusOptions = ["available", "in_use", "maintenance"];
   const labOptions = [
-    { id: 1, name: "Design Studio Lab" },
-    { id: 2, name: "MedTech Lab" },
-    { id: 3, name: "Cezeri Lab" },
+    { id: 1, name: 'Design Studio Lab' },
+    { id: 2, name: 'MedTech Lab' },
+    { id: 3, name: 'Cezeri Lab' },
   ];
 
-  // Fetch equipment data
+  // Fetch equipment and labs data
   useEffect(() => {
     fetchEquipment();
+    fetchLabs(); // Fetch labs when the component mounts
   }, []);
 
   const fetchEquipment = async () => {
@@ -64,6 +68,26 @@ const MedTechLab = () => {
     }
   };
 
+  const fetchLabs = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/labs/', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch labs');
+      }
+
+      const data = await response.json();
+      setLabs(data); // Set the labs state with the fetched data
+    } catch (error) {
+      console.error('Error fetching labs:', error);
+    }
+  };
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,7 +102,7 @@ const MedTechLab = () => {
     setFormData({
       id: item.id,
       name: item.name,
-      unit_price:item.unit_price,
+      unit_price: item.unit_price,
       current_lab: item.current_lab,
       home_lab: item.home_lab,
       status: item.status,
@@ -104,6 +128,12 @@ const MedTechLab = () => {
     setShowQRModal(true);
   };
 
+  // Handle transfer click
+  const handleTransferClick = (item) => {
+    setCurrentItem(item);
+    setShowTransferModal(true);
+  };
+
   // Reset form
   const resetForm = () => {
     setFormData({
@@ -114,10 +144,11 @@ const MedTechLab = () => {
       status: "available",
       qr_code: "",
       quantity: 1,
-      unit_price:0,
+      unit_price: 0,
       last_maintenance: "",
       next_maintenance: "",
       description: "",
+      to_lab: "", // Reset the transfer lab field
     });
     setSubmitError("");
   };
@@ -128,7 +159,7 @@ const MedTechLab = () => {
 
     const payload = {
       name: formData.name,
-      unit_price:formData.unit_price,
+      unit_price: formData.unit_price,
       current_lab_id: parseInt(formData.current_lab, 10),
       home_lab_id: parseInt(formData.home_lab, 10),
       quantity: parseInt(formData.quantity, 10),
@@ -169,7 +200,7 @@ const MedTechLab = () => {
 
     const payload = {
       name: formData.name,
-      unit_price:formData.unit_price,
+      unit_price: formData.unit_price,
       current_lab_id: parseInt(formData.current_lab, 10),
       home_lab_id: parseInt(formData.home_lab, 10),
       quantity: parseInt(formData.quantity, 10),
@@ -229,6 +260,47 @@ const MedTechLab = () => {
     }
   };
 
+  // Handle transfer equipment
+  const handleTransferEquipment = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      equipment_id: currentItem.id, // Use the equipment ID from the current item
+      to_lab: formData.to_lab, // Use the selected lab name
+    };
+
+    try {
+      const response = await fetch('http://localhost:8000/api/transfer-equipment/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to transfer equipment');
+      }
+
+      // Update the equipment list with the new data
+      const updatedItem = await response.json();
+      setEquipment((prevEquipment) =>
+        prevEquipment.map((item) =>
+          item.id === currentItem.id ? { ...item, current_lab: formData.to_lab } : item
+        )
+      );
+
+      // Close the transfer modal and reset the form
+      setShowTransferModal(false);
+      resetForm();
+    } catch (error) {
+      setSubmitError(error.message || 'Failed to transfer equipment. Please try again.');
+      console.error('Error transferring equipment:', error);
+    }
+  };
+
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "Not scheduled";
@@ -262,7 +334,6 @@ const MedTechLab = () => {
         accessor: "unit_price",
         Cell: ({ value }) => `$${value}`,
       },
-
       {
         Header: "Status",
         accessor: "status",
@@ -314,6 +385,13 @@ const MedTechLab = () => {
               title="Delete Equipment"
             >
               <FaTrash />
+            </button>
+            <button
+              className="action-button transfer-button"
+              onClick={() => handleTransferClick(row.original)}
+              title="Transfer Equipment"
+            >
+              <FaExchangeAlt />
             </button>
           </div>
         ),
@@ -558,17 +636,6 @@ const MedTechLab = () => {
                   </div>
 
                   <div className="form-group half">
-                    <label htmlFor="total_price">Total Price</label>
-                    <input
-                      type="number"
-                      id="total_price"
-                      name="total_price"
-                      value={0}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="form-group half">
                     <label htmlFor="unit_price">Unit Price</label>
                     <input
                       type="number"
@@ -578,10 +645,7 @@ const MedTechLab = () => {
                       onChange={handleInputChange}
                     />
                   </div>
-
                 </div>
-
-                
 
                 <div className="form-row">
                   <div className="form-group half">
@@ -611,11 +675,12 @@ const MedTechLab = () => {
                       required
                     >
                       <option value="">Select a lab</option>
-                      {labOptions.map((lab) => (
+                      {labOptions.map(lab => (
                         <option key={lab.id} value={lab.id}>
                           {lab.name}
                         </option>
                       ))}
+                     
                     </select>
                   </div>
                 </div>
@@ -631,11 +696,12 @@ const MedTechLab = () => {
                       required
                     >
                       <option value="">Select a lab</option>
-                      {labOptions.map((lab) => (
+                      {labOptions.map(lab => (
                         <option key={lab.id} value={lab.id}>
                           {lab.name}
                         </option>
                       ))}
+                     
                     </select>
                   </div>
                 </div>
@@ -739,12 +805,12 @@ const MedTechLab = () => {
                   </div>
 
                   <div className="form-group half">
-                    <label htmlFor="edit-total_price">Total Price</label>
+                    <label htmlFor="edit-unit_price">Unit Price</label>
                     <input
                       type="number"
-                      id="edit-total_price"
-                      name="total_price"
-                      value={formData.total_price}
+                      id="edit-unit_price"
+                      name="unit_price"
+                      value={formData.unit_price}
                       onChange={handleInputChange}
                     />
                   </div>
@@ -776,11 +842,12 @@ const MedTechLab = () => {
                       onChange={handleInputChange}
                     >
                       <option value="">Select a lab</option>
-                      {labOptions.map((lab) => (
+                      {labOptions.map(lab => (
                         <option key={lab.id} value={lab.id}>
                           {lab.name}
                         </option>
                       ))}
+                     
                     </select>
                   </div>
                 </div>
@@ -795,11 +862,12 @@ const MedTechLab = () => {
                       onChange={handleInputChange}
                     >
                       <option value="">Select a lab</option>
-                      {labOptions.map((lab) => (
+                      {labOptions.map(lab => (
                         <option key={lab.id} value={lab.id}>
                           {lab.name}
                         </option>
                       ))}
+                     
                     </select>
                   </div>
                 </div>
@@ -921,6 +989,57 @@ const MedTechLab = () => {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Transfer Equipment Modal */}
+        {showTransferModal && currentItem && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2 className="modal-title">Transfer Equipment</h2>
+                <button
+                  className="close-button"
+                  onClick={() => setShowTransferModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <form onSubmit={handleTransferEquipment} className="equipment-form">
+                <div className="form-group">
+                  <label htmlFor="to_lab">Transfer To Lab*</label>
+                  <select
+                    id="to_lab"
+                    name="to_lab"
+                    value={formData.to_lab}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select a lab</option>
+                    {labs.map((lab) => (
+                      <option key={lab.id} value={lab.name}>
+                        {lab.description}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {submitError && <div className="error-message">{submitError}</div>}
+
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="cancel-button"
+                    onClick={() => setShowTransferModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="submit-button">
+                    Transfer Equipment
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

@@ -250,17 +250,43 @@ class ProjectAllocationDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProjectAllocationSerializer
     permission_classes = [IsLabManagerOrAdmin]
 
+# class BookingViewSet(viewsets.ModelViewSet):
+#     serializer_class = BookingSerializer
+#     permission_classes = [IsAuthenticated]
+#     def get_queryset(self):
+#         user = self.request.user
+#         if user.role in ['admin', 'lab_manager', 'technician']:
+#             return Booking.objects.filter(lab_space=user.lab) if user.lab else Booking.objects.all()
+#         return Booking.objects.filter(user=user)
+#     def perform_create(self, serializer):
+#         serializer.save(user=self.request.user)
+#     def perform_update(self, serializer):
+#         if 'status' in serializer.validated_data and serializer.validated_data['status'] in ['approved', 'rejected']:
+#             if self.request.user.role not in ['admin', 'lab_manager', 'technician']:
+#                 raise PermissionDenied("Only staff can approve/reject bookings.")
+#         serializer.save()
+from rest_framework.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import ValidationError as DjangoValidationError
+
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         user = self.request.user
         if user.role in ['admin', 'lab_manager', 'technician']:
             return Booking.objects.filter(lab_space=user.lab) if user.lab else Booking.objects.all()
         return Booking.objects.filter(user=user)
+
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        """Handle booking creation and catch validation errors properly."""
+        try:
+            serializer.save(user=self.request.user)
+        except DjangoValidationError as e:
+            raise ValidationError({"error": e.messages})  # Returns 400 instead of 500
+
     def perform_update(self, serializer):
+        """Ensure only staff can approve/reject bookings."""
         if 'status' in serializer.validated_data and serializer.validated_data['status'] in ['approved', 'rejected']:
             if self.request.user.role not in ['admin', 'lab_manager', 'technician']:
                 raise PermissionDenied("Only staff can approve/reject bookings.")

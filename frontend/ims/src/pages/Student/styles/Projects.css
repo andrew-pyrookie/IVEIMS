@@ -1,111 +1,178 @@
-/* StudentDashboard.css */
-.student-dashboard {
-  padding-top: 70px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
+.projects-container {
+  padding: 20px;
   background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 100vh;
   margin-left: 250px;
-
+  margin-top: 70px;
 }
 
-.dashboard-header {
+.content-header {
   margin-bottom: 20px;
 }
 
-.dashboard-header h1 {
-  font-size: 2rem;
+.content-header h1 {
+  font-size: 24px;
   color: #333;
-  margin-bottom: 10px;
 }
 
-.dashboard-header p {
-  font-size: 1.1rem;
+.content-header p {
+  font-size: 14px;
   color: #666;
 }
 
-.files-section {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.files-section h2 {
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.file-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.file-item {
+.actions-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  transition: background-color 0.3s ease;
+  margin-bottom: 20px;
 }
 
-.file-item:hover {
+.search-container {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
+.search-icon {
+  color: #999;
+  margin-right: 10px;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+}
+
+.table-container {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.projects-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.projects-table th,
+.projects-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.projects-table th {
   background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
 }
 
-.file-info {
+.projects-table td {
+  color: #555;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-available {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-in-progress {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.status-completed {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-buttons {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.file-icon {
-  font-size: 1.2rem;
-  color: #007bff;
-}
-
-.file-name {
-  font-size: 1rem;
-  color: #333;
-}
-
-.download-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 12px;
+.pagination-button {
+  background-color: #fff;
+  border: 1px solid #ddd;
   border-radius: 5px;
+  padding: 5px 10px;
   cursor: pointer;
+  font-size: 14px;
+}
+
+.pagination-button:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.pagination-size-select {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.loading-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
-  font-size: 0.9rem;
-  transition: background-color 0.3s ease;
+  justify-content: center;
+  height: 200px;
 }
 
-.download-button:hover {
-  background-color: #0056b3;
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
 }
 
-.no-files {
-  font-size: 1rem;
-  color: #666;
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 16px;
   text-align: center;
   margin-top: 20px;
 }
 
-.loading,
-.error {
-  font-size: 1.2rem;
-  color: #333;
+.no-data {
   text-align: center;
+  color: #666;
+  font-size: 16px;
   margin-top: 20px;
 }
