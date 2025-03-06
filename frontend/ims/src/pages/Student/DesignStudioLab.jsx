@@ -1,35 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { useTable, useSortBy, useGlobalFilter, usePagination } from "react-table";
-import { FaQrcode, FaSearch, FaSort, FaSortUp, FaSortDown, FaCalendarAlt } from "react-icons/fa";
-import StudentSidebar from "/src/components/Student/StudentSidebar.jsx";
-import StudentTopbar from "/src/components/Student/StudentTopbar.jsx";
+import { FaQrcode, FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import Sidebar from "/src/components/Student/StudentSidebar.jsx";
+import Topbar from "/src/components/Student/StudentTopbar.jsx";
 import "/src/pages/Student/styles/DesignStudioLab.css";
+
+// Define the formatDate function
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A"; // Handle cases where the date is null or undefined
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 const DesignStudio = () => {
   const [equipment, setEquipment] = useState([]);
+  const [labs, setLabs] = useState([]); // State to store labs data
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showQRModal, setShowQRModal] = useState(false);
-  const [showBookModal, setShowBookModal] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const [submitError, setSubmitError] = useState("");
-  const [showBookingSuccess, setShowBookingSuccess] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingFormData, setBookingFormData] = useState({
-    equipmentName: "",
-    bookedBy: "",
-    userEmail: "",
-    startTime: "",
-    endTime: "",
+    equipment_id: "",
+    lab_space_id: "",
+    start_time: "",
+    end_time: "",
+    status: "pending",
+    project: "",
   });
+  const [showBookedEquipmentsModal, setShowBookedEquipmentsModal] = useState(false);
+  const [bookedEquipments, setBookedEquipments] = useState([]);
 
+  // Fetch equipment and labs data
   useEffect(() => {
     fetchEquipment();
+    fetchLabs(); // Fetch labs data when the component mounts
   }, []);
 
+  // Fetch equipment data
   const fetchEquipment = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/equipment/", {
+      const response = await fetch("http://localhost:8000/api/equipment/by-lab/1/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -49,23 +67,72 @@ const DesignStudio = () => {
     }
   };
 
+  // Fetch labs data
+  const fetchLabs = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/labs/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch labs data");
+      }
+
+      const data = await response.json();
+      setLabs(data); // Set the fetched labs data to the state
+    } catch (error) {
+      console.error("Error fetching labs:", error);
+    }
+  };
+
+  // Fetch booked equipment data
+  const fetchBookedEquipments = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/bookings/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch booked equipment data");
+      }
+
+      const data = await response.json();
+      console.log("Booked Equipments Data:", data); // Log the API response
+      setBookedEquipments(data);
+      setShowBookedEquipmentsModal(true);
+    } catch (error) {
+      console.error("Error fetching booked equipment:", error);
+    }
+  };
+
+  // Handle QR code click
   const handleQRCodeClick = (item) => {
     setCurrentItem(item);
     setShowQRModal(true);
   };
 
-  const handleBookClick = (item) => {
+  // Handle booking click
+  const handleBookingClick = (item) => {
     setCurrentItem(item);
+    // Reset the booking form data for the new equipment
     setBookingFormData({
-      equipmentName: item.equipmentName,
-      bookedBy: "",
-      userEmail: "",
-      startTime: "",
-      endTime: "",
+      equipment_id: item.id, // Set the new equipment ID
+      lab_space_id: "",
+      start_time: "",
+      end_time: "",
+      status: "pending",
+      project: "",
     });
-    setShowBookModal(true);
+    setShowBookingModal(true);
   };
 
+  // Handle booking form input changes
   const handleBookingInputChange = (e) => {
     const { name, value } = e.target;
     setBookingFormData({
@@ -74,63 +141,57 @@ const DesignStudio = () => {
     });
   };
 
-  const handleBookEquipment = async (e) => {
+  // Handle booking submission
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
 
+    // Convert start_time and end_time to Date objects for comparison
+    const startTime = new Date(bookingFormData.start_time);
+    const endTime = new Date(bookingFormData.end_time);
+
+    // Validate that end_time is after start_time
+    if (endTime <= startTime) {
+      alert("End time must be after start time.");
+      return; // Stop the submission if validation fails
+    }
+
+    const payload = {
+      equipment_id: bookingFormData.equipment_id,
+      lab_space_id: bookingFormData.lab_space_id,
+      start_time: bookingFormData.start_time,
+      end_time: bookingFormData.end_time,
+      status: bookingFormData.status,
+      project: bookingFormData.project,
+    };
+
     try {
-      const response = await fetch("http://localhost:8000/api/equipment/bookings/", {
+      const response = await fetch("http://localhost:8000/api/bookings/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(bookingFormData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         throw new Error("Failed to book equipment");
       }
 
-      // Close the booking modal
-      setShowBookModal(false);
-
-      // Show success message
-      setShowBookingSuccess(true);
-
-      // Reset the form data
-      setBookingFormData({
-        equipmentName: "",
-        bookedBy: "",
-        userEmail: "",
-        startTime: "",
-        endTime: "",
-      });
-
-      // Refresh equipment list to show updated status
-      fetchEquipment();
-
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setShowBookingSuccess(false);
-      }, 3000);
+      const bookingData = await response.json();
+      console.log("Booking successful:", bookingData);
+      setShowBookingModal(false);
     } catch (error) {
-      setSubmitError("Failed to book equipment. Please try again.");
       console.error("Error booking equipment:", error);
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "Not scheduled";
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
-
-  // Define the columns for the table
+  // Define table columns
   const columns = React.useMemo(
     () => [
       {
-        Header: "Product Name",
-        accessor: "equipmentName",
+        Header: "Name",
+        accessor: "name",
       },
       {
         Header: "Description",
@@ -150,21 +211,11 @@ const DesignStudio = () => {
       },
       {
         Header: "Home Lab",
-        accessor: "homeLab",
+        accessor: "home_lab",
       },
       {
         Header: "Current Lab",
-        accessor: "currentLab",
-      },
-      {
-        Header: "Last Maintenance",
-        accessor: "lastMaintenance",
-        Cell: ({ value }) => formatDate(value),
-      },
-      {
-        Header: "Next Maintenance",
-        accessor: "nextMaintenance",
-        Cell: ({ value }) => formatDate(value),
+        accessor: "current_lab",
       },
       {
         Header: "Actions",
@@ -180,12 +231,11 @@ const DesignStudio = () => {
               <FaQrcode />
             </button>
             <button
-              className="action-button book-button"
-              onClick={() => handleBookClick(row.original)}
+              className="action-button booking-button"
+              onClick={() => handleBookingClick(row.original)}
               title="Book Equipment"
             >
-              <FaCalendarAlt />
-              <span className="button-text">Book</span>
+              Book
             </button>
           </div>
         ),
@@ -194,6 +244,7 @@ const DesignStudio = () => {
     []
   );
 
+  // Table setup
   const {
     getTableProps,
     getTableBodyProps,
@@ -230,9 +281,9 @@ const DesignStudio = () => {
   if (isLoading) {
     return (
       <div className="design-studio-container">
-        <StudentSidebar />
+        <Sidebar />
         <div className="main-content">
-          <StudentTopbar />
+          <Topbar />
           <div className="loading-container">
             <div className="loading-spinner"></div>
             <p>Loading equipment data...</p>
@@ -244,13 +295,13 @@ const DesignStudio = () => {
 
   return (
     <div className="design-studio-container">
-      <StudentSidebar />
+      <Sidebar />
       <div className="main-content">
-        <StudentTopbar />
+        <Topbar />
 
         <div className="content-header">
           <h1>Design Studio Equipment Management</h1>
-          <p>View and book equipment in the Design Studio</p>
+          <p>Manage all equipment in the Design Studio</p>
         </div>
 
         <div className="actions-container">
@@ -264,6 +315,12 @@ const DesignStudio = () => {
               className="search-input"
             />
           </div>
+          <button
+            className="view-booked-equipments-button"
+            onClick={fetchBookedEquipments}
+          >
+            View Booked Equipments
+          </button>
         </div>
 
         <div className="table-container">
@@ -370,137 +427,6 @@ const DesignStudio = () => {
           </div>
         </div>
 
-        {/* Book Equipment Modal */}
-        {showBookModal && currentItem && (
-          <div className="modal-overlay">
-            <div className="modal-content booking-modal">
-              <div className="modal-header">
-                <h2 className="modal-title">Book Equipment</h2>
-                <button
-                  className="close-button"
-                  onClick={() => {
-                    setShowBookModal(false);
-                    setSubmitError("");
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="booking-equipment-details">
-                <div className="equipment-image">
-                  <span className="equipment-image-placeholder">
-                    <FaCalendarAlt />
-                  </span>
-                </div>
-                <div className="equipment-info">
-                  <h3>{currentItem.equipmentName}</h3>
-                  <div className="equipment-meta">
-                    <span>
-                      <strong>Status:</strong> {currentItem.status}
-                    </span>
-                    <span>
-                      <strong>Lab:</strong> {currentItem.homeLab}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <form onSubmit={handleBookEquipment} className="equipment-form">
-                <div className="form-group">
-                  <label htmlFor="equipmentName">Equipment Name</label>
-                  <input
-                    type="text"
-                    id="equipmentName"
-                    name="equipmentName"
-                    value={bookingFormData.equipmentName}
-                    readOnly
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="bookedBy">Booked By*</label>
-                  <input
-                    type="text"
-                    id="bookedBy"
-                    name="bookedBy"
-                    value={bookingFormData.bookedBy}
-                    onChange={handleBookingInputChange}
-                    required
-                    placeholder="Your full name"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="userEmail">Email*</label>
-                  <input
-                    type="email"
-                    id="userEmail"
-                    name="userEmail"
-                    value={bookingFormData.userEmail}
-                    onChange={handleBookingInputChange}
-                    required
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group half">
-                    <label htmlFor="startTime">Start Time*</label>
-                    <input
-                      type="datetime-local"
-                      id="startTime"
-                      name="startTime"
-                      value={bookingFormData.startTime}
-                      onChange={handleBookingInputChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group half">
-                    <label htmlFor="endTime">End Time*</label>
-                    <input
-                      type="datetime-local"
-                      id="endTime"
-                      name="endTime"
-                      value={bookingFormData.endTime}
-                      onChange={handleBookingInputChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="availability-indicator">
-                  <div
-                    className={`availability-dot ${
-                      currentItem.status === "available" ? "available" : "booked"
-                    }`}
-                  ></div>
-                  <span>Current status: {currentItem.status}</span>
-                </div>
-
-                {submitError && <div className="error-message">{submitError}</div>}
-
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="cancel-button"
-                    onClick={() => {
-                      setShowBookModal(false);
-                      setSubmitError("");
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="submit-button">
-                    Book Equipment
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
         {/* QR Code Modal */}
         {showQRModal && currentItem && (
           <div className="modal-overlay">
@@ -517,44 +443,151 @@ const DesignStudio = () => {
               <div className="qr-content">
                 <div className="qr-code-container">
                   <img
-                    src={`/api/placeholder/200/200`}
-                    alt={`QR Code for ${currentItem.equipmentName}`}
+                    src={currentItem.qr_code}
+                    alt={`QR Code for ${currentItem.name}`}
                     className="qr-code-image"
                   />
                 </div>
                 <div className="qr-details">
-                  <h3>{currentItem.equipmentName}</h3>
+                  <h3>{currentItem.name}</h3>
                   <p className="qr-description">{currentItem.description}</p>
                   <p>
                     <strong>ID:</strong> {currentItem.id}
                   </p>
                   <p>
-                    <strong>Home Lab:</strong> {currentItem.homeLab}
+                    <strong>Home Lab:</strong> {currentItem.home_lab}
                   </p>
                 </div>
-              </div>
-              <div className="qr-actions">
-                <button className="print-button">Print QR Code</button>
-                <button className="download-button">Download QR Code</button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Booking Success Modal */}
-        {showBookingSuccess && (
+        {/* Booking Modal */}
+        {showBookingModal && currentItem && (
           <div className="modal-overlay">
-            <div className="modal-content booking-modal">
-              <div className="booking-success">
-                <div className="success-icon">✓</div>
-                <h3>Booking Successful!</h3>
-                <p>Your equipment has been booked successfully.</p>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2 className="modal-title">Book Equipment</h2>
                 <button
-                  className="view-bookings-button"
-                  onClick={() => setShowBookingSuccess(false)}
+                  className="close-button"
+                  onClick={() => setShowBookingModal(false)}
                 >
-                  Close
+                  ✕
                 </button>
+              </div>
+              <form onSubmit={handleBookingSubmit} className="equipment-form">
+                <div className="form-group">
+                  <label htmlFor="lab_space_id">Lab Space*</label>
+                  <select
+                    id="lab_space_id"
+                    name="lab_space_id"
+                    value={bookingFormData.lab_space_id}
+                    onChange={handleBookingInputChange}
+                    required
+                  >
+                    <option value="">Select a lab space</option>
+                    {labs.map((lab) => (
+                      <option key={lab.id} value={lab.id}>
+                        {lab.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="start_time">Start Time*</label>
+                  <input
+                    type="datetime-local"
+                    id="start_time"
+                    name="start_time"
+                    value={bookingFormData.start_time}
+                    onChange={handleBookingInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="end_time">End Time*</label>
+                  <input
+                    type="datetime-local"
+                    id="end_time"
+                    name="end_time"
+                    value={bookingFormData.end_time}
+                    onChange={handleBookingInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="project">Project ID*</label>
+                  <input
+                    type="text"
+                    id="project"
+                    name="project"
+                    value={bookingFormData.project}
+                    onChange={handleBookingInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="cancel-button"
+                    onClick={() => setShowBookingModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="submit-button">
+                    Book Equipment
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Booked Equipments Modal */}
+        {showBookedEquipmentsModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2 className="modal-title">Booked Equipments</h2>
+                <button
+                  className="close-button"
+                  onClick={() => setShowBookedEquipmentsModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="booked-equipments-list">
+                {bookedEquipments.length === 0 ? (
+                  <p>No equipment booked.</p>
+                ) : (
+                  <table className="booked-equipments-table">
+                    <thead>
+                      <tr>
+                        <th>Equipment Name</th>
+                        <th>Lab Space</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bookedEquipments.map((booking) => (
+                        <tr key={booking.id}>
+                          <td>{booking.equipment}</td> {/* Use the equipment field */}
+                          <td>{booking.lab_space}</td> {/* Lab space */}
+                          <td>{formatDate(booking.start_time)}</td> {/* Formatted start time */}
+                          <td>{formatDate(booking.end_time)}</td> {/* Formatted end time */}
+                          <td>{booking.status}</td> {/* Status */}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>

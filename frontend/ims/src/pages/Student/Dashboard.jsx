@@ -95,11 +95,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Notifications Card */}
-          <div className="card notifications">
-            <h3>Notifications</h3>
-            <p>No new notifications</p>
-          </div>
+
         </div>
       </div>
     </div>

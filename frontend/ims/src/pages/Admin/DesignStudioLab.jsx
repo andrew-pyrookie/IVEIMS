@@ -892,6 +892,7 @@ import Sidebar from "/src/components/Admin/Sidebar.jsx";
 import Topbar from "/src/components/Admin/Topbar.jsx";
 import "/src/pages/Admin/styles/DesignStudioLab.css";
 
+
 const DesignStudio = () => {
   const [equipment, setEquipment] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

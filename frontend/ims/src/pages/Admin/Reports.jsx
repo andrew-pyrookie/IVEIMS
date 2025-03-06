@@ -22,7 +22,7 @@ const Reports = () => {
     setIsLoading(true);
     try {
       console.log("Fetching lab reports...");
-  
+
       // Fetch lab reports (equipment transfers)
       const labResponse = await fetch("http://localhost:8000/api/asset-transfers/", {
         method: "GET",
@@ -30,17 +30,19 @@ const Reports = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-  
+
       if (!labResponse.ok) {
         throw new Error(`Lab reports fetch failed: ${labResponse.status} ${labResponse.statusText}`);
       }
-  
+
       const labData = await labResponse.json();
       console.log("Lab Reports Data:", labData);
+
+      // Set the lab reports directly (no need for additional mapping)
       setLabReports(labData);
-  
+
       console.log("Fetching user reports...");
-  
+
       // Fetch user reports (user joins)
       const userResponse = await fetch("http://localhost:8000/api/users/", {
         method: "GET",
@@ -48,14 +50,14 @@ const Reports = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-  
+
       if (!userResponse.ok) {
         throw new Error(`User reports fetch failed: ${userResponse.status} ${userResponse.statusText}`);
       }
-  
+
       const userData = await userResponse.json();
       console.log("User Reports Data:", userData);
-  
+
       // Check if userData contains the created_at field
       if (Array.isArray(userData)) {
         userData.forEach((user, index) => {
@@ -64,7 +66,7 @@ const Reports = () => {
       } else {
         console.warn("Unexpected user data format:", userData);
       }
-  
+
       setUserReports(userData);
     } catch (error) {
       console.error("Error fetching reports:", error);
@@ -73,14 +75,18 @@ const Reports = () => {
       console.log("Fetch process complete.");
     }
   };
-  
 
   // Columns for Lab Report (Equipment Transfers)
   const labColumns = React.useMemo(
     () => [
       {
         Header: "Equipment Name",
-        accessor: "Name",
+        accessor: "equipment", // Use the equipment name from the API response
+      },
+      {
+        Header: "Transferred By",
+        accessor: "transferred_by.name", // Access the nested "name" field in "transferred_by"
+        Cell: ({ value }) => value || "Unknown", // Fallback for missing data
       },
       {
         Header: "From Lab",
@@ -92,8 +98,8 @@ const Reports = () => {
       },
       {
         Header: "Transfer Date",
-        accessor: "transferDate",
-        Cell: ({ value }) => new Date(value).toLocaleDateString(),
+        accessor: "transfer_date",
+        Cell: ({ value }) => new Date(value).toLocaleDateString(), // Format the date
       },
     ],
     []
@@ -113,8 +119,7 @@ const Reports = () => {
       {
         Header: "Role",
         accessor: "role",
-        
-      }
+      },
     ],
     []
   );

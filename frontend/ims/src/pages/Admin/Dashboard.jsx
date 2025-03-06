@@ -128,7 +128,7 @@ const Dashboard = () => {
     const fetchPendingLabBookings = async () => {
       try {
         const token = getAuthToken();
-        const response = await fetch("http://localhost:8000/api/pending-lab-bookings", {
+        const response = await fetch("http://localhost:8000/api/bookings", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

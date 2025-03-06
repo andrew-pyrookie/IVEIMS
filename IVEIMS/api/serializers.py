@@ -8,7 +8,7 @@ class UsersSerializer(serializers.ModelSerializer):
     lab = serializers.StringRelatedField(read_only=True)
     class Meta:
         model = Users
-        fields = ['id', 'name', 'email', 'role', 'lab', 'approved']
+        fields = ['id', 'name', 'email', 'role', 'lab', 'approved', 'password']
 
     def create(self, validated_data):
         user = Users(**validated_data)
@@ -76,6 +76,10 @@ class ProjectSerializer(serializers.ModelSerializer):
             'end_date', 'members', 'equipment', 'progress', 'lab_id'
         ]
 
+from rest_framework import serializers
+from django.core.exceptions import ValidationError
+from .models import Booking, Equipment, Lab, Project
+
 class BookingSerializer(serializers.ModelSerializer):
     user = UsersSerializer(read_only=True)
     equipment = serializers.StringRelatedField(read_only=True)
@@ -91,6 +95,25 @@ class BookingSerializer(serializers.ModelSerializer):
             'status', 'checked_in_at', 'checked_out_at', 'project', 
             'equipment_id', 'lab_space_id'
         ]
+
+    def validate(self, data):
+        """Check for overlapping bookings before saving."""
+        equipment = data.get('equipment')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+
+        if equipment and start_time and end_time:
+            overlapping_bookings = Booking.objects.filter(
+                equipment=equipment,
+                start_time__lt=end_time,
+                end_time__gt=start_time
+            )
+
+            if overlapping_bookings.exists():
+                raise serializers.ValidationError("This equipment is already booked for the selected time range.")
+
+        return data
+
 
 class ProjectAllocationSerializer(serializers.ModelSerializer):
     project = serializers.StringRelatedField(read_only=True)
