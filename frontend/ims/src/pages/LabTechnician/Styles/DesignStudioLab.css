@@ -1,237 +1,263 @@
-DesignStudio.css
+.design-studio-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
 
-  .design-studio-container {
-    display: flex;
-    min-height: 100vh;
-    background-color: #f5f7fa;
-  }
-  
-  .main-content {
-    flex: 1;
-    padding: 24px;
-    margin-left: 250px; /* Adjust based on your sidebar width */
-    margin-top: 60px; /* Adjust based on your topbar height */
-  }
-  
-  .content-header {
-    margin-bottom: 24px;
-  }
-  
-  .content-header h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #2c3e50;
-  }
-  
-  .content-header p {
-    color: #7f8c8d;
-    font-size: 14px;
-  }
-  
-  /* Actions Container */
-  .actions-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-  }
-  
-  .search-container {
-    display: flex;
-    align-items: center;
-    background-color: white;
-    border-radius: 6px;
-    padding: 8px 16px;
-    width: 300px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  .search-icon {
-    color: #95a5a6;
-    margin-right: 10px;
-  }
-  
-  .search-input {
-    border: none;
-    outline: none;
-    width: 100%;
-    font-size: 14px;
-  }
-  
-  .add-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 16px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background-color 0.2s;
-  }
-  
-  .add-button:hover {
-    background-color: #2980b9;
-  }
-  
-  /* Table Styles */
-  .table-container {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-  
-  .equipment-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .equipment-table th {
-    background-color: #f8fafc;
-    padding: 16px;
-    text-align: left;
-    font-weight: 600;
-    color: #4a5568;
-    border-bottom: 1px solid #e2e8f0;
-    white-space: nowrap;
-  }
-  
-  .equipment-table thead tr {
-    height: 60px;
-  }
-  
-  .header-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .sort-icon {
-    margin-left: 4px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .equipment-table td {
-    padding: 16px; /* Ensure sufficient padding */
-    border-bottom: 1px solid #e2e8f0;
-    color: #2d3748;
-    vertical-align: top; /* Align content to the top */
-  }
-  .equipment-table tr:last-child td {
-    border-bottom: none;
-  }
-  
-  .equipment-table tr:hover {
-    background-color: #f7fafc;
-  }
-  
-  .equipment-name-cell {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .equipment-description {
-    font-size: 14px;
-    color: #4a5568; /* Darker color for better readability */
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limit to 2 lines */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    max-width: 300px; /* Adjust as needed */
-  }
-  
-  .status-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: capitalize;
-  }
-  
-  .status-available {
-    background-color: #e3fcef;
-    color: #0f766e;
-  }
-  
-  .status-in-use {
-    background-color: #e1effe;
-    color: #1e429f;
-  }
-  
-  .status-maintenance {
-    background-color: #fef3c7;
-    color: #92400e;
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 8px;
-  }
-  
-  .action-button {
-    border: none;
-    border-radius: 4px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    transition: background-color 0.2s;
-  }
-  
-  .qr-button {
-    background-color: #6b7280;
-  }
-  
-  .qr-button:hover {
-    background-color: #4b5563;
-  } 
+.main-content {
+  flex: 1;
+  padding: 24px;
+  margin-left: 250px; /* Adjust based on your sidebar width */
+  margin-top: 60px; /* Adjust based on your topbar height */
+}
 
-.modal-content{
+.content-header {
+  margin-bottom: 24px;
+}
+
+.content-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.content-header p {
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+/* Actions Container */
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 6px;
+  padding: 8px 16px;
+  width: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-icon {
+  color: #95a5a6;
+  margin-right: 10px;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+}
+
+.add-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.add-button:hover {
+  background-color: #2980b9;
+}
+
+/* Table Styles */
+.table-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.equipment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.equipment-table th {
+  background-color: #f8fafc;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #4a5568;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.equipment-table thead tr {
+  height: 60px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sort-icon {
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.equipment-table td {
+  padding: 16px; /* Ensure sufficient padding */
+  border-bottom: 1px solid #e2e8f0;
+  color: #2d3748;
+  vertical-align: top; /* Align content to the top */
+}
+.equipment-table tr:last-child td {
+  border-bottom: none;
+}
+
+.equipment-table tr:hover {
+  background-color: #f7fafc;
+}
+
+.equipment-name-cell {
   display: flex;
   flex-direction: column;
+}
+
+.equipment-description {
+  font-size: 14px;
+  color: #4a5568; /* Darker color for better readability */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 300px; /* Adjust as needed */
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-available {
+  background-color: #e3fcef;
+  color: #0f766e;
+}
+
+.status-in-use {
+  background-color: #e1effe;
+  color: #1e429f;
+}
+
+.status-maintenance {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-button {
+  border: none;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.qr-button {
+  background-color: #6b7280;
+}
+
+.qr-button:hover {
+  background-color: #4b5563;
+} 
+
+.modal-content{
+display: flex;
+flex-direction: column;
 }
 
 .form-row{
-  display: flex;
-  flex-direction: column;
+display: flex;
+flex-direction: column;
 }
 
 .form-group textarea {
-  background-color: white; /* Ensure the background is white */
-  border: 1px solid #e2e8f0; /* Optional: Add a border for better visibility */
-  border-radius: 4px; /* Optional: Match the border radius of other inputs */
-  padding: 8px; /* Optional: Add padding for better spacing */
-  font-size: 14px; /* Optional: Match the font size of other inputs */
-  resize: vertical; /* Allow vertical resizing */
-  color: #4b5563;
+background-color: white; /* Ensure the background is white */
+border: 1px solid #e2e8f0; /* Optional: Add a border for better visibility */
+border-radius: 4px; /* Optional: Match the border radius of other inputs */
+padding: 8px; /* Optional: Add padding for better spacing */
+font-size: 14px; /* Optional: Match the font size of other inputs */
+resize: vertical; /* Allow vertical resizing */
+color: #4b5563;
 }
 
 .form-group select {
-  background-color: white; /* Ensure the background is white */
-  border: 1px solid #e2e8f0; /* Add a border for better visibility */
-  border-radius: 4px; /* Match the border radius of other inputs */
-  padding: 8px; /* Add padding for better spacing */
-  font-size: 14px; /* Match the font size of other inputs */
-  color: #2d3748; /* Ensure the text color is visible */
-  appearance: none; /* Remove default browser styling */
-  -webkit-appearance: none; /* For Safari */
-  -moz-appearance: none; /* For Firefox */
+background-color: white; /* Ensure the background is white */
+border: 1px solid #e2e8f0; /* Add a border for better visibility */
+border-radius: 4px; /* Match the border radius of other inputs */
+padding: 8px; /* Add padding for better spacing */
+font-size: 14px; /* Match the font size of other inputs */
+color: #2d3748; /* Ensure the text color is visible */
+appearance: none; /* Remove default browser styling */
+-webkit-appearance: none; /* For Safari */
+-moz-appearance: none; /* For Firefox */
 }
 
 /* Add a custom dropdown arrow */
 .form-group select {
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a5568%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 12px;
-  padding-right: 32px; /* Add space for the arrow */
+background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a5568%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+background-repeat: no-repeat;
+background-position: right 8px center;
+background-size: 12px;
+padding-right: 32px; /* Add space for the arrow */
+}
+
+/* Transfer Button Styling */
+.action-button.transfer-button {
+background-color: #4caf50; /* Green color for transfer */
+color: white;
+border: none;
+border-radius: 4px;
+padding: 8px 12px;
+margin: 0 4px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: background-color 0.3s ease;
+}
+
+.action-button.transfer-button:hover {
+background-color: #45a049; /* Darker green on hover */
+}
+
+.action-button.transfer-button:active {
+background-color: #3d8b40; /* Even darker green on click */
+}
+
+.action-button.transfer-button .fa-exchange-alt {
+font-size: 14px;
+margin-right: 4px;
 }

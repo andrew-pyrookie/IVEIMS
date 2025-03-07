@@ -10,11 +10,13 @@ const Dashboard = () => {
   const [equipmentAvailable, setEquipmentAvailable] = useState(0);
   const [pendingEquipmentBookings, setPendingEquipmentBookings] = useState(0);
   const [pendingLabBookings, setPendingLabBookings] = useState(0);
-  const [totalBookings, setTotalBookings] = useState(0); // New state for total bookings
+  const [totalBookings, setTotalBookings] = useState(0);
   const [notification, setNotification] = useState("");
   const [equipmentStatusData, setEquipmentStatusData] = useState([]);
   const [labEquipmentData, setLabEquipmentData] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [projects, setProjects] = useState([]);
+  const [pendingBookings, setPendingBookings] = useState(0);
 
   // Modern color palette
   const STATUS_COLORS = ["#06D6A0", "#118AB2", "#EF476F"];
@@ -39,7 +41,7 @@ const Dashboard = () => {
           throw new Error("Failed to fetch total users");
         }
         const data = await response.json();
-        setTotalUsers(data.length); // Assuming the response is an array of users
+        setTotalUsers(data.length);
       } catch (error) {
         console.error("Error fetching total users:", error);
       }
@@ -57,28 +59,21 @@ const Dashboard = () => {
           throw new Error("Failed to fetch equipment data");
         }
         const data = await response.json();
-        
-        // Set equipment total
         setEquipmentAvailable(data.length);
-        
-        // Process equipment status for pie chart
+
         const statusCounts = {
           available: 0,
           inUse: 0,
           maintenance: 0
         };
-        
-        // Count equipment by lab
+
         const labCounts = {};
-        
-        // Process equipment data
+
         data.forEach(item => {
-          // Count by status
           if (item.status === "available") statusCounts.available++;
           else if (item.status === "in_use") statusCounts.inUse++;
           else if (item.status === "maintenance") statusCounts.maintenance++;
-          
-          // Count by lab
+
           if (item.lab) {
             if (!labCounts[item.lab]) {
               labCounts[item.lab] = 0;
@@ -86,20 +81,18 @@ const Dashboard = () => {
             labCounts[item.lab]++;
           }
         });
-        
-        // Format data for pie chart
+
         const statusChartData = [
           { name: "Available", value: statusCounts.available },
           { name: "In Use", value: statusCounts.inUse },
           { name: "Maintenance", value: statusCounts.maintenance }
         ];
-        
-        // Format data for lab chart
+
         const labChartData = Object.keys(labCounts).map(lab => ({
           name: lab,
           count: labCounts[lab]
-        })).sort((a, b) => b.count - a.count); // Sort by count, descending
-        
+        })).sort((a, b) => b.count - a.count);
+
         setEquipmentStatusData(statusChartData);
         setLabEquipmentData(labChartData);
       } catch (error) {
@@ -155,7 +148,7 @@ const Dashboard = () => {
           throw new Error("Failed to fetch total bookings");
         }
         const data = await response.json();
-        setTotalBookings(data.length); // Assuming the response is an array of bookings
+        setTotalBookings(data.length);
       } catch (error) {
         console.error("Error fetching total bookings:", error);
       }
@@ -179,13 +172,33 @@ const Dashboard = () => {
       }
     };
 
+    const fetchDashboardData = async () => {
+      try {
+        const token = getAuthToken();
+        const response = await fetch("http://localhost:8000/api/dashboard/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data");
+        }
+        const data = await response.json();
+        setProjects(data.projects || []);
+        setPendingBookings(data.pending_bookings || 0);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      }
+    };
+
     // Fetch all data
     fetchTotalUsers();
     fetchEquipmentData();
     fetchPendingEquipmentBookings();
     fetchPendingLabBookings();
-    fetchTotalBookings(); // Fetch total bookings
+    fetchTotalBookings();
     fetchNotification();
+    fetchDashboardData();
   }, []);
 
   // Active shape for animated hover effect on pie chart
@@ -285,117 +298,73 @@ const Dashboard = () => {
           <div className="stat-box">
             <div className="stat-icon">📅</div>
             <div className="stat-label">Total Equipment Bookings</div>
-            <div className="stat-value">{totalBookings}</div> {/* Display total bookings here */}
+            <div className="stat-value">{totalBookings}</div>
           </div>
           <div className="stat-box">
-            <div className="stat-icon">📅</div>
-            <div className="stat-label">Pending Lab Bookings</div>
-            <div className="stat-value">{pendingLabBookings}</div>
+            <div className="stat-icon">📂</div>
+            <div className="stat-label">Total Projects</div>
+            <div className="stat-value">{projects}</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-icon">⏳</div>
+            <div className="stat-label">Pending Bookings</div>
+            <div className="stat-value">{pendingBookings}</div>
           </div>
         </div>
-        
 
         <div className="all-chart-container">
-        {/* Equipment Status Pie Chart */}
-        <div className="chart-container">
-          <div className="chart-header">
-            <h2 className="chart-title">Equipment Status</h2>
-            <div className="chart-legend">
-              {equipmentStatusData.map((entry, index) => (
-                <div key={`legend-${index}`} className="legend-item">
-                  <div className="legend-color" style={{ backgroundColor: STATUS_COLORS[index % STATUS_COLORS.length] }}></div>
-                  <span className="legend-text">{entry.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="chart-content">
-            <div className="pie-chart-wrapper">
-              <ResponsiveContainer width="100%" height={400}>
-                <PieChart>
-                  <Pie
-                    activeIndex={activeIndex}
-                    activeShape={renderActiveShape}
-                    data={equipmentStatusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={80}
-                    outerRadius={120}
-                    fill="#8884d8"
-                    dataKey="value"
-                    onMouseEnter={onPieEnter}
-                  >
-                    {equipmentStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomPieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="chart-summary">
-              <div className="summary-title">Equipment Status Summary</div>
-              <div className="summary-stats">
+          {/* Equipment Status Pie Chart */}
+          <div className="chart-container">
+            <div className="chart-header">
+              <h2 className="chart-title">Equipment Status</h2>
+              <div className="chart-legend">
                 {equipmentStatusData.map((entry, index) => (
-                  <div key={`stat-${index}`} className="summary-stat">
-                    <div className="stat-num" style={{ color: STATUS_COLORS[index % STATUS_COLORS.length] }}>{entry.value}</div>
-                    <div className="stat-desc">{entry.name}</div>
+                  <div key={`legend-${index}`} className="legend-item">
+                    <div className="legend-color" style={{ backgroundColor: STATUS_COLORS[index % STATUS_COLORS.length] }}></div>
+                    <span className="legend-text">{entry.name}</span>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </div>
-        
-        {/* Equipment by Lab Bar Chart */}
-        <div className="chart-container">
-          <div className="chart-header">
-            <h2 className="chart-title">Equipment Distribution by Lab</h2>
-          </div>
-          <div className="chart-content">
-            <div className="bar-chart-wrapper">
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={labEquipmentData} margin={{ top: 20, right: 30, left: 20, bottom: 70 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                  <XAxis 
-                    dataKey="name" 
-                    angle={-45} 
-                    textAnchor="end" 
-                    height={70} 
-                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip content={<CustomBarTooltip />} />
-                  <Bar 
-                    dataKey="count" 
-                    name="Equipment Count" 
-                    radius={[4, 4, 0, 0]}
-                  >
-                    {labEquipmentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={LAB_COLORS[index % LAB_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="lab-distribution-summary">
-            <div className="lab-summary-title">Lab Equipment Summary</div>
-            <div className="lab-summary-stats">
-              {labEquipmentData.map((lab, index) => (
-                <div key={`lab-stat-${index}`} className="lab-stat-item">
-                  <div className="lab-stat-color" style={{ backgroundColor: LAB_COLORS[index % LAB_COLORS.length] }}></div>
-                  <div className="lab-stat-name">{lab.name}</div>
-                  <div className="lab-stat-count">{lab.count}</div>
+            <div className="chart-content">
+              <div className="pie-chart-wrapper">
+                <ResponsiveContainer width="100%" height={400}>
+                  <PieChart>
+                    <Pie
+                      activeIndex={activeIndex}
+                      activeShape={renderActiveShape}
+                      data={equipmentStatusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={80}
+                      outerRadius={120}
+                      fill="#8884d8"
+                      dataKey="value"
+                      onMouseEnter={onPieEnter}
+                    >
+                      {equipmentStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomPieTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="chart-summary">
+                <div className="summary-title">Equipment Status Summary</div>
+                <div className="summary-stats">
+                  {equipmentStatusData.map((entry, index) => (
+                    <div key={`stat-${index}`} className="summary-stat">
+                      <div className="stat-num" style={{ color: STATUS_COLORS[index % STATUS_COLORS.length] }}>{entry.value}</div>
+                      <div className="stat-desc">{entry.name}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
-        </div>
+
+
         </div>
       </div>
     </div>

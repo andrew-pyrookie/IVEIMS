@@ -10,6 +10,9 @@ const TopBar = () => {
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [error, setError] = useState("");
+  const [equipments, setEquipments] = useState([]);
+  const [maintenanceNotification, setMaintenanceNotification] = useState(false);
+  const [showMaintenanceList, setShowMaintenanceList] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +40,31 @@ const TopBar = () => {
   }, []);
 
   useEffect(() => {
+    const fetchEquipments = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/equipment/", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        setEquipments(response.data);
+
+        const today = new Date().toISOString().split('T')[0];
+        const needsMaintenance = response.data.some(equipment => equipment.next_maintenance === today);
+
+        if (needsMaintenance) {
+          setMaintenanceNotification(true);
+        }
+      } catch (error) {
+        console.error("Error fetching equipment data:", error);
+      }
+    };
+
+    fetchEquipments();
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.topbar-user-section')) {
         setDropdownOpen(false);
@@ -53,18 +81,39 @@ const TopBar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login"); // Redirect to login page
+    navigate("/"); 
   };
+
+  const handleBellClick = () => {
+    setShowMaintenanceList(!showMaintenanceList);
+  };
+
+  const today = new Date().toISOString().split('T')[0];
+  const equipmentsNeedingMaintenance = equipments.filter(equipment => equipment.next_maintenance === today);
 
   return (
     <div className="topbar">
       <Sidebar /> {/* Include Sidebar component */}
       <div className="topbar-right-content">
-        <div className="topbar-notification-container">
-          <FaRegBell className="topbar-icon" />
-          <span className="topbar-notification-dot"></span>
-        </div>
+      <div className="topbar-notification-container" onClick={handleBellClick}>
+  <FaRegBell className="topbar-icon" />
+  {maintenanceNotification && <span className="topbar-notification-dot"></span>}
+</div>
 
+{showMaintenanceList && (
+  <div className="maintenance-list">
+    <h4>Equipment Needing Maintenance</h4>
+    {equipmentsNeedingMaintenance.length > 0 ? (
+      <ul>
+        {equipmentsNeedingMaintenance.map(equipment => (
+          <li key={equipment.id}>{equipment.name}</li>
+        ))}
+      </ul>
+    ) : (
+      <p>No equipment needs maintenance today.</p>
+    )}
+  </div>
+)}
         {loading ? (
           <p>Loading...</p>
         ) : error ? (
@@ -79,19 +128,6 @@ const TopBar = () => {
 
             {dropdownOpen && (
               <div className="dropdown-menu">
-                <div className="dropdown-item Myprofile">
-                  <Link to="/admin/profile">
-                    <FaUser className="dropdown-icon-left" />
-                    My Profile
-                  </Link>
-                </div>
-                <div className="dropdown-item Editprofile">
-                  <Link to="/admin/profile">
-                    <FaEdit className="dropdown-icon-left" />
-                    Edit Profile
-                  </Link>
-                </div>
-
                 <hr className="dropdown-divider" />
 
                 <div className="dropdown-item logout" onClick={handleLogout}>

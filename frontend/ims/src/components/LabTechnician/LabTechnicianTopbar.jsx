@@ -5,17 +5,21 @@ import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "/src/components/LabTechnician/LabTechnicianSidebar.jsx"; // Import Sidebar
 import "./TopBar.css";
 
+
 const TopBar = () => {
   const [user, setUser] = useState({ name: "", profileImg: "" });
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [error, setError] = useState("");
+  const [equipments, setEquipments] = useState([]);
+  const [maintenanceNotification, setMaintenanceNotification] = useState(false);
+  const [showMaintenanceList, setShowMaintenanceList] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/profile/", {
+        const response = await axios.get("http://localhost:8000/api/auth/profile/", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -34,6 +38,31 @@ const TopBar = () => {
     };
 
     fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const fetchEquipments = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/equipment/", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        setEquipments(response.data);
+
+        const today = new Date().toISOString().split('T')[0];
+        const needsMaintenance = response.data.some(equipment => equipment.next_maintenance === today);
+
+        if (needsMaintenance) {
+          setMaintenanceNotification(true);
+        }
+      } catch (error) {
+        console.error("Error fetching equipment data:", error);
+      }
+    };
+
+    fetchEquipments();
   }, []);
 
   useEffect(() => {
@@ -56,15 +85,36 @@ const TopBar = () => {
     navigate("/login"); // Redirect to login page
   };
 
+  const handleBellClick = () => {
+    setShowMaintenanceList(!showMaintenanceList);
+  };
+
+  const today = new Date().toISOString().split('T')[0];
+  const equipmentsNeedingMaintenance = equipments.filter(equipment => equipment.next_maintenance === today);
+
   return (
     <div className="topbar">
       <Sidebar /> {/* Include Sidebar component */}
       <div className="topbar-right-content">
-        <div className="topbar-notification-container">
-          <FaRegBell className="topbar-icon" />
-          <span className="topbar-notification-dot"></span>
-        </div>
+      <div className="topbar-notification-container" onClick={handleBellClick}>
+  <FaRegBell className="topbar-icon" />
+  {maintenanceNotification && <span className="topbar-notification-dot"></span>}
+</div>
 
+{showMaintenanceList && (
+  <div className="maintenance-list">
+    <h4>Equipment Needing Maintenance</h4>
+    {equipmentsNeedingMaintenance.length > 0 ? (
+      <ul>
+        {equipmentsNeedingMaintenance.map(equipment => (
+          <li key={equipment.id}>{equipment.name}</li>
+        ))}
+      </ul>
+    ) : (
+      <p>No equipment needs maintenance today.</p>
+    )}
+  </div>
+)}
         {loading ? (
           <p>Loading...</p>
         ) : error ? (

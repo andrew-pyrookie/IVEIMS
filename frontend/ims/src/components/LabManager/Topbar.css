@@ -123,3 +123,66 @@
     
   
   }
+
+  
+.maintenance-list {
+  position: absolute;
+  top: 60px; /* Add margin from the top */
+  right: 20px; /* Add margin from the right corner */
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px; /* Rounded corners */
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  z-index: 1000;
+  width: 250px; /* Fixed width for consistency */
+  max-height: 300px; /* Limit height for scrollability */
+  overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
+.maintenance-list h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.maintenance-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.maintenance-list ul li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0; /* Separator between items */
+  font-size: 14px;
+  color: #555555;
+}
+
+.maintenance-list ul li:last-child {
+  border-bottom: none; /* Remove border for the last item */
+}
+
+.maintenance-list p {
+  margin: 0;
+  font-size: 14px;
+  color: #777777;
+}
+
+.topbar-notification-container {
+  position: relative;
+  cursor: pointer;
+  margin-right: 20px; /* Add margin to separate from other elements */
+}
+
+.topbar-notification-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #ff4d4f; /* Red color for notification dot */
+  border-radius: 50%;
+  border: 2px solid #ffffff; /* Add border to make it stand out */
+}

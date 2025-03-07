@@ -2,12 +2,14 @@
   "name": "ims",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "main": "electron.cjs", 
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "electron .",
+    "electron-dev": "concurrently \"vite\" \"electron .\""
   },
   "dependencies": {
     "@mantine/core": "^7.17.0",
@@ -30,6 +32,8 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^8.2.2",
+    "electron": "^27.3.11",
     "eslint": "^9.19.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.0.0",

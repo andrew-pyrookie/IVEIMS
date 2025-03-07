@@ -2,15 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useTable, useSortBy, useGlobalFilter, usePagination } from "react-table";
 import { FaFilePdf, FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { usePDF } from "react-to-pdf";
-import LabTechnicianSidebar from "/src/components/LabTechnician/LabTechnicianSidebar.jsx";
-import LabTechnicianTopbar from "/src/components/LabTechnician/LabTechnicianTopbar.jsx"
+import Sidebar from "/src/components/LabTechnician/LabTechnicianSidebar.jsx";
+import Topbar from "/src/components/LabTechnician/LabTechnicianTopbar.jsx";
 import "/src/pages/LabTechnician/styles/Reports.css";
 
 const Reports = () => {
   const [labReports, setLabReports] = useState([]);
+  const [userReports, setUserReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { toPDF, targetRef } = usePDF({ filename: "lab-report.pdf" });
+  const [activeReport, setActiveReport] = useState("lab"); // 'lab' or 'user'
+  const { toPDF, targetRef } = usePDF({ filename: `${activeReport}-report.pdf` });
 
   useEffect(() => {
     fetchReports();
@@ -19,37 +21,58 @@ const Reports = () => {
   const fetchReports = async () => {
     setIsLoading(true);
     try {
+      console.log("Fetching lab reports...");
+
       // Fetch lab reports (equipment transfers)
-      const labResponse = await fetch("http://localhost:8000/api/reports/", {
+      const labResponse = await fetch("http://localhost:8000/api/asset-transfers/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+
+      if (!labResponse.ok) {
+        throw new Error(`Lab reports fetch failed: ${labResponse.status} ${labResponse.statusText}`);
+      }
+
       const labData = await labResponse.json();
-      
-      // Calculate duration for each report
-      const labReportsWithDuration = labData.map(report => {
-        // Assuming report has startTime and endTime properties
-        // If the data structure is different, you'll need to adjust this
-        const startTime = new Date(report.startTime || report.transferDate);
-        const endTime = new Date(report.endTime || report.transferDate);
-        
-        // Calculate duration in milliseconds and convert to minutes
-        const durationMs = endTime - startTime;
-        const durationMinutes = Math.floor(durationMs / (1000 * 60));
-        
-        return {
-          ...report,
-          duration: durationMinutes
-        };
+      console.log("Lab Reports Data:", labData);
+
+      // Set the lab reports directly (no need for additional mapping)
+      setLabReports(labData);
+
+      console.log("Fetching user reports...");
+
+      // Fetch user reports (user joins)
+      const userResponse = await fetch("http://localhost:8000/api/users/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      
-      setLabReports(labReportsWithDuration);
+
+      if (!userResponse.ok) {
+        throw new Error(`User reports fetch failed: ${userResponse.status} ${userResponse.statusText}`);
+      }
+
+      const userData = await userResponse.json();
+      console.log("User Reports Data:", userData);
+
+      // Check if userData contains the created_at field
+      if (Array.isArray(userData)) {
+        userData.forEach((user, index) => {
+          console.log(`User ${index + 1} - created_at:`, user.created_at);
+        });
+      } else {
+        console.warn("Unexpected user data format:", userData);
+      }
+
+      setUserReports(userData);
     } catch (error) {
       console.error("Error fetching reports:", error);
     } finally {
       setIsLoading(false);
+      console.log("Fetch process complete.");
     }
   };
 
@@ -58,25 +81,44 @@ const Reports = () => {
     () => [
       {
         Header: "Equipment Name",
-        accessor: "equipmentName",
+        accessor: "equipment", // Use the equipment name from the API response
+      },
+      {
+        Header: "Transferred By",
+        accessor: "transferred_by.name", // Access the nested "name" field in "transferred_by"
+        Cell: ({ value }) => value || "Unknown", // Fallback for missing data
       },
       {
         Header: "From Lab",
-        accessor: "fromLab",
+        accessor: "from_lab",
       },
       {
         Header: "To Lab",
-        accessor: "toLab",
+        accessor: "to_lab",
       },
       {
         Header: "Transfer Date",
-        accessor: "transferDate",
-        Cell: ({ value }) => new Date(value).toLocaleDateString(),
+        accessor: "transfer_date",
+        Cell: ({ value }) => new Date(value).toLocaleDateString(), // Format the date
+      },
+    ],
+    []
+  );
+
+  // Columns for User Report (User Joins)
+  const userColumns = React.useMemo(
+    () => [
+      {
+        Header: "User Name",
+        accessor: "name",
       },
       {
-        Header: "Duration (minutes)",
-        accessor: "duration",
-        Cell: ({ value }) => (value ? `${value} mins` : "N/A"),
+        Header: "Email",
+        accessor: "email",
+      },
+      {
+        Header: "Role",
+        accessor: "role",
       },
     ],
     []
@@ -100,8 +142,8 @@ const Reports = () => {
     setPageSize,
   } = useTable(
     {
-      columns: labColumns,
-      data: labReports,
+      columns: activeReport === "lab" ? labColumns : userColumns,
+      data: activeReport === "lab" ? labReports : userReports,
       initialState: { pageIndex: 0, pageSize: 10 },
     },
     useGlobalFilter,
@@ -118,9 +160,9 @@ const Reports = () => {
   if (isLoading) {
     return (
       <div className="medtech-lab-container">
-        <LabTechnicianSidebar />
+        <Sidebar />
         <div className="main-content">
-          <LabTechnicianTopbar />
+          <Topbar />
           <div className="loading-container">
             <div className="loading-spinner"></div>
             <p>Loading reports...</p>
@@ -132,13 +174,13 @@ const Reports = () => {
 
   return (
     <div className="medtech-lab-container">
-      <LabTechnicianSidebar />
+      <Sidebar />
       <div className="main-content">
-        <LabTechnicianTopbar />
+        <Topbar />
 
         <div className="content-header">
-          <h1>Lab Reports</h1>
-          <p>View and download equipment transfer reports</p>
+          <h1>Reports</h1>
+          <p>View and download lab and user reports</p>
         </div>
 
         <div className="actions-container">
@@ -151,6 +193,20 @@ const Reports = () => {
               placeholder="Search reports..."
               className="search-input"
             />
+          </div>
+          <div className="report-type-buttons">
+            {/* <button
+              className={`report-type-button ${activeReport === "lab" ? "active" : ""}`}
+              onClick={() => setActiveReport("lab")}
+            >
+              Lab Report
+            </button>
+            <button
+              className={`report-type-button ${activeReport === "user" ? "active" : ""}`}
+              onClick={() => setActiveReport("user")}
+            >
+              User Report
+            </button> */}
           </div>
           <button className="add-button" onClick={toPDF}>
             <FaFilePdf /> Download PDF
@@ -188,7 +244,7 @@ const Reports = () => {
             <tbody {...getTableBodyProps()}>
               {page.length === 0 ? (
                 <tr>
-                  <td colSpan={labColumns.length} className="no-data">
+                  <td colSpan={activeReport === "lab" ? labColumns.length : userColumns.length} className="no-data">
                     No reports found.
                   </td>
                 </tr>
@@ -211,7 +267,7 @@ const Reports = () => {
         {/* Pagination Controls */}
         <div className="pagination-controls">
           <div className="pagination-info">
-            Showing {page.length} of {labReports.length} results
+            Showing {page.length} of {activeReport === "lab" ? labReports.length : userReports.length} results
           </div>
           <div className="pagination-buttons">
             <button
