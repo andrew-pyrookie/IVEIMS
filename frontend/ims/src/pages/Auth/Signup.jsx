@@ -196,12 +196,13 @@
 // export default Signup;
 
 
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash, FaChevronDown, FaCheck, FaEnvelope, FaUser, FaLock } from "react-icons/fa";
 import "./Signup.css"; // Import CSS file
+import kuImage from "/src/assets/ku.jpg"; // Import the ku.jpg image
+import kuBackground from "/src/assets/ku-background.jpg"; // Import the ku-background.jpg image
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -293,13 +294,14 @@ const Signup = () => {
   };
 
   return (
-    <div className="signup-container">
+    <div className="signup-container" style={{ backgroundImage: `url(${kuBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <form className="signup-form" onSubmit={handleSubmit}>
+        <img src={kuImage} alt="KU Logo" className="signup-ku-logo" />
         <h2>Sign Up</h2>
 
         {/* Name Input */}
-        <div className="input-container">
-          <FaUser className="input-icon" />
+        <div className="signup-input-container">
+          <FaUser className="signup-input-icon" />
           <input
             type="text"
             name="name"
@@ -311,8 +313,8 @@ const Signup = () => {
         </div>
 
         {/* Username Input */}
-        <div className="input-container">
-          <FaUser className="input-icon" />
+        <div className="signup-input-container">
+          <FaUser className="signup-input-icon" />
           <input
             type="text"
             name="username"
@@ -324,8 +326,8 @@ const Signup = () => {
         </div>
 
         {/* Email Input */}
-        <div className="input-container">
-          <FaEnvelope className="input-icon" />
+        <div className="signup-input-container">
+          <FaEnvelope className="signup-input-icon" />
           <input
             type="email"
             name="email"
@@ -337,8 +339,8 @@ const Signup = () => {
         </div>
 
         {/* Password Input */}
-        <div className="input-container">
-          <FaLock className="input-icon" />
+        <div className="signup-input-container">
+          <FaLock className="signup-input-icon" />
           <input
             type={showPassword ? "text" : "password"}
             name="password"
@@ -347,14 +349,14 @@ const Signup = () => {
             onChange={handleChange}
             required
           />
-          <span className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
+          <span className="signup-password-toggle" onClick={() => setShowPassword(!showPassword)}>
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
 
         {/* Confirm Password Input */}
-        <div className="input-container">
-          <FaLock className="input-icon" />
+        <div className="signup-input-container">
+          <FaLock className="signup-input-icon" />
           <input
             type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"
@@ -363,30 +365,30 @@ const Signup = () => {
             onChange={handleChange}
             required
           />
-          <span className="password-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+          <span className="signup-password-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
             {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
 
         {/* Display Error Message */}
-        {error && <p className="error-msg">{error}</p>}
+        {error && <p className="signup-error-msg">{error}</p>}
 
         {/* Role Dropdown */}
-        <div className="dropdown-container">
+        <div className="signup-dropdown-container">
           <button
             type="button"
-            className="dropdown-button"
+            className="signup-dropdown-button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             {formData.role}
             <FaChevronDown />
           </button>
           {isDropdownOpen && (
-            <div className="dropdown-menu">
+            <div className="signup-dropdown-menu">
               {roles.map((role) => (
                 <div
                   key={role}
-                  className={`dropdown-item ${formData.role === role ? "selected" : ""}`}
+                  className={`signup-dropdown-item ${formData.role === role ? "signup-selected" : ""}`}
                   onClick={() => {
                     setFormData({ ...formData, role });
                     setIsDropdownOpen(false);
@@ -400,10 +402,10 @@ const Signup = () => {
           )}
         </div>
 
-        {success && <p className="success-msg">{success}</p>}
+        {success && <p className="signup-success-msg">{success}</p>}
 
-        <button type="submit" className="submit-button">Sign Up</button>
-        <p>Already have an account? <a href="/login">Login</a></p>
+        <button type="submit" className="signup-submit-button">Sign Up</button>
+        <p>Already have an account? <a href="/">Login</a></p>
       </form>
     </div>
   );

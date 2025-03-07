@@ -1,850 +1,608 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useTable, useSortBy, useGlobalFilter, usePagination } from "react-table";
-import { FaEdit, FaTrash, FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
-import LabManagerSidebar from "/src/components/LabManager/LabManagerSidebar.jsx";
-import LabManagerTopbar from "/src/components/LabManager/LabManagerTopbar.jsx";
-import "/src/pages/LabManager/styles/Bookings.css";
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import Select from 'react-select';
+// import Sidebar from "/src/components/Admin/Sidebar.jsx";
+// import Topbar from "/src/components/Admin/Topbar.jsx";
+// import "/src/pages/Admin/styles/Projects.css";
 
-const Projects = () => {
-  const [projects, setProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [currentProject, setCurrentProject] = useState(null);
-  const [submitError, setSubmitError] = useState("");
-  const [formData, setFormData] = useState({
-    projectTitle: "",
-    labType: "",
-    projectDescription: "",
-    status: "Pending",
-    startDate: "",
-    endDate: "",
-    projectFiles: [],
-    students: [],
-  });
+// const ProjectForm = ({ onProjectCreated, onClose }) => {
+//   const [users, setUsers] = useState([]);
+//   const [equipmentList, setEquipmentList] = useState([]);
+//   const [projectData, setProjectData] = useState({
+//     title: '',
+//     description: '',
+//     status: 'pending',
+//     lab: null,
+//     lab_id: null,
+//     members: [],
+//     equipment: [],
+//     start_date: '',
+//     end_date: '',
+//     progress: 0
+//   });
+//   const [errors, setErrors] = useState({});
 
-  const statusOptions = ["Active", "Pending", "Completed"];
-  const labOptions = ["MedTech Lab", "Design Studio Lab", "Cezari Lab"];
+//   const labOptions = [
+//     { id: 1, name: "Design Studio Lab" },
+//     { id: 2, name: "MedTech Lab" },
+//     { id: 3, name: "Cezeri Lab" },
+//   ];
+
+//   useEffect(() => {
+//     const token = localStorage.getItem('token');
+//     if (!token) {
+//       console.error('No authentication token found');
+//       return;
+//     }
+
+//     const config = { headers: { 'Authorization': `Bearer ${token}` } };
+
+//     // Fetch Users
+//     axios.get('http://localhost:8000/api/users/', config)
+//       .then(response => {
+//         const formattedUsers = response.data.map(user => ({
+//           value: user.id,
+//           label: user.name
+//         }));
+//         setUsers(formattedUsers);
+//       })
+//       .catch(error => console.error('Error fetching users:', error));
+
+//     // Fetch Equipment
+//     axios.get('http://localhost:8000/api/equipment/', config)
+//       .then(response => {
+//         const formattedEquipment = response.data.map(equipment => ({
+//           value: equipment.id,
+//           label: equipment.name
+//         }));
+//         setEquipmentList(formattedEquipment);
+//       })
+//       .catch(error => console.error('Error fetching equipment:', error));
+//   }, []);
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setProjectData(prev => ({ ...prev, [name]: value }));
+//     if (errors[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
+//   };
+
+//   const handleLabChange = (e) => {
+//     const selectedLabId = parseInt(e.target.value);
+//     const selectedLab = labOptions.find(lab => lab.id === selectedLabId);
+//     setProjectData(prev => ({
+//       ...prev,
+//       lab: selectedLab ? selectedLab.name : null,
+//       lab_id: selectedLab ? selectedLab.id : null
+//     }));
+//   };
+
+//   const handleMembersChange = (selectedOptions) => {
+//     const selectedUserIds = selectedOptions.map(option => option.value);
+//     setProjectData(prev => ({ ...prev, members: selectedUserIds }));
+//   };
+
+//   const handleEquipmentChange = (selectedOptions) => {
+//     const selectedEquipmentIds = selectedOptions.map(option => option.value);
+//     setProjectData(prev => ({ ...prev, equipment: selectedEquipmentIds }));
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     const token = localStorage.getItem('token');
+//     try {
+//       const response = await axios.post(
+//         'http://localhost:8000/api/projects/', 
+//         projectData, 
+//         { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+//       );
+//       if (onProjectCreated) onProjectCreated(response.data);
+//       onClose(); // Close the modal after submission
+//     } catch (error) {
+//       console.error('Error creating project:', error.response ? error.response.data : error);
+//       alert(`Error: ${error.response?.data?.message || 'Failed to create project'}`);
+//     }
+//   };
+
+//   return (
+//     <div className="modal-content">
+//       <div className="modal-header">
+//         <h2>Create Project</h2>
+//         <button className="close-button" onClick={onClose}>&times;</button>
+//       </div>
+//       <form onSubmit={handleSubmit}>
+//         <div className="form-group">
+//           <label htmlFor="title">Project Title</label>
+//           <input type="text" id="title" name="title" value={projectData.title} onChange={handleChange} />
+//         </div>
+//         <div className="form-group">
+//           <label htmlFor="lab">Select Lab</label>
+//           <select id="lab" name="lab" value={projectData.lab_id || ''} onChange={handleLabChange}>
+//             <option value="">Select a lab</option>
+//             {labOptions.map(lab => (
+//               <option key={lab.id} value={lab.id}>{lab.name}</option>
+//             ))}
+//           </select>
+//         </div>
+//         <div className="form-group">
+//           <label htmlFor="members">Select Members</label>
+//           <Select options={users} isMulti onChange={handleMembersChange} />
+//         </div>
+//         <div className="form-group">
+//           <label htmlFor="equipment">Select Equipment</label>
+//           <Select options={equipmentList} isMulti onChange={handleEquipmentChange} />
+//         </div>
+//         <div className="form-group">
+//           <label htmlFor="description">Project Description</label>
+//           <textarea id="description" name="description" value={projectData.description} onChange={handleChange} />
+//         </div>
+//         <div className="form-group">
+//           <label htmlFor="start_date">Start Date</label>
+//           <input type="date" id="start_date" name="start_date" value={projectData.start_date} onChange={handleChange} />
+//         </div>
+//         <div className="form-group">
+//           <label htmlFor="end_date">End Date</label>
+//           <input type="date" id="end_date" name="end_date" value={projectData.end_date} onChange={handleChange} />
+//         </div>
+//         <div className="form-group">
+//           <label htmlFor="progress">Progress (%)</label>
+//           <input type="number" id="progress" name="progress" value={projectData.progress} onChange={handleChange} min="0" max="100" />
+//         </div>
+//         <button type="submit" className="button">Create Project</button>
+//       </form>
+//     </div>
+//   );
+// };
+
+// const ProjectsTable = () => {
+//   const [projects, setProjects] = useState([]);
+//   const [showModal, setShowModal] = useState(false);
+
+//   useEffect(() => {
+//     const token = localStorage.getItem('token');
+//     if (!token) {
+//       console.error('No authentication token found');
+//       return;
+//     }
+
+//     const config = { headers: { 'Authorization': `Bearer ${token}` } };
+//     axios.get('http://localhost:8000/api/projects/', config)
+//       .then(response => setProjects(response.data))
+//       .catch(error => console.error('Error fetching projects:', error));
+//   }, []);
+
+//   const handleAddProject = () => setShowModal(true);
+//   const handleCloseModal = () => setShowModal(false);
+
+//   return (
+//     <div className="container">
+//       <h1>Projects</h1>
+//       <button className="button" onClick={handleAddProject}>Add Project</button>
+//       <table className="projects-table">
+//         <thead>
+//           <tr>
+//             <th>Title</th>
+//             <th>Description</th>
+//             <th>Status</th>
+//             <th>Start Date</th>
+//             <th>End Date</th>
+//             <th>Progress</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {projects.map(project => (
+//             <tr key={project.id}>
+//               <td>{project.title}</td>
+//               <td>{project.description}</td>
+//               <td>{project.status}</td>
+//               <td>{project.start_date}</td>
+//               <td>{project.end_date}</td>
+//               <td>{project.progress}%</td>
+//             </tr>
+//           ))}
+//         </tbody>
+//       </table>
+//       {showModal && (
+//         <div className="modal open">
+//           <ProjectForm onProjectCreated={() => setShowModal(false)} onClose={handleCloseModal} />
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default ProjectsTable;
+
+
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Select from "react-select";
+import { FaSearch, FaEdit, FaTrash } from "react-icons/fa";
+import Sidebar from "/src/components/LabManager/LabManagerSidebar.jsx";
+import Topbar from "/src/components/LabManager/LabManagerTopbar.jsx";
+import "/src/pages/LabManager/styles/Projects.css";
+
+const ProjectForm = ({ onProjectSubmitted, onClose, editMode = false, projectData: initialProjectData }) => {
+  const [users, setUsers] = useState([]);
+  const [equipmentList, setEquipmentList] = useState([]);
+  const [projectData, setProjectData] = useState(
+    editMode
+      ? {
+          ...initialProjectData,
+          members: initialProjectData.members || [],
+          equipment: initialProjectData.equipment || [],
+          lab_id: initialProjectData.lab_id || null, // Ensure lab_id is included
+        }
+      : {
+          title: "",
+          description: "",
+          status: "pending",
+          lab: null,
+          lab_id: null,
+          members: [],
+          equipment: [],
+          start_date: "",
+          end_date: "",
+          progress: 0,
+        }
+  );
+  const [errors, setErrors] = useState({});
+
+  const labOptions = [
+    { id: 1, name: "Design Studio Lab" },
+    { id: 2, name: "MedTech Lab" },
+    { id: 3, name: "Cezeri Lab" },
+  ];
 
   useEffect(() => {
-    fetchProjects();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+
+    // Fetch Users
+    axios
+      .get("http://localhost:8000/api/users/", config)
+      .then((response) => {
+        const formattedUsers = response.data.map((user) => ({
+          value: user.id,
+          label: user.name,
+        }));
+        setUsers(formattedUsers);
+      })
+      .catch((error) => console.error("Error fetching users:", error));
+
+    // Fetch Equipment
+    axios
+      .get("http://localhost:8000/api/equipment/", config)
+      .then((response) => {
+        const formattedEquipment = response.data.map((equipment) => ({
+          value: equipment.id,
+          label: equipment.name,
+        }));
+        setEquipmentList(formattedEquipment);
+      })
+      .catch((error) => console.error("Error fetching equipment:", error));
   }, []);
 
-  const fetchProjects = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("http://localhost:8000/api/projects/", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch projects data");
-      }
-
-      const data = await response.json();
-      setProjects(data);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setProjectData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData({
-      ...formData,
-      projectFiles: files,
-    });
-  };
-
-  const handleAddStudent = (e) => {
-    e.preventDefault();
-    const email = e.target.email.value;
-    if (email && !formData.students.includes(email)) {
-      setFormData({
-        ...formData,
-        students: [...formData.students, email],
-      });
-      e.target.email.value = ""; // Clear the input field
-    }
-  };
-
-  const handleRemoveStudent = (email) => {
-    setFormData({
-      ...formData,
-      students: formData.students.filter((student) => student !== email),
-    });
-  };
-
-  const handleEditClick = (project) => {
-    setFormData({
-      projectTitle: project.projectTitle,
-      labType: project.labType,
-      projectDescription: project.projectDescription,
-      status: project.status,
-      startDate: project.startDate || "",
-      endDate: project.endDate || "",
-      projectFiles: project.projectFiles || [],
-      students: project.students || [],
-    });
-    setCurrentProject(project);
-    setShowEditModal(true);
-  };
-
-  const handleDeleteClick = (project) => {
-    setCurrentProject(project);
-    setShowDeleteConfirm(true);
-  };
-
-  const resetForm = () => {
-    setFormData({
-      projectTitle: "",
-      labType: "",
-      projectDescription: "",
-      status: "Pending",
-      startDate: "",
-      endDate: "",
-      projectFiles: [],
-      students: [],
-    });
-    setSubmitError("");
-  };
-
-  const handleAddProject = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await fetch("http://localhost:8000/api/projects/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add project");
-      }
-
-      const newProject = await response.json();
-      setProjects([...projects, newProject]);
-      setShowAddModal(false);
-      resetForm();
-    } catch (error) {
-      setSubmitError("Failed to add project. Please try again.");
-      console.error("Error adding project:", error);
-    }
-  };
-
-  const handleUpdateProject = async (e) => {
-    e.preventDefault();
-
-    try {
-      const updatedFields = {};
-      for (const key in formData) {
-        if (formData[key] !== currentProject[key]) {
-          updatedFields[key] = formData[key];
-        }
-      }
-
-      if (Object.keys(updatedFields).length === 0) {
-        setSubmitError("No fields were updated.");
-        return;
-      }
-
-      const response = await fetch(`http://localhost:8000/api/projects/${currentProject.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(updatedFields),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update project");
-      }
-
-      const updatedProject = await response.json();
-      setProjects((prevProjects) =>
-        prevProjects.map((project) =>
-          project.id === currentProject.id ? { ...project, ...updatedFields } : project
-        )
-      );
-      setShowEditModal(false);
-      resetForm();
-    } catch (error) {
-      setSubmitError("Failed to update project. Please try again.");
-      console.error("Error updating project:", error);
-    }
-  };
-
-  const handleDeleteProject = async () => {
-    try {
-      const response = await fetch(`http://localhost:8000/api/projects/${currentProject.id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete project");
-      }
-
-      setProjects(projects.filter((project) => project.id !== currentProject.id));
-      setShowDeleteConfirm(false);
-      setCurrentProject(null);
-    } catch (error) {
-      console.error("Error deleting project:", error);
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "Not scheduled";
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
-
-  // Sanitize projects data to ensure students is always an array
-  const sanitizedProjects = React.useMemo(() => {
-    return projects.map((project) => ({
-      ...project,
-      students: project.students || [],
+  const handleLabChange = (e) => {
+    const selectedLabId = parseInt(e.target.value);
+    const selectedLab = labOptions.find((lab) => lab.id === selectedLabId);
+    setProjectData((prev) => ({
+      ...prev,
+      lab: selectedLab ? selectedLab.name : null,
+      lab_id: selectedLab ? selectedLab.id : null, // Ensure lab_id is set
     }));
-  }, [projects]);
+  };
 
-  // Define the columns for the table
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: "Project Title",
-        accessor: "projectTitle",
-      },
-      {
-        Header: "Lab Type",
-        accessor: "labType",
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ value }) => (
-          <span className={`status-badge status-${value.toLowerCase()}`}>
-            {value}
-          </span>
-        ),
-      },
-      {
-        Header: "Start Date",
-        accessor: "startDate",
-        Cell: ({ value }) => formatDate(value),
-      },
-      {
-        Header: "End Date",
-        accessor: "endDate",
-        Cell: ({ value }) => formatDate(value),
-      },
-      {
-        Header: "Students",
-        accessor: "students",
-        Cell: ({ value }) => (
-          <div className="students-list">
-            {(value || []).map((student, index) => (
-              <span key={index} className="student-email">
-                {student}
-              </span>
-            ))}
-          </div>
-        ),
-      },
-      {
-        Header: "Actions",
-        accessor: "actions",
-        disableSortBy: true,
-        Cell: ({ row }) => (
-          <div className="action-buttons">
-            <button
-              className="action-button edit-button"
-              onClick={() => handleEditClick(row.original)}
-              title="Edit Project"
-            >
-              <FaEdit />
-            </button>
-            <button
-              className="action-button delete-button"
-              onClick={() => handleDeleteClick(row.original)}
-              title="Delete Project"
-            >
-              <FaTrash />
-            </button>
-          </div>
-        ),
-      },
-    ],
-    []
-  );
+  const handleMembersChange = (selectedOptions) => {
+    const selectedUserIds = selectedOptions.map((option) => option.value);
+    setProjectData((prev) => ({ ...prev, members: selectedUserIds }));
+  };
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    page,
-    prepareRow,
-    state,
-    setGlobalFilter,
-    nextPage,
-    previousPage,
-    canNextPage,
-    canPreviousPage,
-    pageOptions,
-    gotoPage,
-    pageCount,
-    setPageSize,
-  } = useTable(
-    {
-      columns,
-      data: sanitizedProjects,
-      initialState: React.useMemo(() => ({ pageIndex: 0, pageSize: 10 }), []),
-    },
-    useGlobalFilter,
-    useSortBy,
-    usePagination
-  );
+  const handleEquipmentChange = (selectedOptions) => {
+    const selectedEquipmentIds = selectedOptions.map((option) => option.value);
+    setProjectData((prev) => ({ ...prev, equipment: selectedEquipmentIds }));
+  };
 
-  const { pageIndex, pageSize } = state;
-
-  const handleSearch = useCallback(() => {
-    setGlobalFilter(searchTerm);
-  }, [searchTerm, setGlobalFilter]);
-
-  useEffect(() => {
-    handleSearch();
-  }, [handleSearch]);
-
-  if (isLoading) {
-    return (
-      <div className="projects-container">
-        <LabManagerSidebar />
-        <div className="main-content">
-          <LabManagerTopbar />
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Loading projects data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+  
+    // Format dates to match backend requirements
+    const formattedProjectData = {
+      ...projectData,
+      start_date: projectData.start_date ? new Date(projectData.start_date).toISOString() : null,
+      end_date: projectData.end_date ? new Date(projectData.end_date).toISOString() : null,
+    };
+  
+    // Log formatted data to verify
+    console.log("Formatted Project Data before submission:", formattedProjectData);
+  
+    try {
+      let response;
+      
+      if (editMode) {
+        // Update existing project
+        response = await axios.put(
+          `http://localhost:8000/api/projects/${projectData.id}/`,
+          formattedProjectData,
+          { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+        );
+      } else {
+        // Create new project
+        response = await axios.post(
+          "http://localhost:8000/api/projects/",
+          formattedProjectData,
+          { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+        );
+      }
+      
+      if (onProjectSubmitted) onProjectSubmitted(response.data);
+      onClose(); // Close the modal after submission
+    } catch (error) {
+      console.error(`Error ${editMode ? "updating" : "creating"} project:`, 
+        error.response ? error.response.data : error);
+      alert(`Error: ${error.response?.data?.message || `Failed to ${editMode ? "update" : "create"} project`}`);
+    }
+  };
 
   return (
-    <div className="projects-container">
-      <LabManagerSidebar />
-      <div className="main-content">
-        <LabManagerTopbar />
-
-        <div className="content-header">
-          <h1>Projects Management</h1>
-          <p>Manage all lab-specific projects</p>
+    <div className="modal-content">
+      <div className="modal-header">
+        <h2>{editMode ? "Edit Project" : "Create Project"}</h2>
+        <button className="close-button" onClick={onClose}>
+          &times;
+        </button>
+      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="title">Project Title</label>
+          <input type="text" id="title" name="title" value={projectData.title} onChange={handleChange} />
         </div>
+        <div className="form-group">
+          <label htmlFor="lab">Select Lab</label>
+          <select id="lab" name="lab" value={projectData.lab_id || ""} onChange={handleLabChange}>
+            <option value="">Select a lab</option>
+            {labOptions.map((lab) => (
+              <option key={lab.id} value={lab.id}>
+                {lab.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="members">Select Members</label>
+          <Select 
+            options={users} 
+            isMulti 
+            onChange={handleMembersChange}
+            value={users.filter(user => projectData.members.includes(user.value))}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="equipment">Select Equipment</label>
+          <Select 
+            options={equipmentList} 
+            isMulti 
+            onChange={handleEquipmentChange}
+            value={equipmentList.filter(item => projectData.equipment.includes(item.value))}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="status">Status</label>
+          <select id="status" name="status" value={projectData.status} onChange={handleChange}>
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="on-hold">On Hold</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="description">Project Description</label>
+          <textarea id="description" name="description" value={projectData.description} onChange={handleChange} />
+        </div>
+        <div className="form-group">
+          <label htmlFor="start_date">Start Date</label>
+          <input type="date" id="start_date" name="start_date" value={projectData.start_date} onChange={handleChange} />
+        </div>
+        <div className="form-group">
+          <label htmlFor="end_date">End Date</label>
+          <input type="date" id="end_date" name="end_date" value={projectData.end_date} onChange={handleChange} />
+        </div>
+        <div className="form-group">
+          <label htmlFor="progress">Progress (%)</label>
+          <input type="number" id="progress" name="progress" value={projectData.progress} onChange={handleChange} min="0" max="100" />
+        </div>
+        <button type="submit" className="button">
+          {editMode ? "Update Project" : "Create Project"}
+        </button>
+      </form>
+    </div>
+  );
+};
 
-        <div className="actions-container">
-          <div className="search-container">
-            <FaSearch className="search-icon" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search projects..."
-              className="search-input"
-            />
-          </div>
-          <button className="add-button" onClick={() => setShowAddModal(true)}>
-            Add New Project
+const DeleteConfirmationModal = ({ project, onConfirm, onCancel }) => {
+  return (
+    <div className="modal open">
+      <div className="modal-content delete-confirm">
+        <div className="modal-header">
+          <h2>Confirm Delete</h2>
+          <button className="close-button" onClick={onCancel}>
+            &times;
           </button>
         </div>
-
-        <div className="table-container">
-          <table {...getTableProps()} className="projects-table">
-            <thead>
-              {headerGroups.map((headerGroup) => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
-                  {headerGroup.headers.map((column) => (
-                    <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                      <div className="header-content">
-                        {column.render("Header")}
-                        <span className="sort-icon">
-                          {column.canSort ? (
-                            column.isSorted ? (
-                              column.isSortedDesc ? (
-                                <FaSortDown />
-                              ) : (
-                                <FaSortUp />
-                              )
-                            ) : (
-                              <FaSort />
-                            )
-                          ) : null}
-                        </span>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody {...getTableBodyProps()}>
-              {page.length === 0 ? (
-                <tr>
-                  <td colSpan={columns.length} className="no-data">
-                    No projects found. Add some projects to get started.
-                  </td>
-                </tr>
-              ) : (
-                page.map((row) => {
-                  prepareRow(row);
-                  return (
-                    <tr key={row.id} {...row.getRowProps()}>
-                      {row.cells.map((cell) => (
-                        <td key={cell.column.id} {...cell.getCellProps()}>
-                          {cell.render("Cell")}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+        <div className="confirm-message">
+          <p>Are you sure you want to delete project: <strong>{project.title}</strong>?</p>
+          <p>This action cannot be undone.</p>
         </div>
-
-        {/* Pagination Controls */}
-        <div className="pagination-controls">
-          <div className="pagination-info">
-            Showing {page.length} of {projects.length} results
-          </div>
-          <div className="pagination-buttons">
-            <button
-              onClick={() => gotoPage(0)}
-              disabled={!canPreviousPage}
-              className="pagination-button"
-            >
-              {"<<"}
-            </button>
-            <button
-              onClick={() => previousPage()}
-              disabled={!canPreviousPage}
-              className="pagination-button"
-            >
-              {"<"}
-            </button>
-            <span className="pagination-page-info">
-              Page <strong>{pageIndex + 1}</strong> of <strong>{pageOptions.length}</strong>
-            </span>
-            <button
-              onClick={() => nextPage()}
-              disabled={!canNextPage}
-              className="pagination-button"
-            >
-              {">"}
-            </button>
-            <button
-              onClick={() => gotoPage(pageCount - 1)}
-              disabled={!canNextPage}
-              className="pagination-button"
-            >
-              {">>"}
-            </button>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-              }}
-              className="pagination-size-select"
-            >
-              {[10, 25, 50].map((size) => (
-                <option key={size} value={size}>
-                  Show {size}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="confirm-actions">
+          <button className="button cancel-button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="button delete-button" onClick={() => onConfirm(project.id)}>
+            Delete
+          </button>
         </div>
-
-        {/* Add Project Modal */}
-        {showAddModal && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h2 className="modal-title">Add New Project</h2>
-                <button
-                  className="close-button"
-                  onClick={() => {
-                    setShowAddModal(false);
-                    resetForm();
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-              <form onSubmit={handleAddProject} className="project-form">
-                <div className="form-group">
-                  <label htmlFor="projectTitle">Project Title</label>
-                  <input
-                    type="text"
-                    id="projectTitle"
-                    name="projectTitle"
-                    value={formData.projectTitle}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="labType">Lab Type</label>
-                  <select
-                    id="labType"
-                    name="labType"
-                    value={formData.labType}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select a lab</option>
-                    {labOptions.map((lab) => (
-                      <option key={lab} value={lab}>
-                        {lab}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="projectDescription">Project Description</label>
-                  <textarea
-                    id="projectDescription"
-                    name="projectDescription"
-                    value={formData.projectDescription}
-                    onChange={handleInputChange}
-                    rows="3"
-                  ></textarea>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group half">
-                    <label htmlFor="status">Status</label>
-                    <select
-                      id="status"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      {statusOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group half">
-                    <label htmlFor="startDate">Start Date</label>
-                    <input
-                      type="date"
-                      id="startDate"
-                      name="startDate"
-                      value={formData.startDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group half">
-                    <label htmlFor="endDate">End Date</label>
-                    <input
-                      type="date"
-                      id="endDate"
-                      name="endDate"
-                      value={formData.endDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="form-group half">
-                    <label htmlFor="projectFiles">Project Files</label>
-                    <input
-                      type="file"
-                      id="projectFiles"
-                      name="projectFiles"
-                      onChange={handleFileChange}
-                      multiple
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="students">Add Students</label>
-                  <form onSubmit={handleAddStudent} className="add-student-form">
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Enter student email"
-                      required
-                    />
-                    <button type="submit" className="add-student-button">
-                      Add Student
-                    </button>
-                  </form>
-                  <div className="students-list">
-                    {formData.students.map((student, index) => (
-                      <div key={index} className="student-email">
-                        {student}
-                        <button
-                          type="button"
-                          className="remove-student-button"
-                          onClick={() => handleRemoveStudent(student)}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {submitError && <div className="error-message">{submitError}</div>}
-
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="cancel-button"
-                    onClick={() => {
-                      setShowAddModal(false);
-                      resetForm();
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="submit-button">
-                    Add Project
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Project Modal */}
-        {showEditModal && currentProject && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h2 className="modal-title">Edit Project</h2>
-                <button
-                  className="close-button"
-                  onClick={() => {
-                    setShowEditModal(false);
-                    resetForm();
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-              <form onSubmit={handleUpdateProject} className="project-form">
-                <div className="form-group">
-                  <label htmlFor="edit-projectTitle">Project Title</label>
-                  <input
-                    type="text"
-                    id="edit-projectTitle"
-                    name="projectTitle"
-                    value={formData.projectTitle}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="edit-labType">Lab Type</label>
-                  <select
-                    id="edit-labType"
-                    name="labType"
-                    value={formData.labType}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select a lab</option>
-                    {labOptions.map((lab) => (
-                      <option key={lab} value={lab}>
-                        {lab}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="edit-projectDescription">Project Description</label>
-                  <textarea
-                    id="edit-projectDescription"
-                    name="projectDescription"
-                    value={formData.projectDescription}
-                    onChange={handleInputChange}
-                    rows="3"
-                  ></textarea>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group half">
-                    <label htmlFor="edit-status">Status</label>
-                    <select
-                      id="edit-status"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      {statusOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group half">
-                    <label htmlFor="edit-startDate">Start Date</label>
-                    <input
-                      type="date"
-                      id="edit-startDate"
-                      name="startDate"
-                      value={formData.startDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group half">
-                    <label htmlFor="edit-endDate">End Date</label>
-                    <input
-                      type="date"
-                      id="edit-endDate"
-                      name="endDate"
-                      value={formData.endDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="form-group half">
-                    <label htmlFor="edit-projectFiles">Project Files</label>
-                    <input
-                      type="file"
-                      id="edit-projectFiles"
-                      name="projectFiles"
-                      onChange={handleFileChange}
-                      multiple
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="edit-students">Add Students</label>
-                  <form onSubmit={handleAddStudent} className="add-student-form">
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Enter student email"
-                      required
-                    />
-                    <button type="submit" className="add-student-button">
-                      Add Student
-                    </button>
-                  </form>
-                  <div className="students-list">
-                    {formData.students.map((student, index) => (
-                      <div key={index} className="student-email">
-                        {student}
-                        <button
-                          type="button"
-                          className="remove-student-button"
-                          onClick={() => handleRemoveStudent(student)}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {submitError && <div className="error-message">{submitError}</div>}
-
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="cancel-button"
-                    onClick={() => {
-                      setShowEditModal(false);
-                      resetForm();
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="submit-button">
-                    Update Project
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && currentProject && (
-          <div className="modal-overlay">
-            <div className="modal-content delete-confirm-modal">
-              <div className="modal-header">
-                <h2 className="modal-title">Confirm Delete</h2>
-                <button
-                  className="close-button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="confirm-message">
-                <p>
-                  Are you sure you want to delete <strong>{currentProject.projectTitle}</strong>?
-                </p>
-                <p>This action cannot be undone.</p>
-              </div>
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="cancel-button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="delete-confirm-button"
-                  onClick={handleDeleteProject}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default Projects;
+const ProjectsTable = () => {
+  const [projects, setProjects] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchProjects = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    axios
+      .get("http://localhost:8000/api/projects/", config)
+      .then((response) => setProjects(response.data))
+      .catch((error) => console.error("Error fetching projects:", error));
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleAddProject = () => {
+    setIsEditMode(false);
+    setSelectedProject(null);
+    setShowModal(true);
+  };
+
+  const handleEditProject = (project) => {
+    setIsEditMode(true);
+    setSelectedProject(project);
+    setShowModal(true);
+  };
+
+  const handleDeleteProject = (project) => {
+    setSelectedProject(project);
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setShowDeleteModal(false);
+  };
+
+  const handleProjectSubmitted = () => {
+    fetchProjects();
+  };
+
+  const confirmDelete = async (projectId) => {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.delete(`http://localhost:8000/api/projects/${projectId}/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setShowDeleteModal(false);
+      fetchProjects();
+    } catch (error) {
+      console.error("Error deleting project:", error.response ? error.response.data : error);
+      alert(`Error: ${error.response?.data?.message || "Failed to delete project"}`);
+    }
+  };
+
+  // Filter projects based on search term
+  const filteredProjects = projects.filter((project) =>
+    project.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="container">
+      <Sidebar />
+      <Topbar />
+      <h1>Projects</h1>
+
+      <div className="search-add">
+        <div className="search-container">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search projects..."
+            className="search-input"
+          />
+        </div>
+        <button className="button" onClick={handleAddProject}>
+          Add Project
+        </button>
+      </div>
+      <table className="projects-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Progress</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredProjects.map((project) => (
+            <tr key={project.id}>
+              <td>{project.title}</td>
+              <td>{project.description}</td>
+              <td>{project.status}</td>
+              <td>{project.start_date}</td>
+              <td>{project.end_date}</td>
+              <td>{project.progress}%</td>
+              <td className="action-buttons">
+                <button className="icon-button edit" onClick={() => handleEditProject(project)}>
+                  <FaEdit /> Edit
+                </button>
+                <button className="icon-button delete" onClick={() => handleDeleteProject(project)}>
+                  <FaTrash /> Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
+      {showModal && (
+        <div className="modal open">
+          <ProjectForm 
+            onProjectSubmitted={handleProjectSubmitted} 
+            onClose={handleCloseModal}
+            editMode={isEditMode}
+            projectData={selectedProject}
+          />
+        </div>
+      )}
+      
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          project={selectedProject}
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default ProjectsTable;

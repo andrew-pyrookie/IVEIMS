@@ -1,7 +1,6 @@
 .projects-container {
-  padding: 20px;
-  background-color: #f9f9f9;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   margin-left: 250px;
   margin-top: 70px;
 }

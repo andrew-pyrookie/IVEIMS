@@ -124,15 +124,6 @@ const Sidebar = () => {
               <span className="text">Backup</span>
             </NavLink>
           </li>
-          <li>
-            <NavLink
-              to="/admin/profile"
-              activeClassName="active" // Apply active class
-            >
-              <FaUser className="icon" />
-              <span className="text">Profile</span>
-            </NavLink>
-          </li>
         </ul>
       </div>
     </>

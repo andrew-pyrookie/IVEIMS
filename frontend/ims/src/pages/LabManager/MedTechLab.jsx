@@ -1,44 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { useTable, useSortBy, useGlobalFilter, usePagination } from "react-table";
-import { FaEdit, FaTrash, FaQrcode, FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
-import LabManagerSidebar from "/src/components/LabManager/LabManagerSidebar.jsx";
-import LabManagerTopbar from "/src/components/LabManager/LabManagerTopbar.jsx";
-import "/src/pages/LabManager/styles/CezeriLab.css";
+import { FaEdit, FaTrash, FaQrcode, FaSearch, FaSort, FaSortUp, FaSortDown, FaExchangeAlt } from "react-icons/fa";
+import Sidebar from "/src/components/LabManager/LabManagerSidebar.jsx";
+import Topbar from "/src/components/LabManager/LabManagerTopbar.jsx";
+import "/src/pages/LabManager/styles/MedTechLab.css";
 
 const MedTechLab = () => {
   const [equipment, setEquipment] = useState([]);
+  const [labs, setLabs] = useState([]); // New state for labs
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false); // New state for transfer modal
   const [currentItem, setCurrentItem] = useState(null);
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState({
-    productName: "",
-    description: "",
-    quantity: 1,
-    price: 0,
-    totalPrice: 0,
+    id: "",
+    name: "",
+    current_lab: "",
+    home_lab: "",
     status: "available",
-    homeLab: "",
-    currentLab: "",
-    lastMaintenance: "",
-    nextMaintenance: "",
+    qr_code: "",
+    quantity: 1,
+    unit_price: 0,
+    last_maintenance: "",
+    next_maintenance: "",
+    description: "",
+    to_lab: "", // New field for transfer modal
   });
 
-  const statusOptions = ["available", "in use", "maintenance"];
-  const labOptions = ["MedTech Lab", "Design Studio Lab", "Cezari Lab"];
+  const statusOptions = ["available", "in_use", "maintenance"];
+  const labOptions = [
+    { id: 1, name: 'Design Studio Lab' },
+    { id: 2, name: 'MedTech Lab' },
+    { id: 3, name: 'Cezeri Lab' },
+  ];
 
+  // Fetch equipment and labs data
   useEffect(() => {
     fetchEquipment();
+    fetchLabs(); // Fetch labs when the component mounts
   }, []);
 
   const fetchEquipment = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/equipment/", {
+      const response = await fetch("http://localhost:8000/api/equipment/by-lab/2/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -58,60 +68,106 @@ const MedTechLab = () => {
     }
   };
 
+  const fetchLabs = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/labs/', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch labs');
+      }
+
+      const data = await response.json();
+      setLabs(data); // Set the labs state with the fetched data
+    } catch (error) {
+      console.error('Error fetching labs:', error);
+    }
+  };
+
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
-      totalPrice: name === "quantity" || name === "price" ? formData.quantity * formData.price : formData.totalPrice,
     });
   };
 
+  // Handle edit click
   const handleEditClick = (item) => {
     setFormData({
-      productName: item.productName,
-      description: item.description,
-      quantity: item.quantity,
-      price: item.price,
-      totalPrice: item.totalPrice,
+      id: item.id,
+      name: item.name,
+      unit_price: item.unit_price,
+      current_lab: item.current_lab,
+      home_lab: item.home_lab,
       status: item.status,
-      homeLab: item.homeLab,
-      currentLab: item.currentLab,
-      lastMaintenance: item.lastMaintenance || "",
-      nextMaintenance: item.nextMaintenance || "",
+      qr_code: item.qr_code,
+      quantity: item.quantity,
+      last_maintenance: item.last_maintenance || "",
+      next_maintenance: item.next_maintenance || "",
+      description: item.description,
     });
     setCurrentItem(item);
     setShowEditModal(true);
   };
 
+  // Handle delete click
   const handleDeleteClick = (item) => {
     setCurrentItem(item);
     setShowDeleteConfirm(true);
   };
 
+  // Handle QR code click
   const handleQRCodeClick = (item) => {
     setCurrentItem(item);
     setShowQRModal(true);
   };
 
+  // Handle transfer click
+  const handleTransferClick = (item) => {
+    setCurrentItem(item);
+    setShowTransferModal(true);
+  };
+
+  // Reset form
   const resetForm = () => {
     setFormData({
-      productName: "",
-      description: "",
-      quantity: 1,
-      price: 0,
-      totalPrice: 0,
+      id: "",
+      name: "",
+      current_lab: "",
+      home_lab: "",
       status: "available",
-      homeLab: "",
-      currentLab: "",
-      lastMaintenance: "",
-      nextMaintenance: "",
+      qr_code: "",
+      quantity: 1,
+      unit_price: 0,
+      last_maintenance: "",
+      next_maintenance: "",
+      description: "",
+      to_lab: "", // Reset the transfer lab field
     });
     setSubmitError("");
   };
 
+  // Add new equipment
   const handleAddEquipment = async (e) => {
     e.preventDefault();
+
+    const payload = {
+      name: formData.name,
+      unit_price: formData.unit_price,
+      current_lab_id: parseInt(formData.current_lab, 10),
+      home_lab_id: parseInt(formData.home_lab, 10),
+      quantity: parseInt(formData.quantity, 10),
+      last_maintenance: formData.last_maintenance || null,
+      next_maintenance: formData.next_maintenance || null,
+      description: formData.description,
+      status: formData.status,
+    };
 
     try {
       const response = await fetch("http://localhost:8000/api/equipment/", {
@@ -120,11 +176,12 @@ const MedTechLab = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add equipment");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add equipment");
       }
 
       const newItem = await response.json();
@@ -132,52 +189,47 @@ const MedTechLab = () => {
       setShowAddModal(false);
       resetForm();
     } catch (error) {
-      setSubmitError("Failed to add equipment. Please try again.");
+      setSubmitError(error.message || "Failed to add equipment. Please try again.");
       console.error("Error adding equipment:", error);
     }
   };
 
+  // Update equipment
   const handleUpdateEquipment = async (e) => {
     e.preventDefault();
-  
+
+    const payload = {
+      name: formData.name,
+      unit_price: formData.unit_price,
+      current_lab_id: parseInt(formData.current_lab, 10),
+      home_lab_id: parseInt(formData.home_lab, 10),
+      quantity: parseInt(formData.quantity, 10),
+      last_maintenance: formData.last_maintenance || null,
+      next_maintenance: formData.next_maintenance || null,
+      description: formData.description,
+      status: formData.status,
+    };
+
     try {
-      // Create an object with only the updated fields
-      const updatedFields = {};
-      for (const key in formData) {
-        if (formData[key] !== currentItem[key]) {
-          updatedFields[key] = formData[key];
-        }
-      }
-  
-      // If no fields were updated, show an error and return
-      if (Object.keys(updatedFields).length === 0) {
-        setSubmitError("No fields were updated.");
-        return;
-      }
-  
-      // Send only the updated fields to the backend
-      const response = await fetch(`http://localhost:8000/api/equipment/${currentItem.id}`, {
+      const response = await fetch(`http://localhost:8000/api/equipment/${currentItem.id}/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(updatedFields),
+        body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to update equipment");
       }
-  
-      // Update the equipment list with the new data
+
       const updatedItem = await response.json();
       setEquipment((prevEquipment) =>
         prevEquipment.map((item) =>
-          item.id === currentItem.id ? { ...item, ...updatedFields } : item
+          item.id === currentItem.id ? { ...item, ...payload } : item
         )
       );
-  
-      // Close the edit modal and reset the form
       setShowEditModal(false);
       resetForm();
     } catch (error) {
@@ -186,9 +238,10 @@ const MedTechLab = () => {
     }
   };
 
+  // Delete equipment
   const handleDeleteEquipment = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/equipment/${currentItem.id}`, {
+      const response = await fetch(`http://localhost:8000/api/equipment/${currentItem.id}/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -207,38 +260,78 @@ const MedTechLab = () => {
     }
   };
 
+  // Handle transfer equipment
+  const handleTransferEquipment = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      equipment_id: currentItem.id, // Use the equipment ID from the current item
+      to_lab: formData.to_lab, // Use the selected lab name
+    };
+
+    try {
+      const response = await fetch('http://localhost:8000/api/transfer-equipment/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to transfer equipment');
+      }
+
+      // Update the equipment list with the new data
+      const updatedItem = await response.json();
+      setEquipment((prevEquipment) =>
+        prevEquipment.map((item) =>
+          item.id === currentItem.id ? { ...item, current_lab: formData.to_lab } : item
+        )
+      );
+
+      // Close the transfer modal and reset the form
+      setShowTransferModal(false);
+      resetForm();
+    } catch (error) {
+      setSubmitError(error.message || 'Failed to transfer equipment. Please try again.');
+      console.error('Error transferring equipment:', error);
+    }
+  };
+
+  // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "Not scheduled";
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
 
-  // Define the columns for the table
+  // Define table columns
   const columns = React.useMemo(
     () => [
       {
-        Header: "Product Name",
-        accessor: "productName",
+        Header: "Name",
+        accessor: "name",
       },
       {
         Header: "Description",
         accessor: "description",
-        Cell: ({ value }) => (
-          <span className="equipment-description">{value}</span>
-        ),
+        Cell: ({ value }) => <span className="equipment-description">{value}</span>,
       },
       {
         Header: "Quantity",
         accessor: "quantity",
       },
       {
-        Header: "Price",
-        accessor: "price",
+        Header: "Total Price",
+        accessor: "total_price",
         Cell: ({ value }) => `$${value}`,
       },
       {
-        Header: "Total Price",
-        accessor: "totalPrice",
+        Header: "Unit Price",
+        accessor: "unit_price",
         Cell: ({ value }) => `$${value}`,
       },
       {
@@ -250,20 +343,20 @@ const MedTechLab = () => {
       },
       {
         Header: "Home Lab",
-        accessor: "homeLab",
+        accessor: "home_lab",
       },
       {
         Header: "Current Lab",
-        accessor: "currentLab",
+        accessor: "current_lab",
       },
       {
         Header: "Last Maintenance",
-        accessor: "lastMaintenance",
+        accessor: "last_maintenance",
         Cell: ({ value }) => formatDate(value),
       },
       {
         Header: "Next Maintenance",
-        accessor: "nextMaintenance",
+        accessor: "next_maintenance",
         Cell: ({ value }) => formatDate(value),
       },
       {
@@ -293,6 +386,13 @@ const MedTechLab = () => {
             >
               <FaTrash />
             </button>
+            <button
+              className="action-button transfer-button"
+              onClick={() => handleTransferClick(row.original)}
+              title="Transfer Equipment"
+            >
+              <FaExchangeAlt />
+            </button>
           </div>
         ),
       },
@@ -300,6 +400,7 @@ const MedTechLab = () => {
     []
   );
 
+  // Table setup
   const {
     getTableProps,
     getTableBodyProps,
@@ -336,9 +437,9 @@ const MedTechLab = () => {
   if (isLoading) {
     return (
       <div className="medtech-lab-container">
-        <LabManagerSidebar />
+        <Sidebar />
         <div className="main-content">
-          <labManagerTopbar />
+          <Topbar />
           <div className="loading-container">
             <div className="loading-spinner"></div>
             <p>Loading equipment data...</p>
@@ -350,9 +451,9 @@ const MedTechLab = () => {
 
   return (
     <div className="medtech-lab-container">
-      <LabManagerSidebar />
+      <Sidebar />
       <div className="main-content">
-        <LabManagerTopbar />
+        <Topbar />
 
         <div className="content-header">
           <h1>MedTech Lab Equipment Management</h1>
@@ -497,12 +598,12 @@ const MedTechLab = () => {
               </div>
               <form onSubmit={handleAddEquipment} className="equipment-form">
                 <div className="form-group">
-                  <label htmlFor="productName">Product Name*</label>
+                  <label htmlFor="name">Name*</label>
                   <input
                     type="text"
-                    id="productName"
-                    name="productName"
-                    value={formData.productName}
+                    id="name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
                     required
                   />
@@ -535,28 +636,15 @@ const MedTechLab = () => {
                   </div>
 
                   <div className="form-group half">
-                    <label htmlFor="price">Price*</label>
+                    <label htmlFor="unit_price">Unit Price</label>
                     <input
                       type="number"
-                      id="price"
-                      name="price"
-                      min="0"
-                      value={formData.price}
+                      id="unit_price"
+                      name="unit_price"
+                      value={formData.unit_price}
                       onChange={handleInputChange}
-                      required
                     />
                   </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="totalPrice">Total Price</label>
-                  <input
-                    type="number"
-                    id="totalPrice"
-                    name="totalPrice"
-                    value={formData.quantity * formData.price}
-                    readOnly
-                  />
                 </div>
 
                 <div className="form-row">
@@ -578,63 +666,65 @@ const MedTechLab = () => {
                   </div>
 
                   <div className="form-group half">
-                    <label htmlFor="homeLab">Home Lab*</label>
+                    <label htmlFor="home_lab">Home Lab*</label>
                     <select
-                      id="homeLab"
-                      name="homeLab"
-                      value={formData.homeLab}
+                      id="home_lab"
+                      name="home_lab"
+                      value={formData.home_lab}
                       onChange={handleInputChange}
                       required
                     >
                       <option value="">Select a lab</option>
-                      {labOptions.map((lab) => (
-                        <option key={lab} value={lab}>
-                          {lab}
+                      {labOptions.map(lab => (
+                        <option key={lab.id} value={lab.id}>
+                          {lab.name}
                         </option>
                       ))}
+                     
                     </select>
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group half">
-                    <label htmlFor="currentLab">Current Lab*</label>
+                    <label htmlFor="current_lab">Current Lab*</label>
                     <select
-                      id="currentLab"
-                      name="currentLab"
-                      value={formData.currentLab}
+                      id="current_lab"
+                      name="current_lab"
+                      value={formData.current_lab}
                       onChange={handleInputChange}
                       required
                     >
                       <option value="">Select a lab</option>
-                      {labOptions.map((lab) => (
-                        <option key={lab} value={lab}>
-                          {lab}
+                      {labOptions.map(lab => (
+                        <option key={lab.id} value={lab.id}>
+                          {lab.name}
                         </option>
                       ))}
+                     
                     </select>
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group half">
-                    <label htmlFor="lastMaintenance">Last Maintenance Date</label>
+                    <label htmlFor="last_maintenance">Last Maintenance Date</label>
                     <input
                       type="date"
-                      id="lastMaintenance"
-                      name="lastMaintenance"
-                      value={formData.lastMaintenance}
+                      id="last_maintenance"
+                      name="last_maintenance"
+                      value={formData.last_maintenance}
                       onChange={handleInputChange}
                     />
                   </div>
 
                   <div className="form-group half">
-                    <label htmlFor="nextMaintenance">Next Maintenance Date</label>
+                    <label htmlFor="next_maintenance">Next Maintenance Date</label>
                     <input
                       type="date"
-                      id="nextMaintenance"
-                      name="nextMaintenance"
-                      value={formData.nextMaintenance}
+                      id="next_maintenance"
+                      name="next_maintenance"
+                      value={formData.next_maintenance}
                       onChange={handleInputChange}
                     />
                   </div>
@@ -663,7 +753,7 @@ const MedTechLab = () => {
         )}
 
         {/* Edit Equipment Modal */}
-                {showEditModal && currentItem && (
+        {showEditModal && currentItem && (
           <div className="modal-overlay">
             <div className="modal-content">
               <div className="modal-header">
@@ -680,16 +770,16 @@ const MedTechLab = () => {
               </div>
               <form onSubmit={handleUpdateEquipment} className="equipment-form">
                 <div className="form-group">
-                  <label htmlFor="edit-productName">Product Name</label>
+                  <label htmlFor="edit-name">Name</label>
                   <input
                     type="text"
-                    id="edit-productName"
-                    name="productName"
-                    value={formData.productName}
+                    id="edit-name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="edit-description">Description</label>
                   <textarea
@@ -700,7 +790,7 @@ const MedTechLab = () => {
                     rows="3"
                   ></textarea>
                 </div>
-                
+
                 <div className="form-row">
                   <div className="form-group half">
                     <label htmlFor="edit-quantity">Quantity</label>
@@ -713,31 +803,19 @@ const MedTechLab = () => {
                       onChange={handleInputChange}
                     />
                   </div>
-                
+
                   <div className="form-group half">
-                    <label htmlFor="edit-price">Price</label>
+                    <label htmlFor="edit-unit_price">Unit Price</label>
                     <input
                       type="number"
-                      id="edit-price"
-                      name="price"
-                      min="0"
-                      value={formData.price}
+                      id="edit-unit_price"
+                      name="unit_price"
+                      value={formData.unit_price}
                       onChange={handleInputChange}
                     />
                   </div>
                 </div>
-                
-                <div className="form-group">
-                  <label htmlFor="edit-totalPrice">Total Price</label>
-                  <input
-                    type="number"
-                    id="edit-totalPrice"
-                    name="totalPrice"
-                    value={formData.quantity * formData.price}
-                    readOnly
-                  />
-                </div>
-                
+
                 <div className="form-row">
                   <div className="form-group half">
                     <label htmlFor="edit-status">Status</label>
@@ -754,70 +832,72 @@ const MedTechLab = () => {
                       ))}
                     </select>
                   </div>
-                    
+
                   <div className="form-group half">
-                    <label htmlFor="edit-homeLab">Home Lab</label>
+                    <label htmlFor="edit-home_lab">Home Lab</label>
                     <select
-                      id="edit-homeLab"
-                      name="homeLab"
-                      value={formData.homeLab}
+                      id="edit-home_lab"
+                      name="home_lab"
+                      value={formData.home_lab}
                       onChange={handleInputChange}
                     >
                       <option value="">Select a lab</option>
-                      {labOptions.map((lab) => (
-                        <option key={lab} value={lab}>
-                          {lab}
+                      {labOptions.map(lab => (
+                        <option key={lab.id} value={lab.id}>
+                          {lab.name}
                         </option>
                       ))}
+                     
                     </select>
                   </div>
                 </div>
-                    
+
                 <div className="form-row">
                   <div className="form-group half">
-                    <label htmlFor="edit-currentLab">Current Lab</label>
+                    <label htmlFor="edit-current_lab">Current Lab</label>
                     <select
-                      id="edit-currentLab"
-                      name="currentLab"
-                      value={formData.currentLab}
+                      id="edit-current_lab"
+                      name="current_lab"
+                      value={formData.current_lab}
                       onChange={handleInputChange}
                     >
                       <option value="">Select a lab</option>
-                      {labOptions.map((lab) => (
-                        <option key={lab} value={lab}>
-                          {lab}
+                      {labOptions.map(lab => (
+                        <option key={lab.id} value={lab.id}>
+                          {lab.name}
                         </option>
                       ))}
+                     
                     </select>
                   </div>
                 </div>
-                    
+
                 <div className="form-row">
                   <div className="form-group half">
-                    <label htmlFor="edit-lastMaintenance">Last Maintenance Date</label>
+                    <label htmlFor="edit-last_maintenance">Last Maintenance Date</label>
                     <input
                       type="date"
-                      id="edit-lastMaintenance"
-                      name="lastMaintenance"
-                      value={formData.lastMaintenance}
+                      id="edit-last_maintenance"
+                      name="last_maintenance"
+                      value={formData.last_maintenance}
                       onChange={handleInputChange}
                     />
                   </div>
-                    
+
                   <div className="form-group half">
-                    <label htmlFor="edit-nextMaintenance">Next Maintenance Date</label>
+                    <label htmlFor="edit-next_maintenance">Next Maintenance Date</label>
                     <input
                       type="date"
-                      id="edit-nextMaintenance"
-                      name="nextMaintenance"
-                      value={formData.nextMaintenance}
+                      id="edit-next_maintenance"
+                      name="next_maintenance"
+                      value={formData.next_maintenance}
                       onChange={handleInputChange}
                     />
                   </div>
                 </div>
-                    
+
                 {submitError && <div className="error-message">{submitError}</div>}
-                    
+
                 <div className="form-actions">
                   <button
                     type="button"
@@ -853,7 +933,7 @@ const MedTechLab = () => {
               </div>
               <div className="confirm-message">
                 <p>
-                  Are you sure you want to delete <strong>{currentItem.productName}</strong>?
+                  Are you sure you want to delete <strong>{currentItem.name}</strong>?
                 </p>
                 <p>This action cannot be undone.</p>
               </div>
@@ -892,28 +972,74 @@ const MedTechLab = () => {
               </div>
               <div className="qr-content">
                 <div className="qr-code-container">
-                  {/* This would typically be an actual QR code image from your API */}
                   <img
-                    src={`/api/placeholder/200/200`}
-                    alt={`QR Code for ${currentItem.productName}`}
+                    src={currentItem.qr_code}
+                    alt={`QR Code for ${currentItem.name}`}
                     className="qr-code-image"
                   />
                 </div>
                 <div className="qr-details">
-                  <h3>{currentItem.productName}</h3>
+                  <h3>{currentItem.name}</h3>
                   <p className="qr-description">{currentItem.description}</p>
                   <p>
                     <strong>ID:</strong> {currentItem.id}
                   </p>
                   <p>
-                    <strong>Home Lab:</strong> {currentItem.homeLab}
+                    <strong>Home Lab:</strong> {currentItem.home_lab}
                   </p>
                 </div>
               </div>
-              <div className="qr-actions">
-                <button className="print-button">Print QR Code</button>
-                <button className="download-button">Download QR Code</button>
+            </div>
+          </div>
+        )}
+
+        {/* Transfer Equipment Modal */}
+        {showTransferModal && currentItem && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2 className="modal-title">Transfer Equipment</h2>
+                <button
+                  className="close-button"
+                  onClick={() => setShowTransferModal(false)}
+                >
+                  ✕
+                </button>
               </div>
+              <form onSubmit={handleTransferEquipment} className="equipment-form">
+                <div className="form-group">
+                  <label htmlFor="to_lab">Transfer To Lab*</label>
+                  <select
+                    id="to_lab"
+                    name="to_lab"
+                    value={formData.to_lab}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select a lab</option>
+                    {labs.map((lab) => (
+                      <option key={lab.id} value={lab.name}>
+                        {lab.description}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {submitError && <div className="error-message">{submitError}</div>}
+
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="cancel-button"
+                    onClick={() => setShowTransferModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="submit-button">
+                    Transfer Equipment
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

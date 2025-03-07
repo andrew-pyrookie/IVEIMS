@@ -1,0 +1,205 @@
+/* Sidebar Styling */
+.sidebar {
+    width: 200px; /* Default sidebar width */
+    height: 100vh;
+    color: black;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding-top: 20px;
+    transition: width 0.3s ease-in-out;
+    background-color: white;
+    z-index: 10;
+    display: none; /* Hide sidebar by default on small devices */
+  }
+  
+  .sidebar.open {
+    display: block; /* Show sidebar when it's open */
+  }
+  
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 20px;
+    padding-bottom: 40px;
+    position: relative;
+  }
+  .sidebar-logo{
+    max-width: 150px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgb(207, 204, 204);
+  }
+  
+  .hamburger-icon {
+    font-size: 30px;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 20;
+    display: none; /* Hide hamburger icon on large screens */
+  }
+  
+  .sidebar h1 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #3d4a60;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidebar ul li {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding:5px;
+    gap: 20px;
+    transition: background 0.3s;
+    padding-left: 20px;
+  }
+  
+  .sidebar ul li a {
+    display: flex;
+    align-items: center;
+    color: rgb(48, 47, 47);
+    text-decoration: none;
+    padding:15px;
+    width: 100%;
+    position: relative;
+  }
+  
+  .sidebar ul li a:hover {
+    background: #e5e4e4;
+    border-radius: 3px;
+    color: #3d4a60;
+    padding-left: 10px;
+  }
+  
+  .sidebar ul li a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 5px;
+    height: 100%;
+    background-color: #3d4a60;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .sidebar ul li a:hover::after {
+    opacity: 1;
+  }
+  
+  .icon {
+    font-size: 24px;
+    margin-right: 10px;
+    transition: margin-right 0.3s ease-in-out;
+  }
+  
+  .text {
+    opacity: 1;
+    width: auto;
+    overflow: hidden;
+  
+    transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out;
+  }
+  
+  /* Active link styling */
+  .sidebar ul li a.active {
+    background: #e5e4e4;
+    border-radius: 3px;
+    color: #3d4a60;
+    padding-left: 10px;
+  
+  }
+  
+  .sidebar ul li a.active::after {
+    opacity: 1; /* Show the left border */
+  }
+  
+  
+  /* Dropdown styling */
+  .dropdown-link {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .dropdown-icon {
+    margin-left: 50px;
+    font-size: 14px;
+    transition: transform 0.3s;
+  }
+  
+  .submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+  
+  .submenu.open {
+    max-height: 300px; /* Adjust as needed */
+  }
+  
+  .submenu li a {
+    padding-left: 40px;
+    font-size: 14px;
+  }
+  
+  .submenu-icon {
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  
+  /* Add styling for when submenu is open */
+  .submenu-open > a {
+    background: #f0f0f0;
+    color: #3274e5;
+  }
+  
+  /* Media Query for smaller screens */
+  @media (max-width: 768px) {
+    .sidebar-header h1 {
+      display: none; /* Hide title on smaller screens */
+    }
+  
+    .sidebar.closed .text {
+      display: none; /* Hide text when sidebar is collapsed */
+    }
+  
+    .hamburger-icon {
+      display: block; /* Show hamburger icon on small screens */
+    }
+  
+    .sidebar.open {
+      display: block; /* Show sidebar when it's open */
+      width: 200px; /* Full width of the sidebar when open */
+    }
+  
+    .sidebar.closed {
+      display: none; /* Hide sidebar when it's collapsed */
+    }
+    .sidebar ul li a:hover {
+      background: #e5e4e4;
+      border-radius: 3px;
+      color: #3d4a60;
+    }
+  }
+  
+  /* Show the sidebar by default for larger screens */
+  @media (min-width: 769px) {
+    .sidebar {
+      display: block; /* Make sidebar visible by default */
+      width: 200px; /* Default sidebar width */
+    }
+  
+    .hamburger-icon {
+      display: none; /* Hide hamburger icon on large screens */
+    }
+  }
