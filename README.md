@@ -63,6 +63,8 @@ This project is part of the IvE Design Challenge, where the best implementations
     🎯 Testing usability & performance under lab conditions
     🎉 Showcasing at the IvE Design Challenge Finale!
 
+OOOH I WON THE 2nd PLACE, THIS HACKATHON !!!
+
 📧 Contact & Contributions
 
 Have feedback or want to collaborate? Reach out to us!
