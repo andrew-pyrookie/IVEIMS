@@ -707,7 +707,8 @@ const UsersManagement = () => {
 
   const handleApproveClick = async (user) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/users/`, {
+      // Ensure the URL correctly includes the user.id
+      const response = await fetch(`http://localhost:8000/api/users/${user.id}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -715,17 +716,21 @@ const UsersManagement = () => {
         },
         body: JSON.stringify({ approved: true }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to approve user.');
       }
-
+  
       // Update the users state with the approved user
       setUsers(users.map(u => 
         u.id === user.id ? { ...u, approved: true } : u
       ));
+  
+      // Optionally, you can show a success message or perform other actions
+      console.log('User approved successfully:', user.id);
     } catch (error) {
       console.error('Error approving user:', error);
+      // Optionally, you can show an error message to the user
     }
   };
 

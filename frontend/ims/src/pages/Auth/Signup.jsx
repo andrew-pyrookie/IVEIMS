@@ -195,7 +195,6 @@
 
 // export default Signup;
 
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -221,7 +220,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const roles = ["student", "technician", "admin", "lab manager"];
+  const roles = ["student", "technician", "lab manager"];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -255,23 +254,18 @@ const Signup = () => {
       });
 
       // Handle successful registration
-      localStorage.setItem("token", res.data.access);
-      localStorage.setItem("user_id", res.data.user.id);
-      setSuccess("Registration successful!");
+      if (res.data.approved) {
+        // If approved, redirect to login page
+        setSuccess("Registration approved! Redirecting to login...");
+        setTimeout(() => {
+          navigate("/");
+        }, 2000); // Redirect after 2 seconds
+      } else {
+        // If not approved, show pending message
+        setSuccess("Registration pending admin approval.");
+      }
       setError("");
 
-      // Redirect based on role
-      if (res.data.user.role === "student") {
-        navigate(`/student/dashboard/${res.data.user.id}`);
-      } else if (res.data.user.role === "admin") {
-        navigate(`/admin/dashboard/${res.data.user.id}`);
-      } else if (res.data.user.role === "technician") {
-        navigate(`/technician/dashboard/${res.data.user.id}`);
-      } else if (res.data.user.role === "lab manager") {
-        navigate(`/labmanager/dashboard/${res.data.user.id}`);
-      } else {
-        navigate("/"); // Default redirection
-      }
     } catch (err) {
       console.log("Backend error response:", err.response?.data); // Debugging: Log the error
 
@@ -402,6 +396,7 @@ const Signup = () => {
           )}
         </div>
 
+        {/* Display Success Message */}
         {success && <p className="signup-success-msg">{success}</p>}
 
         <button type="submit" className="signup-submit-button">Sign Up</button>

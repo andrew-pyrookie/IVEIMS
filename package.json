@@ -1,0 +1,36 @@
+{
+  "name": "iveims",
+  "version": "1.0.0",
+  "description": "🚀 IvE Design Challenge – Offline Information Management System (OIMS)\r 📌 Project Overview",
+  "main": "main.js",
+  "scripts": {
+    "dev": "cd frontend/ims && vite",
+    "build": "cd frontend/ims && vite build",
+    "electron": "electron .",
+    "electron:dev": "concurrently -k \"cd frontend/ims && vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "cd frontend/ims && vite build && cd ../.. && electron-builder"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8",
+    "electron-packager": "^17.1.2",
+    "wait-on": "^8.0.2"
+  },
+  "build": {
+    "appId": "com.iveims.app",
+    "productName": "IVEIMS",
+    "files": [
+      "main.js",
+      "frontend/ims/dist/**/*"
+    ],
+    "directories": {
+      "output": "dist_electron"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

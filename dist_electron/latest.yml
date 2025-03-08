@@ -1,0 +1,8 @@
+version: 1.0.0
+files:
+  - url: IVEIMS-Setup-1.0.0.exe
+    sha512: A6O+vFWvHvyvu62oCjYfYI307jO1JocmbNvuGQmCSQzFGMF/EulGRjlCRF6w50ADgBsWcbTbZybea2COu/SXXw==
+    size: 85651448
+path: IVEIMS-Setup-1.0.0.exe
+sha512: A6O+vFWvHvyvu62oCjYfYI307jO1JocmbNvuGQmCSQzFGMF/EulGRjlCRF6w50ADgBsWcbTbZybea2COu/SXXw==
+releaseDate: '2025-03-07T10:47:42.191Z'

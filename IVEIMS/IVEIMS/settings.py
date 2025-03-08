@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'api',
+    'drf_yasg',
     
     'rest_framework_simplejwt.token_blacklist',
     
@@ -54,6 +55,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:8000",
 ]
 
 ROOT_URLCONF = "IVEIMS.urls"
