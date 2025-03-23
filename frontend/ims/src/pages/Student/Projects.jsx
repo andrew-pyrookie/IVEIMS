@@ -191,6 +191,8 @@ const Projects = () => {
   if (error) {
     return (
       <div className="projects-container">
+        <Sidebar/>
+        <Topbar/>
         <div className="error-message">Error: {error}</div>
       </div>
     );
@@ -199,6 +201,8 @@ const Projects = () => {
   if (!data || data.length === 0) {
     return (
       <div className="projects-container">
+       <Sidebar/>
+       <Topbar/>
         <div className="no-data">No projects found.</div>
       </div>
     );

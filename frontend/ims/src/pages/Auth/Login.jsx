@@ -3,6 +3,8 @@
 // import axios from "axios";
 // import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa"; // Importing icons
 // import "./Login.css"; // Import Login styles
+// import kuImage from "/src/assets/ku.jpg"; // Import the ku.jpg image
+// import kuBackground from "/src/assets/ku-background.jpg"; // Import the ku-background.jpg image
 
 // const Login = () => {
 //   const navigate = useNavigate();
@@ -36,11 +38,11 @@
 //       setError(err.response?.data?.error || "Invalid credentials");
 //     }
 //   };
-  
 
 //   return (
-//     <div className="login-container">
+//     <div className="login-container" style={{ backgroundImage: `url(${kuBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
 //       <form className="login-form" onSubmit={handleSubmit}>
+//         <img src={kuImage} alt="KU Logo" className="ku-logo" />
 //         <h2>Login</h2>
 //         {/* Email Input */}
 //         <div className="input-container">
@@ -72,18 +74,14 @@
 //         </div>
 
 //         {error && <p className="error-msg">{error}</p>}
-//         <button type="submit">Login</button>
+//         <button type="submit" className="submuz">Login</button>
 //         <p>Don't have an account? <a href="/signup">Sign Up</a></p>
 //       </form>
 //     </div>
 //   );
 // };
 
-
-
-
 // export default Login;
-
 
 
 import React, { useState } from "react";
@@ -108,8 +106,21 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post("http://localhost:8000/api/auth/login/", formData);
+      
+      // Check if the user is approved
+      if (!res.data.user.approved) { // Check the `approved` field
+        setError("Registration pending, waiting for approval.");
+        setTimeout(() => {
+          navigate("/landingpage");
+        }, 2000); // Redirect after 2 seconds
+        return; // Stop further execution
+      }
+  
+      // If approved, proceed with login
       localStorage.setItem("token", res.data.access);
       localStorage.setItem("user_id", res.data.user.id);
+      localStorage.setItem("password", res.data.user.name);
+      localStorage.setItem("username", res.data.user.name);
       setError("");
   
       if (res.data.user.role === "student") {

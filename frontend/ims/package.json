@@ -2,7 +2,7 @@
   "name": "ims",
   "private": true,
   "version": "0.0.0",
-  "main": "electron.cjs", 
+  "main": "electron.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -16,6 +16,7 @@
     "axios": "^1.7.9",
     "jspdf": "^3.0.0",
     "jspdf-autotable": "^5.0.2",
+    "lucide-react": "^0.483.0",
     "mantine-datatable": "^7.15.1",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",

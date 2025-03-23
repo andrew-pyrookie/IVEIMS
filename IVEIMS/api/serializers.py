@@ -4,15 +4,20 @@
 #     BorrowRequest, MaintenanceReminders, MaintenanceLog, ProjectDocument, BackupLog
 # )
 
+
 # class UsersSerializer(serializers.ModelSerializer):
 #     lab = serializers.StringRelatedField(read_only=True)
+    
 #     class Meta:
 #         model = Users
 #         fields = ['id', 'name', 'email', 'role', 'lab', 'approved', 'password']
+#         extra_kwargs = {
+#             'password': {'write_only': True}  
+#         }
 
 #     def create(self, validated_data):
 #         user = Users(**validated_data)
-#         user.set_password(validated_data['password'])  # Ensure password is hashed
+#         user.set_password(validated_data['password'])  # Hash the password
 #         user.save()
 #         return user
 
@@ -229,6 +234,7 @@ class UsersSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     lab = serializers.CharField(source='lab.get_full_name', read_only=True)
+    
     class Meta:
         model = Users
         fields = ['id', 'name', 'email', 'role', 'lab']
@@ -287,10 +293,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             'end_date', 'members', 'equipment', 'progress', 'lab_id'
         ]
 
-from rest_framework import serializers
-from django.core.exceptions import ValidationError
-from .models import Booking, Equipment, Lab, Project
-
 class BookingSerializer(serializers.ModelSerializer):
     user = UsersSerializer(read_only=True)
     equipment = serializers.StringRelatedField(read_only=True)
@@ -324,7 +326,6 @@ class BookingSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("This equipment is already booked for the selected time range.")
 
         return data
-
 
 class ProjectAllocationSerializer(serializers.ModelSerializer):
     project = serializers.StringRelatedField(read_only=True)
