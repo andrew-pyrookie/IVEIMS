@@ -89,6 +89,17 @@ const Sidebar = () => {
                 </li>
               </ul>
             </li>
+            <li>
+            <NavLink
+              to="/student/scanning"
+              className={({ isActive }) => 
+                `${isActive ? 'active' : ''}`
+              }
+            >
+              <FaUser className="icon" />
+              <span className="text">Scan QR code</span>
+            </NavLink>
+          </li>
           <li>
             <NavLink
               to="/student/profile"

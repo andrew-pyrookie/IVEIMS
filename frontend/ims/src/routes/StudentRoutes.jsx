@@ -5,6 +5,7 @@ import Projects from "../pages/Student/Projects";
 import DesignStudioLab from "../pages/Student/DesignStudioLab";
 import CezeriLab from "../pages/Student/CezeriLab";
 import MedTechLab from "../pages/Student/MedTechLab";
+import Scanner from "../pages/Student/Scanning"; 
 import NotFound from "../pages/NotFound/NotFound"; 
 
 const StudentRoutes = () => {
@@ -13,7 +14,8 @@ const StudentRoutes = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="dashboard/:userId" element={<Dashboard />} />
 
-
+        <Route path="scanning" element={<Scanner />} />
+        <Route path="scanning/:userId" element={<Scanner />} />
 
         <Route path="profile" element={<Profile />} />
         <Route path="profile/:userId" element={<Profile />} />

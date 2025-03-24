@@ -8,7 +8,11 @@ from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
+
 from rest_framework.response import Response
+
+
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 import os
 from .models import (
@@ -23,6 +27,104 @@ from .serializers import (
 )
 
 Users = get_user_model()
+
+# Add this import at the top if not already present
+
+class IsApproved(BasePermission):
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+        if request.user.role == 'admin' or request.user.approved:
+            return True
+        # Unapproved users can only use safe methods (GET)
+        return request.method in permissions.SAFE_METHODS
+# Update the EquipmentListCreateView class
+class EquipmentListCreateView(generics.ListCreateAPIView):
+    serializer_class = EquipmentSerializer
+    permission_classes = [IsAuthenticated, IsApproved]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Equipment.objects.all()
+        unique_code = self.request.query_params.get('unique_code', None)
+        
+        # Handle QR code lookup
+        if unique_code:
+            queryset = queryset.filter(unique_code=unique_code)
+            return queryset
+        
+        # Original filtering logic
+        if user.role == 'admin':
+            return queryset
+        elif user.role in ['lab_manager', 'technician']:
+            return queryset.filter(current_lab=user.lab)
+        elif user.role == 'student':
+            return queryset.filter(status='available')
+        return queryset.none()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Override list to handle single equipment lookup by unique_code
+        Returns single object if unique_code provided, otherwise paginated list
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        unique_code = request.query_params.get('unique_code', None)
+        
+        if unique_code:
+            if not queryset.exists():
+                return Response(
+                    {"detail": "No equipment found with this QR code"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            serializer = self.get_serializer(queryset.first())
+            return Response(serializer.data)
+            
+        # Default list behavior
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        if self.request.user.role not in ['admin', 'lab_manager', 'technician']:
+            raise PermissionDenied("Only staff can create equipment.")
+        serializer.save()
+
+# Add this new view for dedicated QR code lookups
+class EquipmentByQRCodeView(generics.RetrieveAPIView):
+    """
+    Dedicated endpoint for QR code lookups
+    """
+    serializer_class = EquipmentSerializer
+    permission_classes = [IsAuthenticated, IsApproved]
+    lookup_field = 'unique_code'
+    queryset = Equipment.objects.all()
+
+    def get_object(self):
+        unique_code = self.request.query_params.get('unique_code')
+        if not unique_code:
+            raise ValidationError({"unique_code": "This parameter is required"})
+        
+        obj = get_object_or_404(Equipment, unique_code=unique_code)
+        
+        # Check permissions
+        user = self.request.user
+        if user.role == 'admin':
+            return obj
+        elif user.role in ['lab_manager', 'technician']:
+            if obj.current_lab != user.lab:
+                raise PermissionDenied("You can only access equipment in your lab")
+            return obj
+        elif user.role == 'student':
+            if obj.status != 'available':
+                raise PermissionDenied("This equipment is not available")
+            return obj
+        raise PermissionDenied("You don't have permission to access this equipment")
+
+
 
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):

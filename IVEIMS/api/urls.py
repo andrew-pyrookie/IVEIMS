@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.response import Response
+from .views import EquipmentByQRCodeView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.decorators import api_view
 from .views import (
@@ -76,6 +77,7 @@ urlpatterns = [
         path('', EquipmentListCreateView.as_view(), name='equipment-list'),
         path('<int:pk>/', EquipmentDetailView.as_view(), name='equipment-detail'),
         path('by-lab/<int:lab_id>/', EquipmentByLabView.as_view(), name='equipment-by-lab'),
+        path('by-qr/', EquipmentByQRCodeView.as_view(), name='equipment-by-qr'),  # New endpoint
     ])),
     path('transfer-equipment/', TransferEquipmentView.as_view(), name='transfer-equipment'),
     path('projects/', include([
