@@ -1,224 +1,260 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import QrScanner from 'qr-scanner';
 import "/src/pages/Student/styles/Scanning.css";
+import Topbar from "/src/components/Student/StudentTopbar.jsx";
 
-function EquipmentScanner() {
-  const [scanResult, setScanResult] = useState(null);
-  const [equipmentData, setEquipmentData] = useState(null);
-  const [error, setError] = useState(null);
+const EquipmentQRScanner = () => {
+  const [scannedCode, setScannedCode] = useState('');
+  const [equipmentDetails, setEquipmentDetails] = useState(null);
+  const [error, setError] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [scanner, setScanner] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef(null);
   const videoRef = useRef(null);
+  const scannerRef = useRef(null);
 
-  // Get authentication token
+  // Get token from localStorage
   const getAuthToken = () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Authentication required. Please login.');
-      return null;
-    }
-    return token;
+    return localStorage.getItem('token'); // Adjust this if you store your token differently
   };
+
+  useEffect(() => {
+    // Cleanup function
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.stop();
+        scannerRef.current.destroy();
+      }
+    };
+  }, []);
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    setSelectedFile(URL.createObjectURL(file));
-    setError(null);
-    setScanResult(null);
-    setEquipmentData(null);
-    setIsLoading(true);
-
     try {
-      const result = await QrScanner.scanImage(file, {
-        returnDetailedScanResult: true,
-        scanRegion: { top: 20, left: 20, width: 60, height: 60 },
-        quality: 0.7
-      });
-
-      if (!result) throw new Error('QR code could not be read');
-      await handleScanResult(result.data);
-    } catch (err) {
-      setError('QR code could not be read. Please try a clearer image.');
-      setIsLoading(false);
+      const result = await QrScanner.scanImage(file);
+      validateAndFetch(result);
+    } catch (error) {
+      setError('Failed to scan QR code. Please try another image.');
+      console.error('Scanning error:', error);
     }
   };
 
-  const handleScanResult = async (result) => {
-    setScanResult(result);
-    setIsLoading(true);
-    setError(null);
-    setEquipmentData(null);
+  const startScanning = () => {
+    if (!videoRef.current) return;
+  
+    setIsScanning(true);
+    scannerRef.current = new QrScanner(
+      videoRef.current, 
+      (result) => {
+        validateAndFetch(result);
+        stopScanning(); // This will stop the scanner and remove highlights
+      },
+      {
+        onDecodeError: (error) => {
+          // Silent on decode errors
+        },
+        highlightScanRegion: false, // Set to false to remove region highlights
+        highlightCodeOutline: false, // Set to false to remove code outline
+        preferredCamera: 'environment',
+      }
+    );
+    scannerRef.current.start();
+  };
 
+  const stopScanning = () => {
+    if (scannerRef.current) {
+      scannerRef.current.stop();
+      setIsScanning(false);
+    }
+  };
+
+  const validateAndFetch = (result) => {
+    console.log('Raw QR Scanner Result:', result);
+    
+    const code = typeof result === 'object' ? result.data : result;
+    console.log('Extracted Code:', code);
+  
+    if (!code || code.length < 3) {
+      setError('Invalid QR code format');
+      return;
+    }
+    
+    setScannedCode(code);
+    fetchEquipmentDetails(code);
+  };
+
+  const fetchEquipmentDetails = async (uniqueCode) => {
     const token = getAuthToken();
     if (!token) {
-      setIsLoading(false);
+      setError('You need to be logged in to scan equipment');
       return;
     }
 
     try {
-      const apiUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/equipment/?unique_code=${encodeURIComponent(result)}/`;
-      
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `http://localhost:8000/api/equipment/by-qr/?unique_code=${encodeURIComponent(uniqueCode)}`, 
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
         }
-      });
+      );
+
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.');
+      }
+
+      if (response.status === 404) {
+        throw new Error('Equipment not found');
+      }
+      
+      if (response.status === 403) {
+        throw new Error('You do not have permission to view this equipment');
+      }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Failed to fetch equipment data');
+        throw new Error('Failed to fetch equipment details');
       }
 
       const data = await response.json();
-      if (!data) throw new Error('No equipment data returned');
-      
-      setEquipmentData(data);
+      setEquipmentDetails(data);
+      setError('');
     } catch (err) {
-      setError(err.message || 'Failed to fetch equipment details');
-      console.error('Scan Error:', err);
-    } finally {
-      setIsLoading(false);
+      setError(err.message || 'Error fetching equipment details');
+      setEquipmentDetails(null);
+      console.error('Error:', err);
     }
   };
 
-  const startScanner = () => {
-    setIsScanning(true);
-    setError(null);
-    setScanResult(null);
-    setEquipmentData(null);
-    setSelectedFile(null);
+  const renderEquipmentDetails = () => {
+    if (!equipmentDetails) return null;
 
-    const qrScanner = new QrScanner(
-      videoRef.current,
-      result => {
-        handleScanResult(result.data);
-        qrScanner.stop();
-        setIsScanning(false);
-      },
-      {
-        preferredCamera: 'environment',
-        highlightScanRegion: true,
-        maxScansPerSecond: 5,
-      }
-    );
-
-    qrScanner.start()
-      .then(() => setScanner(qrScanner))
-      .catch(err => {
-        setError('Camera access denied. Please check permissions.');
-        setIsScanning(false);
-      });
-  };
-
-  const stopScanner = () => {
-    if (scanner) {
-      scanner.stop();
-      scanner.destroy();
-      setScanner(null);
-    }
-    setIsScanning(false);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (scanner) {
-        scanner.stop();
-        scanner.destroy();
-      }
-    };
-  }, [scanner]);
-
-  return (
-    <div className="scanner-app">
-      <header className="app-header">
-        <h1>Equipment Scanner</h1>
-        <p>Scan QR code to view equipment details</p>
-      </header>
-
-      <main className="scanner-content">
-        <div className="scanner-controls">
-          {!isScanning ? (
-            <div className="upload-section">
-              <label className="file-upload-button">
-                Upload QR Image
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleFileUpload}
-                  disabled={isLoading}
-                />
-              </label>
-              <div className="or-divider">OR</div>
-              <button 
-                onClick={startScanner}
-                className="scan-button"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Processing...' : 'Start Camera Scanner'}
-              </button>
-            </div>
-          ) : (
-            <div className="camera-container">
-              <video ref={videoRef} className="scanner-video" />
-              <button onClick={stopScanner} className="stop-button">
-                Stop Scanning
-              </button>
-            </div>
-          )}
-
-          {selectedFile && (
-            <div className="image-preview">
-              <img src={selectedFile} alt="Uploaded QR code" />
-              {scanResult && <div className="scan-result">Scanned: {scanResult}</div>}
-            </div>
+    return (
+      <div className="equipment-details">
+        <Topbar />
+        <h2>Equipment Details</h2>
+        <div className="qr-code-preview">
+          {equipmentDetails.qr_code && (
+            <img 
+              src={equipmentDetails.qr_code} 
+              alt="Equipment QR Code" 
+              className="qr-code-image"
+            />
           )}
         </div>
+        <table>
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td>{equipmentDetails.name}</td>
+            </tr>
+            <tr>
+              <th>Current Lab</th>
+              <td>{equipmentDetails.current_lab}</td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td className={`status-${equipmentDetails.status}`}>
+                {equipmentDetails.status}
+              </td>
+            </tr>
+            <tr>
+              <th>Unit Price</th>
+              <td>${equipmentDetails.unit_price}</td>
+            </tr>
+            <tr>
+              <th>Quantity</th>
+              <td>{equipmentDetails.quantity}</td>
+            </tr>
+            <tr>
+              <th>Description</th>
+              <td>{equipmentDetails.description || 'N/A'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
-        {isLoading && <div className="loading-indicator">Loading...</div>}
-
-        {error && (
-          <div className="error-message">
-            <h3>Error</h3>
-            <p>{error}</p>
-          </div>
+  // Update your return statement to look like this:
+return (
+    <div className="qr-scanner-container">
+      <Topbar />
+      <h1>Equipment QR Scanner</h1>
+      
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => setError('')} className="dismiss-button">
+            Dismiss
+          </button>
+        </div>
+      )}
+      
+      <div className="scanner-actions">
+        <input 
+          type="file" 
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          accept="image/*"
+          className="file-input"
+          hidden
+        />
+        <button 
+          onClick={() => fileInputRef.current.click()}
+          className="action-button1 upload-button"
+        >
+          Upload QR Image
+        </button>
+        
+        {!isScanning ? (
+          <button 
+            onClick={startScanning}
+            className="action-button1 scan-button"
+          >
+            Start Camera Scan
+          </button>
+        ) : (
+          <button 
+            onClick={stopScanning}
+            className="action-button1 stop-button"
+          >
+            Stop Scanning
+          </button>
         )}
-
-        {equipmentData && (
-          <div className="equipment-details">
-            <h2>Equipment Details</h2>
-            <div className="detail-grid">
-              <DetailItem label="Name" value={equipmentData.name} />
-              <DetailItem label="Status" value={equipmentData.status} isStatus />
-              <DetailItem label="Unique Code" value={equipmentData.unique_code} />
-              <DetailItem label="Current Lab" value={equipmentData.current_lab?.name} />
-              <DetailItem label="Category" value={equipmentData.category} />
-              <DetailItem label="Description" value={equipmentData.description} isFullWidth />
-            </div>
-          </div>
-        )}
-      </main>
+      </div>
+  
+      <div className="scanner-video-container">
+  <video 
+    ref={videoRef} 
+    className="scanner-video"
+    style={{ display: isScanning ? 'block' : 'none' }}
+  />
+  {isScanning && (
+    <div className="scanner-overlay">
+      <div className="scanner-frame">
+        <div className="scanner-frame-corner-bottom-left"></div>
+        <div className="scanner-frame-corner-bottom-right"></div>
+        <div className="scanner-instruction">Position QR code within this frame</div>
+      </div>
+      <div className="scanning-animation"></div>
+    </div>
+  )}
+</div>
+  
+      {scannedCode && (
+        <div className="scanned-code">
+          <p>Scanned Code: <code>{scannedCode}</code></p>
+        </div>
+      )}
+  
+      {renderEquipmentDetails()}
     </div>
   );
-}
+};
 
-// Helper component for equipment details
-const DetailItem = ({ label, value, isStatus, isFullWidth }) => (
-  <div className={`detail-item ${isFullWidth ? 'full-width' : ''}`}>
-    <span>{label}:</span>
-    {isStatus ? (
-      <strong className={`status-${value?.toLowerCase() || 'unknown'}`}>
-        {value || 'N/A'}
-      </strong>
-    ) : (
-      <strong>{value || 'N/A'}</strong>
-    )}
-  </div>
-);
-
-export default EquipmentScanner;
+export default EquipmentQRScanner;
