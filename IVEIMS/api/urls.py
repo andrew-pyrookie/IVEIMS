@@ -19,6 +19,7 @@ from .views import (
     ProjectDocumentListCreateView, ProjectDocumentDetailView,
     BackupLogListView,
     OfflineSyncView,
+    CheckApprovalStatusView,
 )
 
 router = DefaultRouter()
@@ -63,7 +64,9 @@ urlpatterns = [
         path('logout/', LogoutView.as_view(), name='logout'),
         path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
         path('profile/', ProfileView.as_view(), name='profile'),
+        
     ])),
+    path('auth/check-approval/', CheckApprovalStatusView.as_view(), name='check-approval'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('labs/', include([
         path('', LabListCreateView.as_view(), name='lab-list'),

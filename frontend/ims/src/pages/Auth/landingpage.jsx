@@ -1,65 +1,102 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, CalendarClock, Database, Layers, Lock, Users, Share2, Box, ClipboardList } from 'lucide-react';
 import './landingpage.css';
-import undraw from '/src/assets/undraw.svg'; // Import the undraw image
-import undraw1 from '/src/assets/undraw1.svg'; // Import the undraw1 image
+import undraw from '/src/assets/undraw.svg';
+import undraw1 from '/src/assets/undraw1.svg';
 
 const IvEOfferingsShowcase = () => {
+  const navigate = useNavigate();
   const [isApproved, setIsApproved] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Function to check approval status
   useEffect(() => {
     const checkApprovalStatus = async () => {
-        try {
-          // Get stored credentials if you have them
-          const username = localStorage.getItem('username');
-          const password = localStorage.getItem('password');
-          // Or use state variables if credentials are entered in a form
-      
-          if (!username || !password) {
-            console.error('No credentials available');
-            setIsApproved(false);
-            return;
-          }
-      
-          const response = await fetch('http://localhost:8000/api/auth/login/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              username: username,
-              password: password,
-              // or whatever fields your API expects
-            }),
-          });
-      
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-      
-          const data = await response.json();
-          
-          // Store the new token
-          if (data.token) {
-            localStorage.setItem('token', data.token);
-          }
-      
-          if (data.approved) {
-            setIsApproved(true);
-            setShowPopup(true);
-          } else {
-            setIsApproved(false);
-          }
-        } catch (error) {
-          console.error('Error checking approval status:', error);
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.log('No token found, user not authenticated');
           setIsApproved(false);
+          setIsLoading(false);
+          return;
         }
-      };
-
+        
+        const response = await fetch('http://localhost:8000/api/auth/check-approval/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.status === 401) {
+          // Token expired or invalid
+          localStorage.removeItem('token');
+          setIsApproved(false);
+          setIsLoading(false);
+          return;
+        }
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        setIsApproved(data.approved);
+        if (data.approved == true) {
+          setShowPopup(true);
+        }
+      } catch (error) {
+        console.error('Error checking approval status:', error);
+        setIsApproved(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
     checkApprovalStatus();
   }, []);
+
+  const handleLoginRedirect = () => {
+    // Get user data from localStorage or make an API call
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      // If no token, redirect to login page
+      navigate('/login');
+      return;
+    }
+  
+    // Fetch user data to determine role
+    fetch('http://localhost:8000/api/auth/check-approval/', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.role === "student") {
+        navigate(`/student/dashboard/${data.id}`);
+      } else if (data.role === "admin") {
+        navigate(`/admin/dashboard/${data.id}`);
+      } else if (data.role === "lab_manager") { // Note the underscore
+        navigate("/lab-manager-dashboard");
+      } else {
+        navigate("/"); // Default redirection
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching user data:', error);
+      navigate('/login'); // Redirect to login if there's an error
+    });
+  };
 
   // Offerings data
   const offerings = [
@@ -101,6 +138,15 @@ const IvEOfferingsShowcase = () => {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="app-container loading">
+        <div className="loading-spinner"></div>
+        <p>Checking your approval status...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
       {/* Hero section */}
@@ -113,7 +159,13 @@ const IvEOfferingsShowcase = () => {
           </p>
           {isApproved === false && (
             <div className="pending-container">
-              <p>Your registration is pending. Please check back after 24 hours.</p>
+              <p>Your registration is pending approval. Please check back after 24 hours.</p>
+              <button 
+                className="btn btn-secondary"
+                onClick={() => window.location.reload()}
+              >
+                Check Approval Status Again
+              </button>
             </div>
           )}
           <div className="hero-buttons">
@@ -130,10 +182,27 @@ const IvEOfferingsShowcase = () => {
 
       {/* Popup for approved registration */}
       {showPopup && (
-        <div className="popup">
-          <div className="popup-content">
-            <p>Your registration is approved by the admin. Please login to continue.</p>
-            <button onClick={() => setShowPopup(false)}>Close</button>
+        <div className="popup-overlay">
+          <div className="popup">
+            <div className="popup-content">
+              <h3>Registration Approved!</h3>
+              <p>Your account has been approved by the administrator.</p>
+              <p>You can now login to access the system.</p>
+              <div className="popup-buttons">
+                <button 
+                  className="btn btn-primary" 
+                  onClick={handleLoginRedirect}
+                >
+                  Proceed to Login
+                </button>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowPopup(false)}
+                >
+                  Continue Browsing
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

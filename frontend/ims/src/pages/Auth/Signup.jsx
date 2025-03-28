@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash, FaChevronDown, FaCheck, FaEnvelope, FaUser, FaLock } from "react-icons/fa";
-import "./Signup.css"; // Import CSS file
-import kuImage from "/src/assets/ku.jpg"; // Import the ku.jpg image
-import kuBackground from "/src/assets/ku-background.jpg"; // Import the ku-background.jpg image
+import "./Signup.css";
+import kuImage from "/src/assets/ku.jpg";
+import kuBackground from "/src/assets/ku-background.jpg";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -23,22 +23,33 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const roles = ["student", "technician", "lab manager"];
+  const roles = ["student", "technician", "lab_manager"];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
+    setSuccess("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate passwords match
+    // Validate form fields
+    if (!formData.name || !formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
       return;
     }
 
-    // Prepare data for the backend
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
     const userData = {
       name: formData.name,
       username: formData.username,
@@ -47,8 +58,6 @@ const Signup = () => {
       password: formData.password,
     };
 
-    console.log("Frontend payload:", userData); // Debugging: Log the payload
-
     try {
       const res = await axios.post("http://localhost:8000/api/auth/register/", userData, {
         headers: {
@@ -56,34 +65,51 @@ const Signup = () => {
         },
       });
 
-      // Handle successful registration
-      if (res.data.approved) {
-        // If approved, redirect to login page
-        setSuccess("Registration approved! Redirecting to login...");
+      // Store tokens in local storage
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+        if (res.data.refresh) {
+          localStorage.setItem('refreshToken', res.data.refresh);
+        }
+        
+        // Store basic user info
+        localStorage.setItem('user', JSON.stringify({
+          id: res.data.user?.id,
+          name: res.data.user?.name,
+          email: res.data.user?.email,
+          role: res.data.user?.role,
+          approved: res.data.user?.approved
+        }));
+      }
+
+      if (res.data.user?.approved && res.data.token ) {
+        localStorage.setItem('token', res.data.token);
+        setSuccess("Registration successful! Redirecting to dashboard...");
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      } else { 
+        localStorage.setItem('token', res.data.token);
+        setSuccess("Registration successful! Login to check your approval status ");
         setTimeout(() => {
           navigate("/");
-        }, 2000); // Redirect after 2 seconds
-      } else {
-        // If not approved, show pending message
-        setSuccess("Registration pending admin approval.");
-        setTimeout(() => {
-          navigate("/landingpage");
-        }, 2000); // Redirect after 2 seconds
+        }, 3000);
       }
       setError("");
 
     } catch (err) {
-      console.log("Backend error response:", err.response?.data); // Debugging: Log the error
-
-      // Extract the error message from the backend response
+      console.error("Registration error:", err.response?.data);
+      
       if (err.response?.data) {
         const errorData = err.response.data;
         if (errorData.email) {
-          setError(errorData.email[0]); // Display the first email error
+          setError(Array.isArray(errorData.email) ? errorData.email[0] : errorData.email);
         } else if (errorData.username) {
-          setError(errorData.username[0]); // Display the first username error
+          setError(Array.isArray(errorData.username) ? errorData.username[0] : errorData.username);
         } else if (errorData.password) {
-          setError(errorData.password[0]); // Display the first password error
+          setError(Array.isArray(errorData.password) ? errorData.password[0] : errorData.password);
+        } else if (errorData.non_field_errors) {
+          setError(errorData.non_field_errors[0]);
         } else {
           setError("Registration failed. Please check your input.");
         }
@@ -144,12 +170,17 @@ const Signup = () => {
           <input
             type={showPassword ? "text" : "password"}
             name="password"
-            placeholder="Password"
+            placeholder="Password (min 8 characters)"
             value={formData.password}
             onChange={handleChange}
             required
+            minLength="8"
           />
-          <span className="signup-password-toggle" onClick={() => setShowPassword(!showPassword)}>
+          <span 
+            className="signup-password-toggle" 
+            onClick={() => setShowPassword(!showPassword)}
+            title={showPassword ? "Hide password" : "Show password"}
+          >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
@@ -164,14 +195,16 @@ const Signup = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
             required
+            minLength="8"
           />
-          <span className="signup-password-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+          <span 
+            className="signup-password-toggle" 
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            title={showConfirmPassword ? "Hide password" : "Show password"}
+          >
             {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
-
-        {/* Display Error Message */}
-        {error && <p className="signup-error-msg">{error}</p>}
 
         {/* Role Dropdown */}
         <div className="signup-dropdown-container">
@@ -179,12 +212,14 @@ const Signup = () => {
             type="button"
             className="signup-dropdown-button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            aria-expanded={isDropdownOpen}
+            aria-haspopup="listbox"
           >
-            {formData.role}
-            <FaChevronDown />
+            {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
+            <FaChevronDown className={`signup-dropdown-chevron ${isDropdownOpen ? "signup-rotate" : ""}`} />
           </button>
           {isDropdownOpen && (
-            <div className="signup-dropdown-menu">
+            <div className="signup-dropdown-menu" role="listbox">
               {roles.map((role) => (
                 <div
                   key={role}
@@ -193,20 +228,30 @@ const Signup = () => {
                     setFormData({ ...formData, role });
                     setIsDropdownOpen(false);
                   }}
+                  role="option"
+                  aria-selected={formData.role === role}
                 >
-                  {role}
-                  {formData.role === role && <FaCheck />}
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                  {formData.role === role && <FaCheck className="signup-check-icon" />}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Display Success Message */}
-        {success && <p className="signup-success-msg">{success}</p>}
+        {/* Display Error Message */}
+        {error && <div className="signup-error-msg" role="alert">{error}</div>}
 
-        <button type="submit" className="signup-submit-button">Sign Up</button>
-        <p>Already have an account? <a href="/">Login</a></p>
+        {/* Display Success Message */}
+        {success && <div className="signup-success-msg" role="status">{success}</div>}
+
+        <button type="submit" className="signup-submit-button">
+          Sign Up
+        </button>
+        
+        <p className="signup-login-link">
+          Already have an account? <a href="/login">Login</a>
+        </p>
       </form>
     </div>
   );

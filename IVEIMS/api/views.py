@@ -137,6 +137,9 @@ class IsLabManagerOrAdmin(BasePermission):
 class IsStudent(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == 'student'
+class IsStudentOrHigher(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role in ['admin', 'lab_manager', 'student']
 
 class IsLabStaff(BasePermission):
     def has_permission(self, request, view):
@@ -255,25 +258,32 @@ class DashboardView(APIView):
 class LabListCreateView(generics.ListCreateAPIView):
     queryset = Lab.objects.all()
     serializer_class = LabSerializer
-    permission_classes = [IsAdmin]
+    permission_classes = [IsAuthenticated, IsApproved]  # Keep IsApproved if needed
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        try:
-            self.perform_create(serializer)
-        except IntegrityError as e:
-            return Response(
-                {"detail": f"Lab with name '{request.data.get('name')}' already exists."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated(), IsApproved(), IsStudentOrHigher()]
+        return [IsAuthenticated(), IsApproved(), IsAdmin()]  # Keep strict permissions for POST
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'admin':
+            return Lab.objects.all()
+        elif user.role == 'lab_manager':
+            return Lab.objects.filter(manager=user)
+        elif user.role == 'student':
+            # Return all labs or filter based on some student-specific logic
+            return Lab.objects.all()
+        return Lab.objects.none()
 
 class LabDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lab.objects.all()
     serializer_class = LabSerializer
-    permission_classes = [IsAdmin]
+    
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated(), IsApproved(), IsStudentOrHigher()]
+        return [IsAuthenticated(), IsApproved(), IsAdmin()]  # Keep strict permissions for PUT/PATCH/DELETE
 
 class EquipmentListCreateView(generics.ListCreateAPIView):
     serializer_class = EquipmentSerializer
@@ -328,7 +338,7 @@ class UserListView(generics.ListAPIView):
     serializer_class = UsersSerializer
     permission_classes = [IsAdmin]
 
-class UserDetailView(generics.RetrieveUpdateAPIView):
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):  
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     permission_classes = [IsAdmin]
@@ -477,6 +487,21 @@ class BackupLogListView(generics.ListAPIView):
     queryset = BackupLog.objects.all()
     serializer_class = BackupLogSerializer
     permission_classes = [IsAdmin]
+
+class CheckApprovalStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        Check if the current user is approved
+        """
+        user = request.user
+        return Response({
+            'approved': user.approved,
+            'role': user.role,
+            'name': user.name,
+            'email': user.email
+        })
 
 class OfflineSyncView(APIView):
     permission_classes = [IsAdmin]

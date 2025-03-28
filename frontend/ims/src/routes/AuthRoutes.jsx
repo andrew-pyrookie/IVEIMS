@@ -9,7 +9,10 @@ const AuthRoutes = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="signup" element={<Signup />} />
+
         <Route path="landingpage" element={<LandingPage />} />
+        <Route path="landingpage/:userId" element={<LandingPage />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
   );
